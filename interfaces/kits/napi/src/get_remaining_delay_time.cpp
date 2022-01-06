@@ -17,12 +17,13 @@
 
 #include "singleton.h"
 
-#include "background_task_mgr.h"
+#include "background_task_manager.h"
 #include "transient_task_log.h"
 
 namespace OHOS {
 namespace BackgroundTaskMgr {
 
+static const int32_t GET_REMAINING_DELAY_TIME_MIN_PARAMS = 1;
 static const int32_t GET_REMAINING_DELAY_TIME_PARAMS = 2;
 
 struct AsyncCallbackInfoGetRemainingDelayTime {
@@ -44,8 +45,8 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     size_t argc = GET_REMAINING_DELAY_TIME_PARAMS;
     napi_value argv[GET_REMAINING_DELAY_TIME_PARAMS] = {nullptr};
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, NULL, NULL));
-    NAPI_ASSERT(env, argc >= 1, "Wrong number of arguments");
-    BGTASK_LOGI("pass number of arguments");
+    NAPI_ASSERT(env, argc == GET_REMAINING_DELAY_TIME_MIN_PARAMS || argc == GET_REMAINING_DELAY_TIME_PARAMS,
+        "Wrong number of arguments");
     
     // argv[0] : requestId
     if (Common::GetInt32NumberValue(env, argv[0], params.requestId) == nullptr) {
@@ -54,7 +55,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     }
 
     // argv[1]: callback
-    if (argc >= 2) {
+    if (argc == GET_REMAINING_DELAY_TIME_PARAMS) {
         napi_valuetype valuetype = napi_undefined;
         NAPI_CALL(env, napi_typeof(env, argv[1], &valuetype));
         NAPI_ASSERT(env, valuetype == napi_function, "Wrong argument type. Function expected.");

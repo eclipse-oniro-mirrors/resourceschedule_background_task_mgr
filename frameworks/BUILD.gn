@@ -34,7 +34,7 @@ ohos_shared_library("bgtaskmgr_fwk") {
         "common/src/bgtaskmgr_log_wrapper.cpp",
         "ipc/src/background_task_mgr_stub.cpp",
         "ipc/src/background_task_mgr_proxy.cpp",
-        "ipc/src/background_task_mgr.cpp",
+        "ipc/src/background_task_manager.cpp",
         "ipc/src/expired_callback_proxy.cpp",
         "ipc/src/expired_callback_stub.cpp",
         "ipc/src/background_task_subscriber_proxy.cpp",

@@ -17,18 +17,13 @@
 
 #include "singleton.h"
 
-#include "background_task_mgr.h"
+#include "background_task_manager.h"
 #include "transient_task_log.h"
 
 namespace OHOS {
 namespace BackgroundTaskMgr {
 
 static const int32_t REQUEST_SUSPEND_DELAY_PARAMS = 2;
-
-struct RequestSuspendDelayParamsInfo {
-    std::u16string reason;
-    napi_ref callback = nullptr;
-};
 
 CallbackInstance::CallbackInstance()
 {}
@@ -77,16 +72,16 @@ napi_value GetExpiredCallback(
 }
 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info,
-    RequestSuspendDelayParamsInfo &params, CallbackInstance *&callback)
+    std::u16string &reason, CallbackInstance *&callback)
 {
     BGTASK_LOGI("init ParseParameters start lkk");
     size_t argc = REQUEST_SUSPEND_DELAY_PARAMS;
     napi_value argv[REQUEST_SUSPEND_DELAY_PARAMS] = {nullptr};
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, NULL, NULL));
-    NAPI_ASSERT(env, argc == 2, "Wrong number of arguments");
+    NAPI_ASSERT(env, argc == REQUEST_SUSPEND_DELAY_PARAMS, "Wrong number of arguments");
     
     // argv[0] : reason
-    if (Common::GetU16StringValue(env, argv[0], params.reason) == nullptr) {
+    if (Common::GetU16StringValue(env, argv[0], reason) == nullptr) {
         BGTASK_LOGE("ParseParameters failed, reason is nullptr ");
         return nullptr;
     }
@@ -105,23 +100,22 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info,
     return Common::NapiGetNull(env);
 }
 
-
 napi_value RequestSuspendDelay(napi_env env, napi_callback_info info)
 {
     BGTASK_LOGI("init RequestSuspendDelay start ");
     CallbackInstance *objectInfo = nullptr;
-    RequestSuspendDelayParamsInfo params;
-    if (ParseParameters(env, info, params, objectInfo) == nullptr) {
+    std::u16string reason;
+    if (ParseParameters(env, info, reason, objectInfo) == nullptr) {
         if (objectInfo) {
             delete objectInfo;
             objectInfo = nullptr;
         }
-        return Common::JSParaError(env, params.callback);
+        return Common::NapiGetNull(env);
     }
 
     std::shared_ptr<DelaySuspendInfo> delaySuspendInfo;
     DelayedSingleton<BackgroundTaskManager>::GetInstance()->
-        RequestSuspendDelay(params.reason, *objectInfo, delaySuspendInfo);
+        RequestSuspendDelay(reason, *objectInfo, delaySuspendInfo);
 
     napi_value result = nullptr;
     napi_create_object(env, &result);

@@ -25,7 +25,6 @@
 
 namespace OHOS {
 namespace BackgroundTaskMgr {
-// using namespace OHOS::BackgroundTaskMgr;
 const std::int32_t STR_MAX_SIZE = 64;
 
 struct CallbackPromiseInfo {
@@ -36,10 +35,6 @@ struct CallbackPromiseInfo {
 };
 
 class Common {
-private:
-    Common();
-
-    ~Common();
 
 public:
     static napi_value NapiGetboolean(napi_env env, const bool &isValue);
@@ -71,12 +66,6 @@ public:
 
     static napi_value SetDelaySuspendInfo(
         const napi_env &env, std::shared_ptr<DelaySuspendInfo>& delaySuspendInfo, napi_value &result);
-
-private:
-    static const int ARGS_ONE = 1;
-    static const int ARGS_TWO = 2;
-    static const int PARAM0 = 0;
-    static const int PARAM1 = 1;
 };
 
 }

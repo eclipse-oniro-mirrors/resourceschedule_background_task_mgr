@@ -18,7 +18,7 @@
 
 #include "shell_command.h"
 
-#include "background_task_mgr.h"
+#include "background_task_manager.h"
 
 namespace OHOS {
 namespace BackgroundTaskMgr {

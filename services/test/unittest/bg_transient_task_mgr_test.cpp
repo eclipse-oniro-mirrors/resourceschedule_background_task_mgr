@@ -18,7 +18,7 @@
 #include <time.h>
 
 #define private public
-#include "bg_transient_task_mgr.h"
+#include "background_task_manager.h"
 #include "background_task_subscriber.h"
 
 using namespace testing::ext;

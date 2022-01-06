@@ -17,7 +17,7 @@
 
 #include "singleton.h"
 
-#include "background_task_mgr.h"
+#include "background_task_manager.h"
 #include "ibackground_task_mgr.h"
 
 namespace OHOS {

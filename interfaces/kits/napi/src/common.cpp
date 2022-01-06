@@ -20,11 +20,6 @@
 
 namespace OHOS {
 namespace BackgroundTaskMgr {
-Common::Common()
-{}
-
-Common::~Common()
-{}
 
 napi_value Common::NapiGetboolean(napi_env env, const bool &isValue)
 {
@@ -58,10 +53,10 @@ void Common::SetCallback(
     napi_value callback = nullptr;
     napi_value resultout = nullptr;
     napi_get_reference_value(env, callbackIn, &callback);
-    napi_value results[ARGS_TWO] = {nullptr};
-    results[PARAM0] = GetCallbackErrorValue(env, errorCode);
-    results[PARAM1] = result;
-    NAPI_CALL_RETURN_VOID(env, napi_call_function(env, undefined, callback, ARGS_TWO, &results[PARAM0], &resultout));
+    napi_value results[2] = {nullptr};
+    results[0] = GetCallbackErrorValue(env, errorCode);
+    results[1] = result;
+    NAPI_CALL_RETURN_VOID(env, napi_call_function(env, undefined, callback, 2, &results[0], &resultout));
 }
 
 void Common::SetCallback(
@@ -73,7 +68,7 @@ void Common::SetCallback(
     napi_value callback = nullptr;
     napi_value resultout = nullptr;
     napi_get_reference_value(env, callbackIn, &callback);
-    NAPI_CALL_RETURN_VOID(env, napi_call_function(env, undefined, callback, ARGS_ONE, &result, &resultout));
+    NAPI_CALL_RETURN_VOID(env, napi_call_function(env, undefined, callback, 1, &result, &resultout));
 }
 
 void Common::SetPromise(const napi_env &env, const napi_deferred &deferred, const napi_value &result)

@@ -16,7 +16,7 @@
 #define private public
 #define protected public
 
-#include "background_task_mgr.h"
+#include "background_task_manager.h"
 #include "iservice_registry.h"
 #include "singleton.h"
 #include "system_ability_definition.h"

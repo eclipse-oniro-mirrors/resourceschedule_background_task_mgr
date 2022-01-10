@@ -85,34 +85,34 @@ napi_value GetRemainingDelayTime(napi_env env, napi_callback_info info)
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "GetRemainingDelayTime", NAPI_AUTO_LENGTH, &resourceName);
 
-    napi_create_async_work(env,
-        nullptr,
-        resourceName,
-        [](napi_env env, void *data) {
-            AsyncCallbackInfoGetRemainingDelayTime *asynccallbackinfo = (AsyncCallbackInfoGetRemainingDelayTime *)data;
-            if (asynccallbackinfo != nullptr) {
-                asynccallbackinfo->info.errorCode = DelayedSingleton<BackgroundTaskManager>::GetInstance()->
-                    GetRemainingDelayTime(asynccallbackinfo->requestId, asynccallbackinfo->delayTime);
-            }
-        },
-        [](napi_env env, napi_status status, void *data) {
-            AsyncCallbackInfoGetRemainingDelayTime *asynccallbackinfo = (AsyncCallbackInfoGetRemainingDelayTime *)data;
-            if (asynccallbackinfo != nullptr) {
-                napi_value result = nullptr;
-                napi_create_int32(env, asynccallbackinfo->delayTime, &result);
-                Common::ReturnCallbackPromise(env, asynccallbackinfo->info, result);
+    // napi_create_async_work(env,
+    //     nullptr,
+    //     resourceName,
+    //     [](napi_env env, void *data) {
+    //         AsyncCallbackInfoGetRemainingDelayTime *asynccallbackinfo = (AsyncCallbackInfoGetRemainingDelayTime *)data;
+    //         if (asynccallbackinfo != nullptr) {
+    //             asynccallbackinfo->info.errorCode = DelayedSingleton<BackgroundTaskManager>::GetInstance()->
+    //                 GetRemainingDelayTime(asynccallbackinfo->requestId, asynccallbackinfo->delayTime);
+    //         }
+    //     },
+    //     [](napi_env env, napi_status status, void *data) {
+    //         AsyncCallbackInfoGetRemainingDelayTime *asynccallbackinfo = (AsyncCallbackInfoGetRemainingDelayTime *)data;
+    //         if (asynccallbackinfo != nullptr) {
+    //             napi_value result = nullptr;
+    //             napi_create_int32(env, asynccallbackinfo->delayTime, &result);
+    //             Common::ReturnCallbackPromise(env, asynccallbackinfo->info, result);
 
-                if (asynccallbackinfo->info.callback != nullptr) {
-                    napi_delete_reference(env, asynccallbackinfo->info.callback);
-                }
+    //             if (asynccallbackinfo->info.callback != nullptr) {
+    //                 napi_delete_reference(env, asynccallbackinfo->info.callback);
+    //             }
 
-                napi_delete_async_work(env, asynccallbackinfo->asyncWork);
-                delete asynccallbackinfo;
-                asynccallbackinfo = nullptr;
-            }
-        },
-        (void *)asynccallbackinfo,
-        &asynccallbackinfo->asyncWork);
+    //             napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+    //             delete asynccallbackinfo;
+    //             asynccallbackinfo = nullptr;
+    //         }
+    //     },
+    //     (void *)asynccallbackinfo,
+    //     &asynccallbackinfo->asyncWork);
 
     NAPI_CALL(env, napi_queue_async_work(env, asynccallbackinfo->asyncWork));
 

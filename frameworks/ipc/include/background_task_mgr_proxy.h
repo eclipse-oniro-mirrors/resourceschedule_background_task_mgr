@@ -42,6 +42,6 @@ private:
 
     static inline BrokerDelegator<BackgroundTaskMgrProxy> delegator_;
 };
-}
-}
+} // namespace BackgroundTaskMgr
+} // namespace OHOS
 #endif // FOUNDATION_RESOURCESCHEDULE_BACKGROUNDTASKMANAGER_FRAMEWORKS_IPC_INCLUDE_BACKGROUND_TASK_MGR_PROXY_H

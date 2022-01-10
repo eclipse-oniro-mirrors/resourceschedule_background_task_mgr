@@ -45,6 +45,6 @@ private:
     std::vector<std::shared_ptr<IEventListener>> listenerList_;
     std::shared_ptr<EventHub> eventHub_ {nullptr};
 };
-}
-}
+} // namespace BackgroundTaskMgr
+} // namespace OHOS
 #endif

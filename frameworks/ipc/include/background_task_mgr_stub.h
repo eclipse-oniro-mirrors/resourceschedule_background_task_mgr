@@ -41,6 +41,6 @@ private:
     ErrCode HandleUnsubscribeBackgroundTask(MessageParcel& data, MessageParcel& reply);
     ErrCode HandleShellDump(MessageParcel& data, MessageParcel& reply);
 };
-}
-}
+} // namespace BackgroundTaskMgr
+} // namespace OHOS
 #endif

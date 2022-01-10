@@ -125,5 +125,5 @@ napi_value RequestSuspendDelay(napi_env env, napi_callback_info info)
     return result;
 }
 
-}
-}
+} // namespace BackgroundTaskMgr
+} // namespace OHOS

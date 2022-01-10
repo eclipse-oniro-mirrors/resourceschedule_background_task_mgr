@@ -78,6 +78,6 @@ private:
     shared_ptr<TimerManager> timerManager_ {nullptr};
     vector<shared_ptr<DelaySuspendInfoEx>> requestList_; 
 };
-}
-}
+} // namespace BackgroundTaskMgr
+} // namespace OHOS
 #endif

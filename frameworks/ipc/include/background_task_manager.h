@@ -66,7 +66,6 @@ private:
     sptr<BgTaskMgrDeathRecipient> recipient_;
 };
 
-}
-}
-
+} // namespace BackgroundTaskMgr
+} // namespace OHOS
 #endif

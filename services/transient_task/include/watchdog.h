@@ -44,6 +44,6 @@ private:
     std::unique_ptr<AppExecFwk::AppMgrClient> appMgrClient_;
     std::shared_ptr<DecisionMaker> decision_ {nullptr};
 };
-}
-}
+} // namespace BackgroundTaskMgr
+} // namespace OHOS
 #endif

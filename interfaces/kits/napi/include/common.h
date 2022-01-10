@@ -45,6 +45,8 @@ public:
 
     static napi_value GetCallbackErrorValue(napi_env env, int errCode);
 
+    static napi_value GetExpireCallbackValue(napi_env env, int errCode, const napi_value &value);
+
     static void PaddingCallbackPromiseInfo(
         const napi_env &env, const napi_ref &callback, CallbackPromiseInfo &info, napi_value &promise);
 
@@ -68,6 +70,6 @@ public:
         const napi_env &env, std::shared_ptr<DelaySuspendInfo>& delaySuspendInfo, napi_value &result);
 };
 
-}
-}
+} // namespace BackgroundTaskMgr
+} // namespace OHOS
 #endif

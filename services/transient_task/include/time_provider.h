@@ -49,6 +49,6 @@ class TimeProvider {
 public:
     static int64_t GetCurrentTime(ClockType type = CLOCK_TYPE_MONOTONIC);
 };
-}
-}
+} // namespace BackgroundTaskMgr
+} // namespace OHOS
 #endif

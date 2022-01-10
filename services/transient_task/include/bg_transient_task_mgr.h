@@ -116,6 +116,6 @@ public:
 private:
     wptr<BackgroundTaskMgrService> service_;
 };
-}
-}
+} // namespace BackgroundTaskMgr
+} // namespace OHOS
 #endif

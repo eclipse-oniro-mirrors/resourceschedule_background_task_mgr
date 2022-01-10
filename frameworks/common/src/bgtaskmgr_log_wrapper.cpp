@@ -39,5 +39,5 @@ std::string BgTaskMgrLogWrapper::GetBriefFileName(const char *str)
     }
     return fullPath.substr(pos + 1);
 }
-}  // namespace Notification
+}  // namespace BackgroundTaskMgr
 }  // namespace OHOS

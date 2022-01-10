@@ -109,6 +109,6 @@ private:
     sptr<AppMgrDeathRecipient> recipient_;
     // sptr<ApplicationStateObserver> observer_ {nullptr};
 };
-}
-}
+} // namespace BackgroundTaskMgr
+} // namespace OHOS
 #endif

@@ -49,5 +49,4 @@ enum : int {
 
 } // namespace BackgroundTaskMgr
 } // namespace OHOS
-
 #endif

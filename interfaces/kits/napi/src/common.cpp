@@ -59,16 +59,28 @@ void Common::SetCallback(
     NAPI_CALL_RETURN_VOID(env, napi_call_function(env, undefined, callback, 2, &results[0], &resultout));
 }
 
-void Common::SetCallback(
-    const napi_env &env, const napi_ref &callbackIn, const napi_value &result)
+void Common::SetCallback(const napi_env &env, const napi_ref &callbackIn, const napi_value &result)
 {
     napi_value undefined = nullptr;
     napi_get_undefined(env, &undefined);
 
     napi_value callback = nullptr;
     napi_value resultout = nullptr;
+    napi_value res = nullptr;
+    res = GetExpireCallbackValue(env, 0, result);
     napi_get_reference_value(env, callbackIn, &callback);
-    NAPI_CALL_RETURN_VOID(env, napi_call_function(env, undefined, callback, 1, &result, &resultout));
+    NAPI_CALL_RETURN_VOID(env, napi_call_function(env, undefined, callback, 1, &res, &resultout));
+}
+
+napi_value Common::GetExpireCallbackValue(napi_env env, int errCode, const napi_value &value)
+{
+    napi_value result = nullptr;
+    napi_value eCode = nullptr;
+    NAPI_CALL(env, napi_create_int32(env, errCode, &eCode));
+    NAPI_CALL(env, napi_create_object(env, &result));
+    NAPI_CALL(env, napi_set_named_property(env, result, "code", eCode));
+    NAPI_CALL(env, napi_set_named_property(env, result, "data", value));
+    return result;
 }
 
 void Common::SetPromise(const napi_env &env, const napi_deferred &deferred, const napi_value &result)
@@ -82,7 +94,7 @@ napi_value Common::GetCallbackErrorValue(napi_env env, int errCode)
     napi_value eCode = nullptr;
     NAPI_CALL(env, napi_create_int32(env, errCode, &eCode));
     NAPI_CALL(env, napi_create_object(env, &result));
-    NAPI_CALL(env, napi_set_named_property(env, result, "code", eCode));
+    NAPI_CALL(env, napi_set_named_property(env, result, "data", eCode));
     return result;
 }
 
@@ -105,8 +117,7 @@ napi_value Common::GetU16StringValue(const napi_env &env, const napi_value &valu
     napi_valuetype valuetype = napi_undefined;
 
     NAPI_CALL(env, napi_typeof(env, value, &valuetype));
-    NAPI_ASSERT(env, valuetype == napi_string,
-        "Wrong argument type. String or function expected.");
+    NAPI_ASSERT(env, valuetype == napi_string, "Wrong argument type. String or function expected.");
     if (valuetype == napi_string) {
         char str[STR_MAX_SIZE] = {0};
         size_t strLen = 0;
@@ -127,8 +138,7 @@ napi_value Common::GetInt32NumberValue(const napi_env &env, const napi_value &va
     napi_valuetype valuetype = napi_undefined;
 
     NAPI_CALL(env, napi_typeof(env, value, &valuetype));
-    NAPI_ASSERT(env, valuetype == napi_number,
-        "Wrong argument type. Number or function expected.");
+    NAPI_ASSERT(env, valuetype == napi_number, "Wrong argument type. Number or function expected.");
     napi_get_value_int32(env, value, &result);
    
     BGTASK_LOGI("number result: %{public}d", result);
@@ -169,5 +179,5 @@ napi_value Common::SetDelaySuspendInfo(
 
     return NapiGetboolean(env, true);
 }
-}
-}
+} // namespace BackgroundTaskMgr
+} // namespace OHOS

@@ -47,7 +47,7 @@ ErrCode BackgroundTaskMgrStub::OnRemoteRequest(uint32_t code, MessageParcel& dat
     std::u16string descriptor = BackgroundTaskMgrStub::GetDescriptor();
     std::u16string remoteDescriptor = data.ReadInterfaceToken();
     if (descriptor != remoteDescriptor) {
-        BGTASK_LOGE(" BackgroundTaskMgrStub::%{public}s local descriptor not match remote.", __func__);
+        BGTASK_LOGE("Local descriptor not match remote.");
         return ERR_TRANSACTION_FAILED;
     }
     auto it = interfaces_.find(code);
@@ -65,7 +65,7 @@ ErrCode BackgroundTaskMgrStub::OnRemoteRequest(uint32_t code, MessageParcel& dat
         return ERR_OK;
     }
 
-    BGTASK_LOGI("[OnRemoteRequest] fail: Failed to call interface %{public}u, err:%{public}d", code, result);
+    BGTASK_LOGE("Failed to call interface %{public}u, err:%{public}d", code, result);
     return result;
 }
 
@@ -74,22 +74,21 @@ ErrCode BackgroundTaskMgrStub::HandleRequestSuspendDelay(MessageParcel& data, Me
     std::u16string reason = data.ReadString16();
     sptr<IRemoteObject> callback = data.ReadRemoteObject();
     if (callback == nullptr) {
-        BGTASK_LOGE("BackgroundTaskMgrStub::%{public}s read callback fail.", __func__);
+        BGTASK_LOGE("Read callback fail.");
         return ERR_BGTASK_PARCELABLE_FAILED;
     }
 
     std::shared_ptr<DelaySuspendInfo> info;
     ErrCode result = RequestSuspendDelay(reason, iface_cast<IExpiredCallback>(callback), info);
     if (!reply.WriteInt32(result)) {
-        BGTASK_LOGI("[HandleStartBackgroundRunning] fail: write result failed, ErrCode=%{public}d", result);
+        BGTASK_LOGE("Write result failed, ErrCode=%{public}d", result);
         return ERR_BGTASK_PARCELABLE_FAILED;
     }
 
     if (info == nullptr || !info->Marshalling(reply)) {
-        BGTASK_LOGE("BackgroundTaskMgrStub::%{public}s write result fail.", __func__);
+        BGTASK_LOGE("Write result fail.");
         return ERR_BGTASK_PARCELABLE_FAILED;
     }
-    BGTASK_LOGD("BackgroundTaskMgrStub::%{public}s write result success.", __func__);
     return ERR_OK;
 }
 
@@ -100,7 +99,7 @@ ErrCode BackgroundTaskMgrStub::HandleCancelSuspendDelay(MessageParcel& data, Mes
     ErrCode result = CancelSuspendDelay(id);
     
     if (!reply.WriteInt32(result)) {
-        BGTASK_LOGI("[HandleCancelBackgroundRunning] fail: write result failed, ErrCode=%{public}d", result);
+        BGTASK_LOGE("Write result failed, ErrCode=%{public}d", result);
         return ERR_BGTASK_PARCELABLE_FAILED;
     }
     return ERR_OK;
@@ -112,11 +111,11 @@ ErrCode BackgroundTaskMgrStub::HandleGetRemainingDelayTime(MessageParcel& data, 
     int32_t time = 0;
     ErrCode result =  GetRemainingDelayTime(id, time);
     if (!reply.WriteInt32(result)) {
-        BGTASK_LOGI("[HandleCancelBackgroundRunning] fail: write result failed, ErrCode=%{public}d", result);
+        BGTASK_LOGE("Write result failed, ErrCode=%{public}d", result);
         return ERR_BGTASK_PARCELABLE_FAILED;
     }
     if (!reply.WriteInt32(time)) {
-        BGTASK_LOGE("BackgroundTaskMgrStub::%{public}s write result fail.", __func__);
+        BGTASK_LOGE("Write result fail.");
         return ERR_BGTASK_PARCELABLE_FAILED;
     }
     return ERR_OK;
@@ -126,13 +125,13 @@ ErrCode BackgroundTaskMgrStub::HandleSubscribeBackgroundTask(MessageParcel& data
 {
     sptr<IRemoteObject> subscriber = data.ReadRemoteObject();
     if (subscriber == nullptr) {
-        BGTASK_LOGE("BackgroundTaskMgrStub::%{public}s read callback fail.", __func__);
+        BGTASK_LOGE("Read callback fail.");
         return ERR_BGTASK_PARCELABLE_FAILED;
     }
 
     ErrCode result = SubscribeBackgroundTask(iface_cast<IBackgroundTaskSubscriber>(subscriber));
     if (!reply.WriteInt32(result)) {
-        BGTASK_LOGE("BackgroundTaskMgrStub::%{public}s write result fail.", __func__);
+        BGTASK_LOGE("Write result failed, ErrCode=%{public}d", result);
         return ERR_BGTASK_PARCELABLE_FAILED;
     }
     return ERR_OK;
@@ -142,13 +141,13 @@ ErrCode BackgroundTaskMgrStub::HandleUnsubscribeBackgroundTask(MessageParcel& da
 {
     sptr<IRemoteObject> subscriber = data.ReadRemoteObject();
     if (subscriber == nullptr) {
-        BGTASK_LOGE("BackgroundTaskMgrStub::%{public}s read callback fail.", __func__);
+        BGTASK_LOGE("Read callback fail.");
         return ERR_BGTASK_PARCELABLE_FAILED;
     }
 
     ErrCode result = UnsubscribeBackgroundTask(iface_cast<IBackgroundTaskSubscriber>(subscriber));
     if (!reply.WriteInt32(result)) {
-        BGTASK_LOGE("BackgroundTaskMgrStub::%{public}s write result fail.", __func__);
+        BGTASK_LOGE("Write result failed, ErrCode=%{public}d", result);
         return ERR_BGTASK_PARCELABLE_FAILED;
     }
     return ERR_OK;
@@ -158,7 +157,7 @@ ErrCode BackgroundTaskMgrStub::HandleShellDump(MessageParcel& data, MessageParce
 {
     std::vector<std::string> dumpOption;
     if (!data.ReadStringVector(&dumpOption)) {
-        BGTASK_LOGE("[HandleShellDump] fail: read dumpOption failed.");
+        BGTASK_LOGE("Read dumpOption failed.");
         return ERR_BGTASK_PARCELABLE_FAILED;
     }
 
@@ -166,14 +165,14 @@ ErrCode BackgroundTaskMgrStub::HandleShellDump(MessageParcel& data, MessageParce
     ErrCode result = ShellDump(dumpOption, bgtaskmgrInfo);
     
     if (!reply.WriteInt32(result)) {
-        BGTASK_LOGE("BackgroundTaskMgrStub::%{public}s write result fail.", __func__);
+        BGTASK_LOGE("Write result failed, ErrCode=%{public}d", result);
         return ERR_BGTASK_PARCELABLE_FAILED;
     }
     if (!reply.WriteStringVector(bgtaskmgrInfo)) {
-        BGTASK_LOGE("BackgroundTaskMgrStub::%{public}s write bgtaskmgrInfo fail.", __func__);
+        BGTASK_LOGE("Write bgtaskmgrInfo fail.");
         return ERR_BGTASK_PARCELABLE_FAILED;
     }
     return ERR_OK;
 }
-}
-}
+} // namespace BackgroundTaskMgr
+} // namespace OHOS

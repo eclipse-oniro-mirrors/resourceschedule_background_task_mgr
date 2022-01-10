@@ -57,6 +57,6 @@ private:
     int32_t uid_;
     int32_t pid_;
 };
-}
-}
+} // namespace BackgroundTaskMgr
+} // namespace OHOS
 #endif

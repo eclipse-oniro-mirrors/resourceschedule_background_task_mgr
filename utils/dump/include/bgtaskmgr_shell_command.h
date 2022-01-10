@@ -39,6 +39,6 @@ private:
     std::shared_ptr<BackgroundTaskManager> btm_;
 };
 
-}
-}  // namespace OHOS
+} // namespace BackgroundTaskMgr
+} // namespace OHOS
 #endif  // RESOURCESCHEDULE_BGTASKMGR_SHELL_COMMAND_H

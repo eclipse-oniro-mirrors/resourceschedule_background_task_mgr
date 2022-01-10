@@ -40,7 +40,7 @@ enum EventId {
 
 class EventInfo{
 public:
-    EventInfo() : eventId_(0) {}
+    EventInfo() {}
     virtual ~EventInfo() = default;
 
     inline void SetEventId(const int32_t& eventId)
@@ -85,10 +85,10 @@ public:
         return ret;
     }
 private:
-    int32_t eventId_;
+    int32_t eventId_ {0};
     std::vector<int32_t> intArgs_;
     std::vector<std::string> stringArgs_;
 };
-}
-}
+} // namespace BackgroundTaskMgr
+} // namespace OHOS
 #endif

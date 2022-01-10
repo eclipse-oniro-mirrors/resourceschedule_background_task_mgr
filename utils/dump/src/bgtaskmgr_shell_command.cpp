@@ -130,5 +130,5 @@ ErrCode BgtaskmgrShellCommand::RunAsDumpCommand()
     return ret;
 }
 
-}  
-}  // namespace OHOS
+} // namespace BackgroundTaskMgr
+} // namespace OHOS

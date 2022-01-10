@@ -60,6 +60,6 @@ private:
     friend class BackgroundTaskManager;
 };
 
-}
-}
+} // namespace BackgroundTaskMgr
+} // namespace OHOS
 #endif

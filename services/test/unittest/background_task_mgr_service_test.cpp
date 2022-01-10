@@ -47,5 +47,5 @@ HWTEST_F(BackgroundTaskMgrServiceTest, BackgroundTaskMgrServiceTest_001, TestSiz
     sptr<IRemoteObject> remoteObject = sm->CheckSystemAbility(BACKGROUND_TASK_MANAGER_SERVICE_ID);
     EXPECT_TRUE(remoteObject != nullptr) << "GetSystemAbility failed";
 }
-}
-}
+} // namespace BackgroundTaskMgr
+} // namespace OHOS

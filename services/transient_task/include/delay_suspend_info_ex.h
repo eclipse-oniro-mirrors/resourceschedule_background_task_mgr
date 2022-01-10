@@ -53,6 +53,6 @@ private:
     int64_t baseTime_ {0};
     int64_t spendTime_ {0};
 };
-}
-}
+} // namespace BackgroundTaskMgr
+} // namespace OHOS
 #endif

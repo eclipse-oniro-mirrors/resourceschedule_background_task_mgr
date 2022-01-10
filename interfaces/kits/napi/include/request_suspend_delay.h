@@ -53,6 +53,6 @@ static std::mutex mutex_;
 
 napi_value RequestSuspendDelay(napi_env env, napi_callback_info info);
 
-}
-}
+} // namespace BackgroundTaskMgr
+} // namespace OHOS
 #endif

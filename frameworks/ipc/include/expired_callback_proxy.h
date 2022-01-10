@@ -34,6 +34,6 @@ public:
 private:
     static inline BrokerDelegator<ExpiredCallbackProxy> delegator_;
 };
-}
-}
+} // namespace BackgroundTaskMgr
+} // namespace OHOS
 #endif

@@ -33,6 +33,6 @@ private:
     int32_t HandleOnExpired(MessageParcel& data);
 };
 
-}
-}
-#endif // RESOURCESCHEDULE_BGTASKMGR_EXPIRED_CALLBACK_STUB_H
+} // namespace BackgroundTaskMgr
+} // namespace OHOS
+#endif // FOUNDATION_RESOURCESCHEDULE_BACKGROUNDTASKMANAGER_FRAMEWORKS_IPC_INCLUDE_EXPIRED_CALLBACK_STUB_H

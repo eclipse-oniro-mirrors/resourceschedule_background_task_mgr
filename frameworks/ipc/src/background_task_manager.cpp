@@ -121,7 +121,6 @@ bool BackgroundTaskManager::GetBackgroundTaskManagerProxy()
         return false;
     }
     backgroundTaskMgrProxy_->AsObject()->AddDeathRecipient(recipient_);    
-
     return true;
 }
 
@@ -144,7 +143,7 @@ ErrCode BackgroundTaskManager::ShellDump(const std::vector<std::string> &dumpOpt
 }
 
 BackgroundTaskManager::BgTaskMgrDeathRecipient::BgTaskMgrDeathRecipient(BackgroundTaskManager &backgroundTaskManager)
-    : backgroundTaskManager_(backgroundTaskManager){};
+    : backgroundTaskManager_(backgroundTaskManager) {};
 
 BackgroundTaskManager::BgTaskMgrDeathRecipient::~BgTaskMgrDeathRecipient(){};
 
@@ -152,5 +151,5 @@ void BackgroundTaskManager::BgTaskMgrDeathRecipient::OnRemoteDied(const wptr<IRe
 {
     backgroundTaskManager_.ResetBackgroundTaskManagerProxy();
 }
-}
-}
+} // namespace BackgroundTaskMgr
+} // namespace OHOS

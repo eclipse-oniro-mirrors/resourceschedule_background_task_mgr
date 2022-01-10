@@ -52,6 +52,6 @@ private:
     bool isScreenUnlock_ {false};
     bool isLowPowerMode_ {false};
 };
-}
-}
+} // namespace BackgroundTaskMgr
+} // namespace OHOS
 #endif

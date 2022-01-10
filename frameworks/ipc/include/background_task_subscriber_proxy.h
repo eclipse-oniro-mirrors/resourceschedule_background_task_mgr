@@ -35,6 +35,6 @@ public:
 private:
     static inline BrokerDelegator<BackgroundTaskSubscriberProxy> delegator_;
 };
-}
-}
+} // namespace BackgroundTaskMgr
+} // namespace OHOS
 #endif // RESOURCESCHEDULE_BGTASKMGR_SUSPEND_LISTENER_PROXY_H

@@ -31,6 +31,6 @@ public:
 private:
     std::map<std::shared_ptr<KeyInfo>, uint32_t, KeyInfoComp> delaySuspendApps_;
 };
-}
-}
+} // namespace BackgroundTaskMgr
+} // namespace OHOS
 #endif

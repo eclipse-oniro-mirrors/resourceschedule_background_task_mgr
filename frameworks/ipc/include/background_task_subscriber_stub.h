@@ -33,6 +33,6 @@ private:
     int32_t HandleOnTransientTaskStart(MessageParcel& data);
     int32_t HandleOnTransientTaskEnd(MessageParcel& data);
 };
-}
-}
-#endif // RESOURCESCHEDULE_BGTASKMGR_SUSPEND_STUB_H
+} // namespace BackgroundTaskMgr
+} // namespace OHOS
+#endif // FOUNDATION_RESOURCESCHEDULE_BACKGROUNDTASKMANAGER_FRAMEWORKS_IPC_INCLUDE_TRANSIENT_TASK_SUBSCRIBER_STUB_H

@@ -38,6 +38,6 @@ private:
     int32_t requestId_{-1};
     int32_t actualDelayTime_{0};
 };
-}
-}
+} // namespace BackgroundTaskMgr
+} // namespace OHOS
 #endif

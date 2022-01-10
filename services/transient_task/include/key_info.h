@@ -75,6 +75,6 @@ struct KeyInfoComp
     }
 };
 
-}
-}
+} // namespace BackgroundTaskMgr
+} // namespace OHOS
 #endif

@@ -39,6 +39,6 @@ public:
     static ErrCode UnsubscribeBackgroundTask(const BackgroundTaskSubscriber &subscriber);
 };
 
-}
-}
+} // namespace BackgroundTaskMgr
+} // namespace OHOS
 #endif

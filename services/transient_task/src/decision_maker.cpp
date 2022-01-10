@@ -339,5 +339,5 @@ void DecisionMaker::HandleScreenOff()
         }
     }
 }
-}
-}
+} // namespace BackgroundTaskMgr
+} // namespace OHOS

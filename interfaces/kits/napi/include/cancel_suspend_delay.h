@@ -23,6 +23,6 @@
 namespace OHOS {
 namespace BackgroundTaskMgr {
     napi_value CancelSuspendDelay(napi_env env, napi_callback_info info);
-}
-}
+} // namespace BackgroundTaskMgr
+} // namespace OHOS
 #endif

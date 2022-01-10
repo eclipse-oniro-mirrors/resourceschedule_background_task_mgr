@@ -46,6 +46,6 @@ napi_module _module = {
     .reserved = {0}
 };
 
-}
-}
+} // namespace BackgroundTaskMgr
+} // namespace OHOS
 #endif

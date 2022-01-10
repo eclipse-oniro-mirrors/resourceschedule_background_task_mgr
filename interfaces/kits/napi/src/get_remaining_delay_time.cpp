@@ -122,5 +122,5 @@ napi_value GetRemainingDelayTime(napi_env env, napi_callback_info info)
         return promise;
     }
 }
-}
-}
+} // namespace BackgroundTaskMgr
+} // namespace OHOS

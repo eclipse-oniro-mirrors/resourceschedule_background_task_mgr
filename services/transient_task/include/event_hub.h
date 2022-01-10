@@ -37,6 +37,6 @@ public:
 private:
     InputManager& inputManager_;
 };
-}
-}
+} // namespace BackgroundTaskMgr
+} // namespace OHOS
 #endif

@@ -17,13 +17,13 @@ In the resource scheduling subsystem, the background task management is responsi
 
 ```
 /foundation/resourceschedule/background_task_mgr
-├── frameworks   # Frameworks
+├── frameworks       # Frameworks
 ├── interfaces
 │   ├── innerkits    # Internal APIs
 │   └── kits         # External APIs
-├── sa_profile   # SA profile
-├── services     # Services
-└── utils        # Utilities
+├── sa_profile       # SA profile
+├── services         # Services
+└── utils            # Utilities
 
 ```
 ## Transient Tasks<a name="section1312121216216"></a>

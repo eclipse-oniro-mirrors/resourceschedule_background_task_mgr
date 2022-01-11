@@ -16,14 +16,14 @@
 ## 目录<a name="section161941989596"></a>
 
 ```
-
-├── frameworks   # 接口实现
+/foundation/resourceschedule/background_task_mgr
+├── frameworks       # 接口实现
 ├── interfaces
 │   ├── innerkits    # 对内接口目录
 │   └── kits         # 对外接口目录
-├── sa_profile   # 组件服务配置
-├── services     # 组件服务实现
-└── utils        # 组件工具实现
+├── sa_profile       # 组件服务配置
+├── services         # 组件服务实现
+└── utils            # 组件工具实现
 
 ```
 ## 短时任务<a name="section1312121216216"></a>

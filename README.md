@@ -16,7 +16,7 @@ In the resource scheduling subsystem, the background task management is responsi
 ## Directory Structure<a name="section161941989596"></a>
 
 ```
-
+/foundation/resourceschedule/background_task_mgr
 ├── frameworks   # Frameworks
 ├── interfaces
 │   ├── innerkits    # Internal APIs

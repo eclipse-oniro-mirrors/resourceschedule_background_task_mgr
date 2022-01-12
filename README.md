@@ -30,12 +30,12 @@ In the resource scheduling subsystem, the background task management is responsi
 
 ### Available APIs<a name="section114564657874"></a>
 
-API                                                      |     Description                         
----------------------------------------------------------|-----------------------------------------
-function requestSuspendDelay(reason:string, callback:Callback\<void>): DelaySuspendInfo; | Request suspend delay 
-function cancelSuspendDelay(requestId:number): void;        | Cancel suspend delay 
-function getRemainingDelayTime(requestId:number, callback:AsyncCallback\<number>):void; | Get remaining delay time(callback) 
-function getRemainingDelayTime(requestId:number): Promise\<number>; | Get remaining delay time(Promise) 
+| API                                                                                      |     Description   |
+|------------------------------------------------------------------------------------------|-------------------|
+| function requestSuspendDelay(reason:string, callback:Callback\<void>): DelaySuspendInfo; | Request a suspend delay |
+| function cancelSuspendDelay(requestId:number): void;                                     | Cancel the suspend delay |
+| function getRemainingDelayTime(requestId:number, callback:AsyncCallback\<number>):void;  | Get remaining delay time(callback) |
+| function getRemainingDelayTime(requestId:number): Promise\<number>;                      | Get remaining delay time(Promise) |
 
 ### Usage Guidelines<a name="section129654513264"></a>
 

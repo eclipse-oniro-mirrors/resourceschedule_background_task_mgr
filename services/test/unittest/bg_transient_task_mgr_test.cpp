@@ -18,7 +18,7 @@
 #include <time.h>
 
 #define private public
-#include "background_task_manager.h"
+#include "bg_transient_task_mgr.h"
 #include "background_task_subscriber.h"
 
 using namespace testing::ext;
@@ -31,8 +31,6 @@ public:
     void OnTransientTaskStart(const std::shared_ptr<TransientTaskAppInfo>& info) override
     {}
     void OnTransientTaskEnd(const std::shared_ptr<TransientTaskAppInfo>& info) override
-    {}
-    void OnDied() override
     {}
 };
 

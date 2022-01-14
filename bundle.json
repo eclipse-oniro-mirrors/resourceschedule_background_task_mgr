@@ -1,17 +1,21 @@
 {
-    "name": "@openharmony/background_task_mgr",
-    "version": "3.1.0",
+    "name": "@ohos/background_task_mgr",
     "description": "background task manager service",
-    "publishAs": "code-segment",
-    "scripts": {
-      "install": "DEST_PATH=${DEP_BUNDLE_BASE}/foundation/resourceschedule/background_task_mgr && mkdir -p $DEST_PATH && cp -r ./* $DEST_PATH"
-    },
-    "repository": "https://gitee.com/openharmony/resourceschedule_background_task_mgr",
+    "version": "3.1",
     "license": "Apache License 2.0",
+    "publishAs": "code-segment",
+    "segment": {
+      "destPath" : "https://gitee.com/openharmony/resourceschedule_background_task_mgr"
+    },
+    "scripts": {},
     "component": {
       "name": "background_task_mgr",
       "subsystem": "resourceschedule",
-      "adapted_system_type": [ "standard" ],
+      "syscap": [ "SystemCapability.Ressched.BackgroundTaskMgr" ],
+      "features": [],
+      "adapted_system_type": [ "mini", "small", "standard" ],
+      "rom": "1024KB",
+      "ram": "2048KB",
       "deps": {
         "components": [
           "appexecfwk_core",

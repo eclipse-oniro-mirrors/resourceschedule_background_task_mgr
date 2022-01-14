@@ -227,6 +227,10 @@ int32_t DecisionMaker::GetQuota(const std::shared_ptr<KeyInfo>& key)
 
 bool DecisionMaker::IsFrontApp(const string& pkgName, int32_t uid)
 {
+    if (!GetAppMgrProxy()) {
+        BGTASK_LOGE("GetAppMgrProxy failed");
+        return false;
+    }
     vector<AppExecFwk::AppStateData> fgAppList;
     appMgrProxy_->GetForegroundApplications(fgAppList);
     for (auto fgApp : fgAppList) {
@@ -317,6 +321,10 @@ void DecisionMaker::OnInputEvent(const EventInfo& eventInfo)
 void DecisionMaker::HandleScreenOn()
 {
     lock_guard<mutex> lock(lock_);
+    if (!GetAppMgrProxy()) {
+        BGTASK_LOGE("GetAppMgrProxy failed");
+        return;
+    }
     vector<AppExecFwk::AppStateData> fgAppList;
     appMgrProxy_->GetForegroundApplications(fgAppList);
     for (auto fgApp : fgAppList) {

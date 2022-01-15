@@ -82,11 +82,11 @@ void BgTransientTaskMgr::InitNecessaryState()
         return;
     }
 
-    callbackDeathRecipient_ = 
+    callbackDeathRecipient_ =
         new ExpiredCallbackDeathRecipient(DelayedSingleton<BackgroundTaskMgrService>::GetInstance().get());
-    susriberDeathRecipient_ = 
+    susriberDeathRecipient_ =
         new SubscriberDeathRecipient(DelayedSingleton<BackgroundTaskMgrService>::GetInstance().get());
-    
+
     deviceInfoManeger_ = make_shared<DeviceInfoManager>();
     timerManager_ = make_shared<TimerManager>(DelayedSingleton<BackgroundTaskMgrService>::GetInstance().get());
     decisionMaker_ = make_shared<DecisionMaker>(timerManager_, deviceInfoManeger_);

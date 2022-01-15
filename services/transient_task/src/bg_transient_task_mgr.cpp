@@ -49,6 +49,7 @@ static const std::string CANCEL_DUMP_OPTION = "DUMP_CANCEL";
 
 constexpr int32_t BG_INVALID_REMAIN_TIME = -1;
 constexpr int32_t WATCHDOG_DELAY_TIME = 6 * MSEC_PER_SEC;
+constexpr int32_t SERVICE_WAIT_TIME = 5000;
 }
 
 BgTransientTaskMgr::BgTransientTaskMgr() {}
@@ -77,7 +78,7 @@ void BgTransientTaskMgr::InitNecessaryState()
         || systemAbilityManager->CheckSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID) == nullptr) {
         BGTASK_LOGI("request system service is not ready yet!");
         std::function <void()> InitNecessaryStateFunc = std::bind(&BgTransientTaskMgr::InitNecessaryState, this);
-        handler_->PostTask(InitNecessaryStateFunc, 5000);
+        handler_->PostTask(InitNecessaryStateFunc, SERVICE_WAIT_TIME);
         return;
     }
 
@@ -123,8 +124,8 @@ bool BgTransientTaskMgr::GetBundleNamesForUid(int32_t uid, std::string &bundleNa
     return true;
 }
 
-ErrCode BgTransientTaskMgr::RequestSuspendDelay(const std::u16string& reason, 
-        const sptr<IExpiredCallback>& callback, std::shared_ptr<DelaySuspendInfo> &delayInfo)
+ErrCode BgTransientTaskMgr::RequestSuspendDelay(const std::u16string& reason,
+    const sptr<IExpiredCallback>& callback, std::shared_ptr<DelaySuspendInfo> &delayInfo)
 {
     auto uid = IPCSkeleton::GetCallingUid();
     auto pid = IPCSkeleton::GetCallingPid();

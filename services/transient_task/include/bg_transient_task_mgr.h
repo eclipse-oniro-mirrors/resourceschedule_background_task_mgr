@@ -52,7 +52,7 @@ class BgTransientTaskMgr {
     DECLARE_DELAYED_SINGLETON(BgTransientTaskMgr);
 public:
     void Init();
-    ErrCode RequestSuspendDelay(const std::u16string& reason, 
+    ErrCode RequestSuspendDelay(const std::u16string& reason,
         const sptr<IExpiredCallback>& callback, std::shared_ptr<DelaySuspendInfo> &delayInfo);
     ErrCode CancelSuspendDelay(int32_t requestId);
     ErrCode GetRemainingDelayTime(int32_t requestId, int32_t &delayTime);
@@ -70,8 +70,7 @@ private:
     bool VerifyCallingInfo(int32_t uid, int32_t pid);
     bool VerifyRequestIdLocked(const std::string& name, int32_t uid, int32_t requestId);
     ErrCode CancelSuspendDelayLocked(int32_t requestId);
-    void NotifyTransientTaskSuscriber(shared_ptr<TransientTaskAppInfo>& appInfo,
-        TransientTaskEventType type);
+    void NotifyTransientTaskSuscriber(shared_ptr<TransientTaskAppInfo>& appInfo, TransientTaskEventType type);
     bool DumpAllRequestId(std::vector<std::string> &dumpInfo);
     void SendLowBatteryEvent(std::vector<std::string> &dumpInfo);
     void SendOkayBatteryEvent(std::vector<std::string> &dumpInfo);

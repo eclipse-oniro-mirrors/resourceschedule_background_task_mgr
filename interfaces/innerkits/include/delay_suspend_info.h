@@ -26,23 +26,28 @@ public:
 
     bool Marshalling(Parcel& out) const override;
 
-    inline bool IsSameRequestId(int32_t requestId) const {
+    inline bool IsSameRequestId(int32_t requestId) const
+    {
         return requestId_ == requestId;
     }
 
-    inline int32_t GetRequestId() const {
+    inline int32_t GetRequestId() const
+    {
         return requestId_;
     }
 
-    inline int32_t GetActualDelayTime() const {
+    inline int32_t GetActualDelayTime() const
+    {
         return actualDelayTime_;
     }
 
-    inline void SetRequestId(int32_t id) {
+    inline void SetRequestId(int32_t id)
+    {
         requestId_ = id;
     }
 
-    inline void SetActualDelayTime(int32_t time) {
+    inline void SetActualDelayTime(int32_t time)
+    {
         actualDelayTime_ = time;
     }
 

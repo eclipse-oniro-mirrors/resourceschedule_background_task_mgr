@@ -30,17 +30,17 @@ const sptr<BackgroundTaskSubscriber::BackgroundTaskSubscriberImpl> BackgroundTas
     return impl_;
 }
 
-BackgroundTaskSubscriber::BackgroundTaskSubscriberImpl::
-    BackgroundTaskSubscriberImpl(BackgroundTaskSubscriber &subscriber) : subscriber_(subscriber) {}
+BackgroundTaskSubscriber::BackgroundTaskSubscriberImpl::BackgroundTaskSubscriberImpl(
+    BackgroundTaskSubscriber &subscriber) : subscriber_(subscriber) {}
 
-void BackgroundTaskSubscriber::BackgroundTaskSubscriberImpl::
-    OnTransientTaskStart(const std::shared_ptr<TransientTaskAppInfo>& info)
+void BackgroundTaskSubscriber::BackgroundTaskSubscriberImpl::OnTransientTaskStart(
+    const std::shared_ptr<TransientTaskAppInfo>& info)
 {
     subscriber_.OnTransientTaskStart(info);
 }
 
-void BackgroundTaskSubscriber::BackgroundTaskSubscriberImpl::
-    OnTransientTaskEnd(const std::shared_ptr<TransientTaskAppInfo>& info)
+void BackgroundTaskSubscriber::BackgroundTaskSubscriberImpl::OnTransientTaskEnd(
+    const std::shared_ptr<TransientTaskAppInfo>& info)
 {
     subscriber_.OnTransientTaskEnd(info);
 }

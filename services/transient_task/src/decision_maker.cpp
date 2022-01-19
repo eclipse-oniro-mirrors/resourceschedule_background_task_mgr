@@ -97,8 +97,8 @@ void DecisionMaker::AppMgrDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>
     decisionMaker_.GetAppMgrProxy();
 }
 
-void DecisionMaker::ApplicationStateObserver::
-    OnForegroundApplicationChanged(const AppExecFwk::AppStateData &appStateData)
+void DecisionMaker::ApplicationStateObserver::OnForegroundApplicationChanged(
+    const AppExecFwk::AppStateData &appStateData)
 {
     lock_guard<mutex> lock(decisionMaker_.lock_);
 

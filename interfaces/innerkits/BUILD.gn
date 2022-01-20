@@ -17,8 +17,6 @@ import("//foundation/resourceschedule/background_task_mgr/bgtaskmgr.gni")
 config("bgtaskmgr_public_config") {
   include_dirs = [
     "include",
-    "//utils/native/base/include",
-    "//utils/system/safwk/native/include",
   ]
 }
 

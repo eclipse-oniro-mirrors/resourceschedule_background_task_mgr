@@ -15,9 +15,7 @@ import("//build/ohos.gni")
 import("//foundation/resourceschedule/background_task_mgr/bgtaskmgr.gni")
 
 config("bgtaskmgr_public_config") {
-  include_dirs = [
-    "include",
-  ]
+  include_dirs = [ "include" ]
 }
 
 ohos_shared_library("bgtaskmgr_innerkits") {

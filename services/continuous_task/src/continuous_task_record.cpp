@@ -208,10 +208,12 @@ std::string ContinuousTaskRecord::ParseToJsonStr()
     root["audioPlayState"] = audioPlayState_;
     root["isStandbySuspend"] = isStandbySuspend_;
     if (progressInfo_ != nullptr) {
-        nlohmann::json progressJson = nlohmann::json::parse(progressInfo_->ParseToJsonStr());
-        if (!progressJson.is_discarded()) {
-            root["progressInfo"] = progressJson;
-        }
+        nlohmann::json progressJson;
+        progressJson["title"] = progressInfo_->GetTitle();
+        progressJson["fileName"] = progressInfo_->GetFileName();
+        progressJson["progressValue"] = progressInfo_->GetProgressValue();
+        progressJson["isMute"] = progressInfo_->IsMute();
+        root["progressInfo"] = progressJson;
     }
     root["isFromComponent"] = isFromComponent_;
     return root.dump(CommonUtils::jsonFormat_);
@@ -266,10 +268,22 @@ bool ContinuousTaskRecord::ParseFromJson(const nlohmann::json &value)
         this->notificationId_ = value.at("notificationId").get<int32_t>();
     }
     if (value.contains("progressInfo") && value["progressInfo"].is_object()) {
-        this->progressInfo_ = std::make_shared<ProgressInfo>();
-        if (!this->progressInfo_->ParseFromJson(value["progressInfo"])) {
+        auto progressVal = value["progressInfo"];
+        if (progressVal.is_null() || !progressVal.is_object() ||
+            !progressVal.contains("title") || !progressVal["title"].is_string() ||
+            !progressVal.contains("fileName") || !progressVal["fileName"].is_string()) {
             BGTASK_LOGE("parse progressInfo from json failed");
             this->progressInfo_ = nullptr;
+        } else {
+            this->progressInfo_ = std::make_shared<ProgressInfo>();
+            this->progressInfo_->SetTitle(progressVal.at("title").get<std::string>());
+            this->progressInfo_->SetFileName(progressVal.at("fileName").get<std::string>());
+            if (progressVal.contains("progressValue") && progressVal["progressValue"].is_number_integer()) {
+                this->progressInfo_->SetProgressValue(progressVal.at("progressValue").get<int32_t>());
+            }
+            if (progressVal.contains("isMute") && progressVal["isMute"].is_boolean()) {
+                this->progressInfo_->SetIsMute(progressVal.at("isMute").get<bool>());
+            }
         }
     }
     return true;

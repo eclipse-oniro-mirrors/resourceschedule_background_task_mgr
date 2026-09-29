@@ -101,6 +101,7 @@ class BgContinuousTaskMgr : public DelayedSingleton<BgContinuousTaskMgr>,
                             public std::enable_shared_from_this<BgContinuousTaskMgr> {
 public:
     ErrCode StartBackgroundRunning(const sptr<ContinuousTaskParam> &taskParam);
+    ErrCode StartContinuousTask(const sptr<ContinuousTaskParam> &taskParam);
     ErrCode UpdateBackgroundRunning(const sptr<ContinuousTaskParam> &taskParam);
     ErrCode StopBackgroundRunning(const std::string &abilityName, int32_t abilityId, int32_t continuousTaskId = -1);
     ErrCode GetAllContinuousTasks(std::vector<std::shared_ptr<ContinuousTaskInfo>> &list);

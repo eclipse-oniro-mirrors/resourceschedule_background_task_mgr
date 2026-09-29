@@ -1015,6 +1015,10 @@ ErrCode BgContinuousTaskMgr::StartBackgroundRunning(const sptr<ContinuousTaskPar
     if (!CheckTaskParam(taskParam)) {
         return ERR_BGTASK_CHECK_TASK_PARAM;
     }
+    if (taskParam->progressInfo_ != nullptr) {
+        BGTASK_LOGI("progressInfo is not effective in startBackgroundRunning, ignore it");
+        taskParam->progressInfo_ = nullptr;
+    }
     ErrCode result = ERR_OK;
     int32_t callingUid = IPCSkeleton::GetCallingUid();
     pid_t callingPid = IPCSkeleton::GetCallingPid();
@@ -1053,6 +1057,61 @@ ErrCode BgContinuousTaskMgr::StartBackgroundRunning(const sptr<ContinuousTaskPar
         result = this->StartBackgroundRunningInner(continuousTaskRecord);
         }, AppExecFwk::EventQueue::Priority::HIGH);
     taskParam->notificationId_ = continuousTaskRecord->GetNotificationId();
+    taskParam->continuousTaskId_ = continuousTaskRecord->continuousTaskId_;
+    return result;
+}
+
+ErrCode BgContinuousTaskMgr::StartContinuousTask(const sptr<ContinuousTaskParam> &taskParam)
+{
+    BgTaskHiTraceChain traceChain(__func__);
+    if (!isSysReady_.load()) {
+        return ERR_BGTASK_SYS_NOT_READY;
+    }
+    if (!CheckTaskParam(taskParam)) {
+        return ERR_BGTASK_CHECK_TASK_PARAM;
+    }
+    if (taskParam->progressInfo_ != nullptr &&
+        !CommonUtils::CheckExistMode(taskParam->bgModeIds_, BackgroundMode::DATA_TRANSFER)) {
+        BGTASK_LOGI("progressInfo is not effective without DATA_TRANSFER mode, ignore it");
+        taskParam->progressInfo_ = nullptr;
+    }
+    ErrCode result = ERR_OK;
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    pid_t callingPid = IPCSkeleton::GetCallingPid();
+    std::string bundleName = BundleManagerHelper::GetInstance()->GetClientBundleName(callingUid);
+    int32_t userId = -1;
+#ifdef HAS_OS_ACCOUNT_PART
+    AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(callingUid, userId);
+#else // HAS_OS_ACCOUNT_PART
+    GetOsAccountIdFromUid(callingUid, userId);
+#endif // HAS_OS_ACCOUNT_PART
+    if (!BundleManagerHelper::GetInstance()->CheckPermission(BGMODE_PERMISSION)) {
+        BGTASK_LOGE("background mode permission is not passed");
+        return ERR_BGTASK_PERMISSION_DENIED;
+    }
+    std::shared_ptr<ContinuousTaskRecord> continuousTaskRecord = std::make_shared<ContinuousTaskRecord>(bundleName,
+        taskParam->abilityName_, callingUid, callingPid, taskParam->bgModeId_, taskParam->isBatchApi_,
+        taskParam->bgModeIds_, taskParam->abilityId_);
+    InitRecordParam(continuousTaskRecord, taskParam, userId);
+    if (taskParam->wantAgent_ != nullptr && taskParam->wantAgent_->GetPendingWant() != nullptr) {
+        auto target = taskParam->wantAgent_->GetPendingWant()->GetTarget();
+        auto want = taskParam->wantAgent_->GetPendingWant()->GetWant(target);
+        if (want != nullptr) {
+            std::shared_ptr<WantAgentInfo> info = std::make_shared<WantAgentInfo>();
+            info->bundleName_ = want->GetOperation().GetBundleName();
+            info->abilityName_ = want->GetOperation().GetAbilityName();
+            continuousTaskRecord->wantAgentInfo_ = info;
+            result = CheckSubMode(want, continuousTaskRecord);
+            if (result != ERR_OK) {
+                return result;
+            }
+        }
+    }
+    HitraceScoped traceScoped(HITRACE_TAG_OHOS,
+        "BackgroundTaskManager::ContinuousTask::Service::StartContinuousTaskInner");
+    handler_->PostSyncTask([this, continuousTaskRecord, &result]() mutable {
+        result = this->StartBackgroundRunningInner(continuousTaskRecord);
+        }, AppExecFwk::EventQueue::Priority::HIGH);
     taskParam->continuousTaskId_ = continuousTaskRecord->continuousTaskId_;
     return result;
 }
@@ -1400,10 +1459,10 @@ ErrCode BgContinuousTaskMgr::AllowApplyContinuousTask(const std::shared_ptr<Cont
         return ret;
     }
     int32_t uid = record->GetUid();
-    // 有progressInfo参数需要有DATA_TRANSFER类型
+    // 有progressInfo参数需要有DATA_TRANSFER类型，否则静默忽略
     if (record->progressInfo_ && !CommonUtils::CheckExistMode(record->bgModeIds_, BackgroundMode::DATA_TRANSFER)) {
-        BGTASK_LOGE("uid: %{public}d, task is not have DATA_TRANSFER mode.", uid);
-        return ERR_BGTASK_CONTINUOUS_NOT_DATA_TRANSFER;
+        BGTASK_LOGI("uid: %{public}d, task is not DATA_TRANSFER mode, ignore progressInfo.", uid);
+        record->progressInfo_ = nullptr;
     }
     // 需要豁免的情况：inner接口或应用在前台
     if (record->IsFromWebview() || appOnForeground_.count(uid) > 0) {
@@ -3639,6 +3698,7 @@ ErrCode BgContinuousTaskMgr::SendLiveViewAndOtherNotification(std::shared_ptr<Co
     subRecord->continuousTaskId_ = record->continuousTaskId_;
     subRecord->isNewApi_ = record->isNewApi_;
     subRecord->isByRequestObject_ = true;
+    subRecord->progressInfo_ = record->progressInfo_;
     subRecord->bgModeIds_.clear();
     subRecord->bgModeId_ = BackgroundMode::DATA_TRANSFER;
     subRecord->bgModeIds_.push_back(BackgroundMode::DATA_TRANSFER);

@@ -71,6 +71,7 @@ public:
     // notificationId和continuousTaskId为idl化整改工具能力暂不具备而添加，在proxy中使用
     ErrCode StartBackgroundRunning(const ContinuousTaskParam &taskParam, int32_t& notificationId,
         int32_t& continuousTaskId) override;
+    ErrCode StartContinuousTask(const ContinuousTaskParam &taskParam, int32_t& continuousTaskId) override;
     ErrCode UpdateBackgroundRunning(const ContinuousTaskParam &taskParam, int32_t& notificationId,
         int32_t& continuousTaskId) override;
     ErrCode RequestBackgroundRunningForInner(const ContinuousTaskParamForInner &taskParam) override;

@@ -117,40 +117,5 @@ bool DataTransferProgress::ReadFromParcel(Parcel& in)
     }
     return true;
 }
-
-std::string DataTransferProgress::ParseToJsonStr() const
-{
-    nlohmann::json root;
-    root["continuousTaskId"] = continuousTaskId_;
-    if (progressInfo_ != nullptr) {
-        nlohmann::json progressJson = nlohmann::json::parse(progressInfo_->ParseToJsonStr(), nullptr, false);
-        if (!progressJson.is_discarded()) {
-            root["progressInfo"] = progressJson;
-        }
-    }
-    return root.dump(jsonFormat_, ' ', false, nlohmann::json::error_handler_t::replace);
-}
-
-bool DataTransferProgress::ParseFromJson(const nlohmann::json &value)
-{
-    if (value.is_null() || !value.is_object()) {
-        BGTASK_LOGE("DataTransferProgress json is invalid");
-        return false;
-    }
-    if (!value["continuousTaskId"].is_number_integer()) {
-        BGTASK_LOGE("DataTransferProgress json field type mismatch");
-        return false;
-    }
-    continuousTaskId_ = value.at("continuousTaskId").get<int32_t>();
-    if (value.contains("progressInfo") && value["progressInfo"].is_object()) {
-        auto progressInfo = std::make_shared<ProgressInfo>();
-        if (!progressInfo->ParseFromJson(value["progressInfo"])) {
-            BGTASK_LOGE("parse progressInfo from json failed");
-            return false;
-        }
-        progressInfo_ = progressInfo;
-    }
-    return true;
-}
 }  // namespace BackgroundTaskMgr
 }  // namespace OHOS

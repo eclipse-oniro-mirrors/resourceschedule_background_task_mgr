@@ -380,7 +380,11 @@ function CreateContinuousTaskRequest(): ContinuousTaskRequest;
 @rename("startBackgroundRunning")
 @promise function StartBackgroundRunningSync3(
   context: @sts_type("BaseContext") Opaque, request: ContinuousTaskRequest): ContinuousTaskNotification;
- 	 
+
+@rename("startContinuousTask")
+@promise function StartContinuousTask(
+  context: @sts_type("BaseContext") Opaque, request: ContinuousTaskRequest): i32;
+
 @rename("updateBackgroundRunning")
 @promise function UpdateBackgroundRunningSync2(
   context: @sts_type("BaseContext") Opaque, request: ContinuousTaskRequest): ContinuousTaskNotification;

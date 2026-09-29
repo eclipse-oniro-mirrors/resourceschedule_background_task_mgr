@@ -71,6 +71,7 @@ struct ContinuousTaskParamForInner : public Parcelable {
     int32_t abilityId_ {-1};
     uint64_t tokenId_ {0};
     int32_t pid_ {0};
+    int32_t appIndex_ {-1};
 
     ContinuousTaskParamForInner() = default;
     ContinuousTaskParamForInner(int32_t uid, uint32_t bgModeId, bool isStart, int32_t abilityId = -1,
@@ -82,6 +83,8 @@ struct ContinuousTaskParamForInner : public Parcelable {
     static ContinuousTaskParamForInner *Unmarshalling(Parcel &parcel);
     void SetPid(const int32_t pid);
     int32_t GetPid() const;
+    void SetAppIndex(const int32_t appIndex);
+    int32_t GetAppIndex() const;
 };
 }  // namespace BackgroundTaskMgr
 }  // namespace OHOS

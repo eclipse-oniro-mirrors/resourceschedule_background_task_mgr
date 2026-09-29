@@ -990,6 +990,7 @@ ErrCode BgContinuousTaskMgr::StartBackgroundRunningForInner(const sptr<Continuou
     continuousTaskRecord->isFromWebview_ = true;
     continuousTaskRecord->userId_ = userId;
     continuousTaskRecord->fullTokenId_ = fullTokenId;
+    continuousTaskRecord->appIndex_ = taskParam->appIndex_;
     continuousTaskRecord->needNotificationForInnerApi_ = g_innerApiReqBgRunningConfig.count(callingUid) ?
         g_innerApiReqBgRunningConfig.at(callingUid).needNotification_ : false;
     if (callingUid == taskParam->uid_ && taskParam->bgModeId_ == BackgroundMode::AUDIO_PLAYBACK) {

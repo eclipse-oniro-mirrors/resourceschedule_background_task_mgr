@@ -1494,26 +1494,21 @@ HWTEST_F(BgTaskClientUnitTest, ContinuousTaskParam_ProgressInfo_001, TestSize.Le
 }
 
 /**
- * @tc.name: ProgressInfo_002
- * @tc.desc: test ProgressInfo parcel round-trip.
+ * @tc.name: ContinuousTaskParam_ProgressInfo_002
+ * @tc.desc: test ContinuousTaskParam parcel round-trip without progressInfo.
  * @tc.type: FUNC
  */
-HWTEST_F(BgTaskClientUnitTest, ProgressInfo_002, TestSize.Level1)
+HWTEST_F(BgTaskClientUnitTest, ContinuousTaskParam_ProgressInfo_002, TestSize.Level1)
 {
-    auto progressInfo = std::make_shared<ProgressInfo>();
-    progressInfo->SetTitle("uploading");
-    progressInfo->SetFileName("data.csv");
-    progressInfo->SetProgressValue(88);
-    progressInfo->SetIsMute(false);
-
+    sptr<ContinuousTaskParam> param = new ContinuousTaskParam(true, 1,
+        std::make_shared<AbilityRuntime::WantAgent::WantAgent>(),
+        "ability1", nullptr, "Entry", true, {1}, 1);
+    EXPECT_EQ(param->progressInfo_, nullptr);
+ 
     Parcel parcel;
-    EXPECT_TRUE(progressInfo->Marshalling(parcel));
-    auto readInfo = std::shared_ptr<ProgressInfo>(ProgressInfo::Unmarshalling(parcel));
-    ASSERT_NE(readInfo, nullptr);
-    EXPECT_EQ(readInfo->GetTitle(), "uploading");
-    EXPECT_EQ(readInfo->GetFileName(), "data.csv");
-    EXPECT_EQ(readInfo->GetProgressValue(), 88);
-    EXPECT_EQ(readInfo->IsMute(), false);
+    EXPECT_TRUE(param->Marshalling(parcel));
+    auto deserialized = ContinuousTaskParam::Unmarshalling(parcel);
+    EXPECT_EQ(deserialized->progressInfo_, nullptr);
 }
 
 /**
@@ -1610,7 +1605,7 @@ HWTEST_F(BgTaskClientUnitTest, ProgressInfo_001, TestSize.Level1)
 
 /**
  * @tc.name: ProgressInfo_002
- * @tc.desc: test ProgressInfo JSON round-trip.
+ * @tc.desc: test ProgressInfo parcel round-trip.
  * @tc.type: FUNC
  */
 HWTEST_F(BgTaskClientUnitTest, ProgressInfo_002, TestSize.Level1)
@@ -1621,9 +1616,10 @@ HWTEST_F(BgTaskClientUnitTest, ProgressInfo_002, TestSize.Level1)
     progressInfo->SetProgressValue(88);
     progressInfo->SetIsMute(false);
 
-    std::string jsonStr = progressInfo->ParseToJsonStr();
-    auto readInfo = std::make_shared<ProgressInfo>();
-    EXPECT_TRUE(readInfo->ParseFromJson(nlohmann::json::parse(jsonStr)));
+    Parcel parcel;
+    EXPECT_TRUE(progressInfo->Marshalling(parcel));
+    auto readInfo = std::shared_ptr<ProgressInfo>(ProgressInfo::Unmarshalling(parcel));
+    ASSERT_NE(readInfo, nullptr);
     EXPECT_EQ(readInfo->GetTitle(), "uploading");
     EXPECT_EQ(readInfo->GetFileName(), "data.csv");
     EXPECT_EQ(readInfo->GetProgressValue(), 88);

@@ -1037,18 +1037,11 @@ ErrCode BgContinuousTaskMgr::StartBackgroundRunning(const sptr<ContinuousTaskPar
         taskParam->abilityName_, callingUid, callingPid, taskParam->bgModeId_, taskParam->isBatchApi_,
         taskParam->bgModeIds_, taskParam->abilityId_);
     InitRecordParam(continuousTaskRecord, taskParam, userId);
-    if (taskParam->wantAgent_ != nullptr && taskParam->wantAgent_->GetPendingWant() != nullptr) {
-        auto target = taskParam->wantAgent_->GetPendingWant()->GetTarget();
-        auto want = taskParam->wantAgent_->GetPendingWant()->GetWant(target);
-        if (want != nullptr) {
-            std::shared_ptr<WantAgentInfo> info = std::make_shared<WantAgentInfo>();
-            info->bundleName_ = want->GetOperation().GetBundleName();
-            info->abilityName_ = want->GetOperation().GetAbilityName();
-            continuousTaskRecord->wantAgentInfo_ = info;
-            result = CheckSubMode(want, continuousTaskRecord);
-            if (result != ERR_OK) {
-                return result;
-            }
+    auto want = ParseWantAgent(taskParam, continuousTaskRecord);
+    if (want != nullptr) {
+        result = CheckSubMode(want, continuousTaskRecord);
+        if (result != ERR_OK) {
+            return result;
         }
     }
     HitraceScoped traceScoped(HITRACE_TAG_OHOS,
@@ -1093,18 +1086,11 @@ ErrCode BgContinuousTaskMgr::StartContinuousTask(const sptr<ContinuousTaskParam>
         taskParam->abilityName_, callingUid, callingPid, taskParam->bgModeId_, taskParam->isBatchApi_,
         taskParam->bgModeIds_, taskParam->abilityId_);
     InitRecordParam(continuousTaskRecord, taskParam, userId);
-    if (taskParam->wantAgent_ != nullptr && taskParam->wantAgent_->GetPendingWant() != nullptr) {
-        auto target = taskParam->wantAgent_->GetPendingWant()->GetTarget();
-        auto want = taskParam->wantAgent_->GetPendingWant()->GetWant(target);
-        if (want != nullptr) {
-            std::shared_ptr<WantAgentInfo> info = std::make_shared<WantAgentInfo>();
-            info->bundleName_ = want->GetOperation().GetBundleName();
-            info->abilityName_ = want->GetOperation().GetAbilityName();
-            continuousTaskRecord->wantAgentInfo_ = info;
-            result = CheckSubMode(want, continuousTaskRecord);
-            if (result != ERR_OK) {
-                return result;
-            }
+    auto want = ParseWantAgent(taskParam, continuousTaskRecord);
+    if (want != nullptr) {
+        result = CheckSubMode(want, continuousTaskRecord);
+        if (result != ERR_OK) {
+            return result;
         }
     }
     HitraceScoped traceScoped(HITRACE_TAG_OHOS,
@@ -1114,6 +1100,24 @@ ErrCode BgContinuousTaskMgr::StartContinuousTask(const sptr<ContinuousTaskParam>
         }, AppExecFwk::EventQueue::Priority::HIGH);
     taskParam->continuousTaskId_ = continuousTaskRecord->continuousTaskId_;
     return result;
+}
+
+std::shared_ptr<AAFwk::Want> BgContinuousTaskMgr::ParseWantAgent(const sptr<ContinuousTaskParam> &taskParam,
+    std::shared_ptr<ContinuousTaskRecord> &continuousTaskRecord)
+{
+    if (taskParam->wantAgent_ == nullptr || taskParam->wantAgent_->GetPendingWant() == nullptr) {
+        return nullptr;
+    }
+    auto target = taskParam->wantAgent_->GetPendingWant()->GetTarget();
+    auto want = taskParam->wantAgent_->GetPendingWant()->GetWant(target);
+    if (want == nullptr) {
+        return nullptr;
+    }
+    std::shared_ptr<WantAgentInfo> info = std::make_shared<WantAgentInfo>();
+    info->bundleName_ = want->GetOperation().GetBundleName();
+    info->abilityName_ = want->GetOperation().GetAbilityName();
+    continuousTaskRecord->wantAgentInfo_ = info;
+    return want;
 }
 
 void BgContinuousTaskMgr::InitRecordParam(std::shared_ptr<ContinuousTaskRecord> continuousTaskRecord,
@@ -3677,6 +3681,23 @@ ErrCode BgContinuousTaskMgr::SendNotification(const std::shared_ptr<ContinuousTa
     }
 }
 
+std::shared_ptr<ContinuousTaskRecord> BgContinuousTaskMgr::CreateSubRecordForLiveView(
+    const std::shared_ptr<ContinuousTaskRecord> &record)
+{
+    auto subRecord = std::make_shared<ContinuousTaskRecord>(record->bundleName_,
+        record->abilityName_, record->uid_, record->pid_, record->bgModeId_);
+    subRecord->wantAgent_ = record->wantAgent_;
+    subRecord->abilityId_ = record->abilityId_;
+    subRecord->continuousTaskId_ = record->continuousTaskId_;
+    subRecord->isNewApi_ = record->isNewApi_;
+    subRecord->isByRequestObject_ = true;
+    subRecord->progressInfo_ = record->progressInfo_;
+    subRecord->bgModeIds_.clear();
+    subRecord->bgModeId_ = BackgroundMode::DATA_TRANSFER;
+    subRecord->bgModeIds_.push_back(BackgroundMode::DATA_TRANSFER);
+    return subRecord;
+}
+
 ErrCode BgContinuousTaskMgr::SendLiveViewAndOtherNotification(std::shared_ptr<ContinuousTaskRecord> record)
 {
     if (continuousTaskText_.empty()) {
@@ -3691,17 +3712,7 @@ ErrCode BgContinuousTaskMgr::SendLiveViewAndOtherNotification(std::shared_ptr<Co
         BGTASK_LOGE("appName is empty");
         return ERR_BGTASK_NOTIFICATION_VERIFY_FAILED;
     }
-    std::shared_ptr<ContinuousTaskRecord> subRecord = std::make_shared<ContinuousTaskRecord>(record->bundleName_,
-        record->abilityName_, record->uid_, record->pid_, record->bgModeId_);
-    subRecord->wantAgent_ = record->wantAgent_;
-    subRecord->abilityId_ = record->abilityId_;
-    subRecord->continuousTaskId_ = record->continuousTaskId_;
-    subRecord->isNewApi_ = record->isNewApi_;
-    subRecord->isByRequestObject_ = true;
-    subRecord->progressInfo_ = record->progressInfo_;
-    subRecord->bgModeIds_.clear();
-    subRecord->bgModeId_ = BackgroundMode::DATA_TRANSFER;
-    subRecord->bgModeIds_.push_back(BackgroundMode::DATA_TRANSFER);
+    std::shared_ptr<ContinuousTaskRecord> subRecord = CreateSubRecordForLiveView(record);
     ErrCode ret = SendNotification(subRecord, record, appName, false);
     if (ret != ERR_OK) {
         return ret;

@@ -89,7 +89,14 @@ static std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateStartAbilityW
     wants.push_back(want);
     std::vector<AbilityRuntime::WantAgent::WantAgentConstant::Flags> flags;
     flags.push_back(AbilityRuntime::WantAgent::WantAgentConstant::Flags::UPDATE_PRESENT_FLAG);
-
+    int32_t appIndex = continuousTaskRecord->GetAppIndex();
+    if (appIndex > 0) {
+        int32_t uid = continuousTaskRecord->GetUid();
+        int32_t userId = continuousTaskRecord->GetUserId();
+        AbilityRuntime::WantAgent::WantAgentInfo wantAgentInfo(0, appIndex,
+            AbilityRuntime::WantAgent::WantAgentConstant::OperationType::START_ABILITY, flags, wants, nullptr);
+        return AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(wantAgentInfo, userId, uid);
+    }
     AbilityRuntime::WantAgent::WantAgentInfo wantAgentInfo(
         0, AbilityRuntime::WantAgent::WantAgentConstant::OperationType::START_ABILITY, flags, wants, nullptr);
     return AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(wantAgentInfo);

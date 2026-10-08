@@ -149,6 +149,10 @@ bool ContinuousTaskParamForInner::ReadFromParcel(Parcel &parcel)
         BGTASK_LOGE("Failed to read the pid");
         return false;
     }
+    if (!parcel.ReadInt32(appIndex_)) {
+        BGTASK_LOGE("Failed to read the appIndex_");
+        return false;
+    }
     return true;
 }
 
@@ -304,6 +308,10 @@ bool ContinuousTaskParamForInner::Marshalling(Parcel &parcel) const
         BGTASK_LOGE("Failed to write pid_");
         return false;
     }
+    if (!parcel.WriteInt32(appIndex_)) {
+        BGTASK_LOGE("Failed to write appIndex_");
+        return false;
+    }
     return true;
 }
 
@@ -315,6 +323,16 @@ void ContinuousTaskParamForInner::SetPid(const int32_t pid)
 int32_t ContinuousTaskParamForInner::GetPid() const
 {
     return pid_;
+}
+
+void ContinuousTaskParamForInner::SetAppIndex(const int32_t appIndex)
+{
+    appIndex_ = appIndex;
+}
+
+int32_t ContinuousTaskParamForInner::GetAppIndex() const
+{
+    return appIndex_;
 }
 }  // namespace BackgroundTaskMgr
 }  // namespace OHOS

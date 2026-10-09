@@ -1504,7 +1504,7 @@ HWTEST_F(BgTaskClientUnitTest, ContinuousTaskParam_ProgressInfo_002, TestSize.Le
         std::make_shared<AbilityRuntime::WantAgent::WantAgent>(),
         "ability1", nullptr, "Entry", true, {1}, 1);
     EXPECT_EQ(param->progressInfo_, nullptr);
- 
+
     Parcel parcel;
     EXPECT_TRUE(param->Marshalling(parcel));
     auto deserialized = ContinuousTaskParam::Unmarshalling(parcel);

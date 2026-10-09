@@ -1016,7 +1016,8 @@ ErrCode BgContinuousTaskMgr::StartBackgroundRunning(const sptr<ContinuousTaskPar
         return ERR_BGTASK_CHECK_TASK_PARAM;
     }
     if (taskParam->progressInfo_ != nullptr) {
-        BGTASK_LOGI("progressInfo is not effective in startBackgroundRunning, ignore it");
+        BGTASK_LOGD("appName %{public}s, progressInfo is ignore in startBackgroundRunning",
+            taskParam->appName_.c_str());
         taskParam->progressInfo_ = nullptr;
     }
     ErrCode result = ERR_OK;
@@ -1065,7 +1066,8 @@ ErrCode BgContinuousTaskMgr::StartContinuousTask(const sptr<ContinuousTaskParam>
     }
     if (taskParam->progressInfo_ != nullptr &&
         !CommonUtils::CheckExistMode(taskParam->bgModeIds_, BackgroundMode::DATA_TRANSFER)) {
-        BGTASK_LOGI("progressInfo is not effective without DATA_TRANSFER mode, ignore it");
+        BGTASK_LOGD("appName %{public}s, without DATA_TRANSFER mode, ignore it",
+            taskParam->appName_.c_str());
         taskParam->progressInfo_ = nullptr;
     }
     ErrCode result = ERR_OK;

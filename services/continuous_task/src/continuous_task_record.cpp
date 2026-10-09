@@ -277,8 +277,7 @@ void ContinuousTaskRecord::ParseProgressInfo(const nlohmann::json &value)
         return;
     }
     auto progressVal = value["progressInfo"];
-    if (progressVal.is_null() || !progressVal.is_object() ||
-        !progressVal.contains("title") || !progressVal["title"].is_string() ||
+    if (!progressVal.contains("title") || !progressVal["title"].is_string() ||
         !progressVal.contains("fileName") || !progressVal["fileName"].is_string()) {
         BGTASK_LOGE("parse progressInfo from json failed");
         this->progressInfo_ = nullptr;

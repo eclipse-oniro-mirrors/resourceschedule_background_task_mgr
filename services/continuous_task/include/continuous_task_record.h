@@ -72,6 +72,7 @@ public:
 private:
     std::vector<uint32_t> ToVector(std::string &str);
     void SetRecordValue(const nlohmann::json &value);
+    void ParseProgressInfo(const nlohmann::json &value);
 
     std::string bundleName_ {""};
     std::string abilityName_ {""};

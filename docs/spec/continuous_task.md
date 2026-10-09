@@ -26,6 +26,7 @@
 | -------------------------------------------------------------------------------------------------------------------------------| -------------------------------------------------------------------------|
 | `startBackgroundRunning(context: Context, bgMode: BackgroundMode, wantAgent: WantAgent, callback: AsyncCallback[void]): void` | 服务启动后，向系统申请长时任务，使服务一直保持后台运行（callback 形式） |
 | `startBackgroundRunning(context: Context, bgMode: BackgroundMode, wantAgent: WantAgent): Promise[void]`　　　　　　　　　　　 | 服务启动后，向系统申请长时任务，使服务一直保持后台运行（promise 形式）　|
+| `startContinuousTask(context: Context, request: ContinuousTaskRequest): Promise[int]`　　　　　　　　　　　　　　　　　　 | 服务启动后，向系统申请长时任务，返回任务ID（API26+，promise 形式）　　　|
 | `stopBackgroundRunning(context: Context, callback: AsyncCallback[void]): void`　　　　　　　　　　　　　　　　　　　　　　　　| 停止后台长时任务的运行（callback 形式）　　　　　　　　　　　　　　　　 |
 | `stopBackgroundRunning(context: Context): Promise[void]`　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　| 停止后台长时任务的运行（promise 形式）　　　　　　　　　　　　　　　　　|
 

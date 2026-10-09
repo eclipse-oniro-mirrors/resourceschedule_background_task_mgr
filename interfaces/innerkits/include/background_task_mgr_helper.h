@@ -37,6 +37,14 @@ public:
     static ErrCode RequestStartBackgroundRunning(ContinuousTaskParam &taskParam);
 
     /**
+     * @brief Request service to start continuous task (returns continuousTaskId only).
+     *
+     * @param taskParam Request params.
+     * @return ERR_OK if success, else fail.
+     */
+    static ErrCode RequestStartContinuousTask(ContinuousTaskParam &taskParam);
+
+    /**
      * @brief Request service to update running background
      *
      * @param taskParam Request params.

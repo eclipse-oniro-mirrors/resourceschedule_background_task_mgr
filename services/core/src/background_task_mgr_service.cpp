@@ -253,6 +253,29 @@ ErrCode BackgroundTaskMgrService::StartBackgroundRunning(const ContinuousTaskPar
     return result;
 }
 
+ErrCode BackgroundTaskMgrService::StartContinuousTask(const ContinuousTaskParam &taskParam,
+    int32_t& continuousTaskId)
+{
+    if (CheckAtomicService()) {
+        for (const auto mode : taskParam.bgModeIds_) {
+            if (mode != BackgroundMode::AUDIO_PLAYBACK && mode != BackgroundMode::MULTI_DEVICE_CONNECTION &&
+                mode != BackgroundMode::LOCATION) {
+                pid_t callingPid = IPCSkeleton::GetCallingPid();
+                pid_t callingUid = IPCSkeleton::GetCallingUid();
+                BGTASK_LOGE("uid %{public}d pid %{public}d Check atomisc service fail,"
+                    " apply continuoustask not allowed", callingUid, callingPid);
+                return ERR_BGTASK_PERMISSION_DENIED;
+            }
+        }
+    }
+    auto paramPtr = sptr<ContinuousTaskParam>(new ContinuousTaskParam(taskParam));
+    ErrCode result = BgContinuousTaskMgr::GetInstance()->StartContinuousTask(paramPtr);
+    if (result == ERR_OK) {
+        continuousTaskId = paramPtr->continuousTaskId_;
+    }
+    return result;
+}
+
 ErrCode BackgroundTaskMgrService::UpdateBackgroundRunning(const ContinuousTaskParam &taskParam,
     int32_t& notificationId, int32_t& continuousTaskId)
 {

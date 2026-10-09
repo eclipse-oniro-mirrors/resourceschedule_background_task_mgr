@@ -18,7 +18,6 @@
 
 #include <memory>
 
-#include "nlohmann/json.hpp"
 #include "parcel.h"
 #include "progress_info.h"
 #include "want_agent.h"
@@ -77,9 +76,6 @@ struct DataTransferProgress : public Parcelable {
 
     bool Marshalling(Parcel& out) const override;
     static DataTransferProgress* Unmarshalling(Parcel& in);
-
-    std::string ParseToJsonStr() const;
-    bool ParseFromJson(const nlohmann::json &value);
 
 private:
     bool ReadFromParcel(Parcel& in);

@@ -1463,15 +1463,12 @@ bool CheckRequestParams(ani_env *env, ContinuousTaskCallbackInfo *asyncCallbackI
     return true;
 }
 
-::ohos::resourceschedule::backgroundTaskManager::ContinuousTaskNotification StartBackgroundRunningSync3(
-    uintptr_t context, ::ohos::resourceschedule::backgroundTaskManager::ContinuousTaskRequest request)
+bool PrepareStartTaskParam(ani_env *env, ContinuousTaskCallbackInfo *asyncCallbackInfo, uintptr_t context,
+    ::ohos::resourceschedule::backgroundTaskManager::ContinuousTaskRequest &request, ContinuousTaskParam &taskParam)
 {
-    auto env = taihe::get_env();
-    std::unique_ptr<ContinuousTaskCallbackInfo> asyncCallbackInfo = std::make_unique<ContinuousTaskCallbackInfo>();
-    ::ohos::resourceschedule::backgroundTaskManager::ContinuousTaskNotification notification;
-    if (!CheckRequestParams(env, asyncCallbackInfo.get(), context, request)) {
+    if (!CheckRequestParams(env, asyncCallbackInfo, context, request)) {
         BGTASK_LOGE("check request param failed");
-        return notification;
+        return false;
     }
     sptr<IRemoteObject> token = asyncCallbackInfo->abilityContext->GetToken();
     const std::shared_ptr<AppExecFwk::AbilityInfo> info = asyncCallbackInfo->abilityContext->GetAbilityInfo();
@@ -1480,20 +1477,27 @@ bool CheckRequestParams(ani_env *env, ContinuousTaskCallbackInfo *asyncCallbackI
     if (requetImpl == nullptr) {
         set_business_error(Common::FindErrCode(ERR_BGTASK_CHECK_TASK_PARAM),
             Common::FindErrMsg(ERR_BGTASK_CHECK_TASK_PARAM));
-        return notification;
+        return false;
     }
-    ContinuousTaskParam taskParam = ContinuousTaskParam(true, asyncCallbackInfo->bgMode,
+    taskParam = ContinuousTaskParam(true, asyncCallbackInfo->bgMode,
         requetImpl->wantAgent_, info->name, token, "", true, asyncCallbackInfo->bgModes, abilityId);
     taskParam.appIndex_ = info->appIndex;
     taskParam.bgSubModeIds_ = asyncCallbackInfo->bgSubModes;
     taskParam.isByRequestObject_ = true;
     taskParam.isCombinedTaskNotification_ = requetImpl->combinedTaskNotification_;
     taskParam.combinedNotificationTaskId_ = requetImpl->continuousTaskId_;
-    if (requetImpl->getProgressInfo().has_value()) {
-        taskParam.progressInfo_ = GetProgressInfoParam(requetImpl->getProgressInfo().value());
-        if (taskParam.progressInfo_ == nullptr) {
-            return notification;
-        }
+    return true;
+}
+
+::ohos::resourceschedule::backgroundTaskManager::ContinuousTaskNotification StartBackgroundRunningSync3(
+    uintptr_t context, ::ohos::resourceschedule::backgroundTaskManager::ContinuousTaskRequest request)
+{
+    auto env = taihe::get_env();
+    std::unique_ptr<ContinuousTaskCallbackInfo> asyncCallbackInfo = std::make_unique<ContinuousTaskCallbackInfo>();
+    ::ohos::resourceschedule::backgroundTaskManager::ContinuousTaskNotification notification;
+    ContinuousTaskParam taskParam;
+    if (!PrepareStartTaskParam(env, asyncCallbackInfo.get(), context, request, taskParam)) {
+        return notification;
     }
     asyncCallbackInfo->errCode = BackgroundTaskMgrHelper::RequestStartBackgroundRunning(taskParam);
     asyncCallbackInfo->notificationId = taskParam.notificationId_;
@@ -1511,6 +1515,33 @@ bool CheckRequestParams(ani_env *env, ContinuousTaskCallbackInfo *asyncCallbackI
     notification.notificationId = taskParam.notificationId_;
     notification.continuousTaskId = optional<int32_t>(std::in_place, taskParam.continuousTaskId_);
     return notification;
+}
+
+int32_t StartContinuousTask(
+    uintptr_t context, ::ohos::resourceschedule::backgroundTaskManager::ContinuousTaskRequest request)
+{
+    auto env = taihe::get_env();
+    std::unique_ptr<ContinuousTaskCallbackInfo> asyncCallbackInfo = std::make_unique<ContinuousTaskCallbackInfo>();
+    int32_t continuousTaskId = -1;
+    ContinuousTaskParam taskParam;
+    if (!PrepareStartTaskParam(env, asyncCallbackInfo.get(), context, request, taskParam)) {
+        return continuousTaskId;
+    }
+    auto requetImpl = reinterpret_cast<ContinuousTaskRequestImpl*>(request->GetInner());
+    if (requetImpl->getProgressInfo().has_value()) {
+        taskParam.progressInfo_ = GetProgressInfoParam(requetImpl->getProgressInfo().value());
+        if (taskParam.progressInfo_ == nullptr) {
+            return continuousTaskId;
+        }
+    }
+    asyncCallbackInfo->errCode = BackgroundTaskMgrHelper::RequestStartContinuousTask(taskParam);
+    if (asyncCallbackInfo->errCode) {
+        set_business_error(
+            Common::FindErrCode(asyncCallbackInfo->errCode), Common::FindErrMsg(asyncCallbackInfo->errCode));
+        return continuousTaskId;
+    }
+    continuousTaskId = taskParam.continuousTaskId_;
+    return continuousTaskId;
 }
 
 ::ohos::resourceschedule::backgroundTaskManager::ContinuousTaskNotification UpdateBackgroundRunningSync2(
@@ -1640,6 +1671,7 @@ TH_EXPORT_CPP_API_GetBackgroundTaskState(GetBackgroundTaskState);
 TH_EXPORT_CPP_API_ObtainAllContinuousTasksSync(ObtainAllContinuousTasksSync);
 TH_EXPORT_CPP_API_CreateContinuousTaskRequest(CreateContinuousTaskRequest);
 TH_EXPORT_CPP_API_StartBackgroundRunningSync3(StartBackgroundRunningSync3);
+TH_EXPORT_CPP_API_StartContinuousTask(StartContinuousTask);
 TH_EXPORT_CPP_API_UpdateBackgroundRunningSync2(UpdateBackgroundRunningSync2);
 TH_EXPORT_CPP_API_UpdateDataTransferProgress(UpdateDataTransferProgress);
 // NOLINTEND

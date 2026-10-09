@@ -110,6 +110,8 @@ SA --> App : 返回
 - API26版本新增支持星闪类型长时任务（`MODE_NEARLINK`）
 - 7.0版本新增 `SuspendContinuousTask` / `ActiveContinuousTask` 暂停/激活机制，长时任务因为使用不当临时被系统暂停时通知挂起，恢复后通知激活。
 - 7.1版本新增支持USB类型长时任务（`MODE_USB_CONNECTION`）及对应的暂停原因、取消原因。
+- API26版本新增`startContinuousTask(context: Context, request: ContinuousTaskRequest): Promise<int>`接口，功能与`startBackgroundRunning(context, request: ContinuousTaskRequest)`一致，仅返回`continuousTaskId`（`int`）而非`ContinuousTaskNotification`。
+- API26版本新增`progressInfo` 字段使用约束：`ContinuousTaskRequest.progressInfo` 仅在 `startContinuousTask` 中有效，`startBackgroundRunning` 传入 `progressInfo` 返回 `ERR_BGTASK_CONTINUOUS_PROGRESS_INFO_INVALID`。
 
 ## 特殊场景任务授权实现
 
@@ -387,6 +389,7 @@ end
 | 方法 | 签名 | 说明 |
 |------|------|------|
 | `StartBackgroundRunning` | `ErrCode StartBackgroundRunning(const sptr[ContinuousTaskParam] &taskParam)` | 开始长时任务 |
+| `StartContinuousTask` | `ErrCode StartContinuousTask(const sptr[ContinuousTaskParam] &taskParam)` | 开始长时任务（API26，允许 progressInfo，不设置 notificationId，仅返回 continuousTaskId） |
 | `UpdateBackgroundRunning` | `ErrCode UpdateBackgroundRunning(const sptr[ContinuousTaskParam] &taskParam)` | 更新长时任务模式 |
 | `StopBackgroundRunning` | `ErrCode StopBackgroundRunning(const std::string &abilityName, int32_t abilityId, int32_t continuousTaskId = -1)` | 停止长时任务 |
 | `GetAllContinuousTasks` | `ErrCode GetAllContinuousTasks(vector[ContinuousTaskInfo] &list)` | 查询长时任务 |
@@ -414,6 +417,7 @@ end
 @startuml
 class BgContinuousTaskMgr {
   +StartBackgroundRunning()
+  +StartContinuousTask()
   +StopBackgroundRunning()
   +UpdateBackgroundRunning()
   -StartBackgroundRunningInner()
@@ -537,3 +541,9 @@ FA 模型与 Stage 模型的申请路径差异：FA 模型通过 `wantAgent` 方
 **`appIndex_` 与 `notificationLabel_`（应用分身）**
 - `appIndex_` 标识应用分身实例，同一 `bundleName` 下不同 `appIndex` 视为不同应用实例
 - `notificationLabel_` 格式 `{bundleName}_{userId}_{appIndex}` 作为通知标签，确保分身场景下通知正确分流与取消
+
+**`progressInfo_` 字段约束（API26）**
+- `ContinuousTaskParam.progressInfo_` 字段在 API26 引入 `startContinuousTask` 接口后限定使用范围
+- `startContinuousTask`：允许传入 `progressInfo_`，服务端 `BgContinuousTaskMgr::StartContinuousTask` 正常处理
+- `startBackgroundRunning`：在 `BgContinuousTaskMgr::StartBackgroundRunning` 入口处校验，若 `progressInfo_` 非 null 则返回 `ERR_BGTASK_CONTINUOUS_PROGRESS_INFO_INVALID`
+- 校验位置在 `CheckTaskParam` 之后、`StartBackgroundRunningInner` 之前，确保参数基本合法性先通过再执行 progressInfo 专属校验

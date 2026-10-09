@@ -14,9 +14,7 @@
  */
 
 #include "progress_info.h"
-
 #include "bgtaskmgr_log_wrapper.h"
-#include "string_ex.h"
 
 namespace OHOS {
 namespace BackgroundTaskMgr {
@@ -63,11 +61,11 @@ void ProgressInfo::SetIsMute(bool isMute)
 
 bool ProgressInfo::Marshalling(Parcel& out) const
 {
-    if (!out.WriteString16(Str8ToStr16(title_))) {
+    if (!out.WriteString(title_)) {
         BGTASK_LOGE("Failed to write title");
         return false;
     }
-    if (!out.WriteString16(Str8ToStr16(fileName_))) {
+    if (!out.WriteString(fileName_)) {
         BGTASK_LOGE("Failed to write fileName");
         return false;
     }
@@ -95,19 +93,15 @@ ProgressInfo* ProgressInfo::Unmarshalling(Parcel& in)
 
 bool ProgressInfo::ReadFromParcel(Parcel& in)
 {
-    std::u16string u16Title;
-    if (!in.ReadString16(u16Title)) {
+    if (!in.ReadString(title_)) {
         BGTASK_LOGE("read parcel title error");
         return false;
     }
-    title_ = Str16ToStr8(u16Title);
 
-    std::u16string u16FileName;
-    if (!in.ReadString16(u16FileName)) {
+    if (!in.ReadString(fileName_)) {
         BGTASK_LOGE("read parcel fileName error");
         return false;
     }
-    fileName_ = Str16ToStr8(u16FileName);
 
     if (!in.ReadInt32(progressValue_)) {
         BGTASK_LOGE("read parcel progressValue error");
@@ -116,38 +110,6 @@ bool ProgressInfo::ReadFromParcel(Parcel& in)
     if (!in.ReadBool(isMute_)) {
         BGTASK_LOGE("read parcel isMute error");
         return false;
-    }
-    return true;
-}
-
-std::string ProgressInfo::ParseToJsonStr() const
-{
-    nlohmann::json root;
-    root["title"] = title_;
-    root["fileName"] = fileName_;
-    root["progressValue"] = progressValue_;
-    root["isMute"] = isMute_;
-    return root.dump(jsonFormat_, ' ', false, nlohmann::json::error_handler_t::replace);
-}
-
-bool ProgressInfo::ParseFromJson(const nlohmann::json &value)
-{
-    if (value.is_null() || !value.is_object()) {
-        BGTASK_LOGE("progressInfo json is invalid");
-        return false;
-    }
-    if (!value.contains("title") || !value["title"].is_string() ||
-        !value.contains("fileName") || !value["fileName"].is_string()) {
-        BGTASK_LOGE("progressInfo json field type mismatch");
-        return false;
-    }
-    title_ = value.at("title").get<std::string>();
-    fileName_ = value.at("fileName").get<std::string>();
-    if (value.contains("progressValue") && value["progressValue"].is_number_integer()) {
-        progressValue_ = value.at("progressValue").get<int32_t>();
-    }
-    if (value.contains("isMute") && value["isMute"].is_boolean()) {
-        isMute_ = value.at("isMute").get<bool>();
     }
     return true;
 }

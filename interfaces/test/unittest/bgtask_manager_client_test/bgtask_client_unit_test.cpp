@@ -1605,7 +1605,7 @@ HWTEST_F(BgTaskClientUnitTest, ProgressInfo_001, TestSize.Level1)
 
 /**
  * @tc.name: ProgressInfo_002
- * @tc.desc: test ProgressInfo JSON round-trip.
+ * @tc.desc: test ProgressInfo parcel round-trip.
  * @tc.type: FUNC
  */
 HWTEST_F(BgTaskClientUnitTest, ProgressInfo_002, TestSize.Level1)
@@ -1616,9 +1616,10 @@ HWTEST_F(BgTaskClientUnitTest, ProgressInfo_002, TestSize.Level1)
     progressInfo->SetProgressValue(88);
     progressInfo->SetIsMute(false);
 
-    std::string jsonStr = progressInfo->ParseToJsonStr();
-    auto readInfo = std::make_shared<ProgressInfo>();
-    EXPECT_TRUE(readInfo->ParseFromJson(nlohmann::json::parse(jsonStr)));
+    Parcel parcel;
+    EXPECT_TRUE(progressInfo->Marshalling(parcel));
+    auto readInfo = std::shared_ptr<ProgressInfo>(ProgressInfo::Unmarshalling(parcel));
+    ASSERT_NE(readInfo, nullptr);
     EXPECT_EQ(readInfo->GetTitle(), "uploading");
     EXPECT_EQ(readInfo->GetFileName(), "data.csv");
     EXPECT_EQ(readInfo->GetProgressValue(), 88);
@@ -1666,6 +1667,17 @@ HWTEST_F(BgTaskClientUnitTest, DataTransferProgress_002, TestSize.Level1)
     EXPECT_EQ(deserialized->GetContinuousTaskId(), 5);
     EXPECT_EQ(deserialized->GetWantAgent(), nullptr);
     EXPECT_EQ(deserialized->GetProgressInfo(), nullptr);
+}
+
+/**
+ * @tc.name: RequestStartContinuousTask_001
+ * @tc.desc: test RequestStartContinuousTask interface with invalid param.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BgTaskClientUnitTest, RequestStartContinuousTask_001, TestSize.Level0)
+{
+    ContinuousTaskParam taskParam = ContinuousTaskParam();
+    EXPECT_NE(BackgroundTaskMgrHelper::RequestStartContinuousTask(taskParam), ERR_OK);
 }
 }
 }

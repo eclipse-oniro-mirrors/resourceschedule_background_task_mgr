@@ -3911,5 +3911,146 @@ HWTEST_F(BgContinuousTaskMgrTest, SendContinuousTaskNotification_InnerApiCompone
     record->isFromComponent_ = true;
     EXPECT_EQ(bgContinuousTaskMgr_->SendContinuousTaskNotification(record), ERR_OK);
 }
+
+/**
+ * @tc.name: StartContinuousTask_001
+ * @tc.desc: Test StartContinuousTask with nullptr param.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BgContinuousTaskMgrTest, StartContinuousTask_001, TestSize.Level1)
+{
+    EXPECT_EQ((int32_t)bgContinuousTaskMgr_->StartContinuousTask(nullptr),
+        (int32_t)ERR_BGTASK_CHECK_TASK_PARAM);
+}
+
+/**
+ * @tc.name: StartContinuousTask_002
+ * @tc.desc: Test StartContinuousTask with valid params, check continuousTaskId is set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BgContinuousTaskMgrTest, StartContinuousTask_002, TestSize.Level1)
+{
+    bgContinuousTaskMgr_->cachedBundleInfos_.clear();
+    CachedBundleInfo info = CachedBundleInfo();
+    info.abilityBgMode_["ability1"] = CONFIGURE_ALL_MODES;
+    info.appName_ = "Entry";
+    bgContinuousTaskMgr_->cachedBundleInfos_.emplace(1, info);
+
+    sptr<ContinuousTaskParam> taskParam = new (std::nothrow) ContinuousTaskParam();
+    EXPECT_NE(taskParam, nullptr);
+    taskParam->appName_ = "Entry";
+    taskParam->isNewApi_ = true;
+    taskParam->abilityId_ = 1;
+    taskParam->abilityName_ = "ability1";
+    taskParam->wantAgent_ = std::make_shared<AbilityRuntime::WantAgent::WantAgent>();
+    taskParam->bgModeId_ = 4;
+    EXPECT_EQ((int32_t)bgContinuousTaskMgr_->StartContinuousTask(taskParam), (int32_t)ERR_OK);
+    EXPECT_GE(taskParam->continuousTaskId_, 0);
+}
+
+/**
+ * @tc.name: StartContinuousTask_003
+ * @tc.desc: Test StartContinuousTask with progressInfo and DATA_TRANSFER mode (progressInfo effective).
+ * @tc.type: FUNC
+ */
+HWTEST_F(BgContinuousTaskMgrTest, StartContinuousTask_003, TestSize.Level1)
+{
+    bgContinuousTaskMgr_->cachedBundleInfos_.clear();
+    CachedBundleInfo info = CachedBundleInfo();
+    info.abilityBgMode_["ability1"] = CONFIGURE_ALL_MODES;
+    info.appName_ = "Entry";
+    bgContinuousTaskMgr_->cachedBundleInfos_.emplace(1, info);
+
+    sptr<ContinuousTaskParam> taskParam = new (std::nothrow) ContinuousTaskParam();
+    EXPECT_NE(taskParam, nullptr);
+    taskParam->appName_ = "Entry";
+    taskParam->isNewApi_ = true;
+    taskParam->abilityId_ = 1;
+    taskParam->abilityName_ = "ability1";
+    taskParam->wantAgent_ = std::make_shared<AbilityRuntime::WantAgent::WantAgent>();
+    taskParam->bgModeId_ = 1; // DATA_TRANSFER
+    taskParam->progressInfo_ = std::make_shared<ProgressInfo>();
+    taskParam->progressInfo_->SetTitle("test_download");
+    EXPECT_EQ((int32_t)bgContinuousTaskMgr_->StartContinuousTask(taskParam), (int32_t)ERR_OK);
+    EXPECT_GE(taskParam->continuousTaskId_, 0);
+}
+
+/**
+ * @tc.name: StartBackgroundRunning_ProgressInfoIgnore_001
+ * @tc.desc: Test StartBackgroundRunning silently ignores non-null progressInfo (field not effective, no error).
+ * @tc.type: FUNC
+ */
+HWTEST_F(BgContinuousTaskMgrTest, StartBackgroundRunning_ProgressInfoIgnore_001, TestSize.Level1)
+{
+    bgContinuousTaskMgr_->cachedBundleInfos_.clear();
+    CachedBundleInfo info = CachedBundleInfo();
+    info.abilityBgMode_["ability1"] = CONFIGURE_ALL_MODES;
+    info.appName_ = "Entry";
+    bgContinuousTaskMgr_->cachedBundleInfos_.emplace(1, info);
+
+    sptr<ContinuousTaskParam> taskParam = new (std::nothrow) ContinuousTaskParam();
+    EXPECT_NE(taskParam, nullptr);
+    taskParam->appName_ = "Entry";
+    taskParam->isNewApi_ = true;
+    taskParam->abilityId_ = 1;
+    taskParam->abilityName_ = "ability1";
+    taskParam->wantAgent_ = std::make_shared<AbilityRuntime::WantAgent::WantAgent>();
+    taskParam->bgModeId_ = 1; // DATA_TRANSFER
+    taskParam->progressInfo_ = std::make_shared<ProgressInfo>();
+    taskParam->progressInfo_->SetTitle("test_download");
+    EXPECT_EQ((int32_t)bgContinuousTaskMgr_->StartBackgroundRunning(taskParam), (int32_t)ERR_OK);
+}
+
+/**
+ * @tc.name: StartBackgroundRunning_ProgressInfoIgnore_002
+ * @tc.desc: Test StartBackgroundRunning with null progressInfo still works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BgContinuousTaskMgrTest, StartBackgroundRunning_ProgressInfoIgnore_002, TestSize.Level1)
+{
+    bgContinuousTaskMgr_->cachedBundleInfos_.clear();
+    CachedBundleInfo info = CachedBundleInfo();
+    info.abilityBgMode_["ability1"] = CONFIGURE_ALL_MODES;
+    info.appName_ = "Entry";
+    bgContinuousTaskMgr_->cachedBundleInfos_.emplace(1, info);
+
+    sptr<ContinuousTaskParam> taskParam = new (std::nothrow) ContinuousTaskParam();
+    EXPECT_NE(taskParam, nullptr);
+    taskParam->appName_ = "Entry";
+    taskParam->isNewApi_ = true;
+    taskParam->abilityId_ = 1;
+    taskParam->abilityName_ = "ability1";
+    taskParam->wantAgent_ = std::make_shared<AbilityRuntime::WantAgent::WantAgent>();
+    taskParam->bgModeId_ = 4;
+    taskParam->progressInfo_ = nullptr;
+    EXPECT_EQ((int32_t)bgContinuousTaskMgr_->StartBackgroundRunning(taskParam), (int32_t)ERR_OK);
+}
+
+/**
+ * @tc.name: StartContinuousTask_004
+ * @tc.desc: Test StartContinuousTask with progressInfo but non-DATA_TRANSFER mode (progressInfo silently ignored).
+ * @tc.type: FUNC
+ */
+HWTEST_F(BgContinuousTaskMgrTest, StartContinuousTask_004, TestSize.Level1)
+{
+    bgContinuousTaskMgr_->cachedBundleInfos_.clear();
+    CachedBundleInfo info = CachedBundleInfo();
+    info.abilityBgMode_["ability1"] = CONFIGURE_ALL_MODES;
+    info.appName_ = "Entry";
+    bgContinuousTaskMgr_->cachedBundleInfos_.emplace(1, info);
+
+    sptr<ContinuousTaskParam> taskParam = new (std::nothrow) ContinuousTaskParam();
+    EXPECT_NE(taskParam, nullptr);
+    taskParam->appName_ = "Entry";
+    taskParam->isNewApi_ = true;
+    taskParam->abilityId_ = 1;
+    taskParam->abilityName_ = "ability1";
+    taskParam->wantAgent_ = std::make_shared<AbilityRuntime::WantAgent::WantAgent>();
+    taskParam->bgModeId_ = 4; // non-DATA_TRANSFER
+    taskParam->progressInfo_ = std::make_shared<ProgressInfo>();
+    taskParam->progressInfo_->SetTitle("test_download");
+    EXPECT_EQ((int32_t)bgContinuousTaskMgr_->StartContinuousTask(taskParam), (int32_t)ERR_OK);
+    EXPECT_GE(taskParam->continuousTaskId_, 0);
+}
 }  // namespace BackgroundTaskMgr
 }  // namespace OHOS

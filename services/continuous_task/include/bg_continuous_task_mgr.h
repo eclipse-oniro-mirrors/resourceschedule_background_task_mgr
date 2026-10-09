@@ -101,6 +101,7 @@ class BgContinuousTaskMgr : public DelayedSingleton<BgContinuousTaskMgr>,
                             public std::enable_shared_from_this<BgContinuousTaskMgr> {
 public:
     ErrCode StartBackgroundRunning(const sptr<ContinuousTaskParam> &taskParam);
+    ErrCode StartContinuousTask(const sptr<ContinuousTaskParam> &taskParam);
     ErrCode UpdateBackgroundRunning(const sptr<ContinuousTaskParam> &taskParam);
     ErrCode StopBackgroundRunning(const std::string &abilityName, int32_t abilityId, int32_t continuousTaskId = -1);
     ErrCode GetAllContinuousTasks(std::vector<std::shared_ptr<ContinuousTaskInfo>> &list);
@@ -248,6 +249,8 @@ private:
     ErrCode CheckBgmodeTypeForInner(uint32_t requestedBgModeId);
     void InitRecordParam(std::shared_ptr<ContinuousTaskRecord> continuousTaskRecord,
         const sptr<ContinuousTaskParam> &taskParam, int32_t userId);
+    std::shared_ptr<AAFwk::Want> ParseWantAgent(const sptr<ContinuousTaskParam> &taskParam,
+        std::shared_ptr<ContinuousTaskRecord> &continuousTaskRecord);
     ErrCode CheckSubMode(const std::shared_ptr<AAFwk::Want> want, std::shared_ptr<ContinuousTaskRecord> record);
     ErrCode CheckNotificationText(std::string &notificationText,
         const std::shared_ptr<ContinuousTaskRecord> continuousTaskRecord);
@@ -288,6 +291,8 @@ private:
     bool CheckPermissionForInner(const sptr<ContinuousTaskParamForInner> &taskParam, int32_t callingUid);
     ErrCode AllowApplyContinuousTask(const std::shared_ptr<ContinuousTaskRecord> record);
     ErrCode SendLiveViewAndOtherNotification(std::shared_ptr<ContinuousTaskRecord> record);
+    std::shared_ptr<ContinuousTaskRecord> CreateSubRecordForLiveView(
+        const std::shared_ptr<ContinuousTaskRecord> &record);
     ErrCode SendNotification(const std::shared_ptr<ContinuousTaskRecord> subRecord,
         std::shared_ptr<ContinuousTaskRecord> record, const std::string &appName, bool isSubNotification);
     ErrCode CheckAuthParam(std::shared_ptr<ContinuousTaskRecord> record, const sptr<IExpiredCallback>& callback,

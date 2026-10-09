@@ -47,6 +47,7 @@ napi_value BackgroundTaskMgrInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("getRemainingDelayTime", GetRemainingDelayTimeThrow),
         DECLARE_NAPI_FUNCTION("getTransientTaskInfo", GetAllTransientTasksThrow),
         DECLARE_NAPI_FUNCTION("startBackgroundRunning", StartBackgroundRunningThrow),
+        DECLARE_NAPI_FUNCTION("startContinuousTask", StartContinuousTaskThrow),
         DECLARE_NAPI_FUNCTION("updateBackgroundRunning", UpdateBackgroundRunningThrow),
         DECLARE_NAPI_FUNCTION("stopBackgroundRunning", StopBackgroundRunningThrow),
         DECLARE_NAPI_FUNCTION("getAllContinuousTasks", GetAllContinuousTasksThrow),

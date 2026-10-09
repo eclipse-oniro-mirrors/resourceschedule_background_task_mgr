@@ -121,6 +121,25 @@ ErrCode BackgroundTaskManager::RequestStartBackgroundRunning(ContinuousTaskParam
     return res;
 }
 
+ErrCode BackgroundTaskManager::RequestStartContinuousTask(ContinuousTaskParam &taskParam)
+{
+    HitraceScoped traceScoped(HITRACE_TAG_OHOS,
+        "BackgroundTaskManager::ContinuousTask::Mgr::RequestStartContinuousTask");
+
+    std::lock_guard<std::mutex> lock(mutex_);
+    GET_BACK_GROUND_TASK_MANAGER_PROXY_RETURN
+
+    sptr<ContinuousTaskParam> taskParamPtr = new (std::nothrow) ContinuousTaskParam(taskParam);
+    if (taskParamPtr == nullptr || taskParamPtr.GetRefPtr() == nullptr) {
+        BGTASK_LOGE("Failed to create continuous task param");
+        return ERR_BGTASK_NO_MEMORY;
+    }
+    int32_t continuousTaskId = taskParamPtr->continuousTaskId_;
+    ErrCode res = proxy_->StartContinuousTask(*taskParamPtr.GetRefPtr(), continuousTaskId);
+    taskParam.continuousTaskId_ = continuousTaskId;
+    return res;
+}
+
 ErrCode BackgroundTaskManager::RequestUpdateBackgroundRunning(ContinuousTaskParam &taskParam)
 {
     HitraceScoped traceScoped(HITRACE_TAG_OHOS,

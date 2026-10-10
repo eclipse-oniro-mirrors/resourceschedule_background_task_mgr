@@ -789,7 +789,7 @@ ErrCode BgContinuousTaskMgr::CheckBgmodeTypeNewApi(uint32_t configuredBgMode, ui
         return ERR_BGTASK_CONTINUOUS_MODE_USB_NOT_SUPPORT_DEVICETYPE;
 #endif
     }
-    if ((configuredBgMode & (BG_MODE_INDEX_HEAD << (requestedBgModeId - 1))) == 0) {
+    if ((configuredBgMode & recordedBgMode) == 0) {
         BGTASK_LOGE("requested background mode is not declared in config file, configured: %{public}d,"
             "%{public}u", configuredBgMode, requestedBgModeId);
         return ERR_BGTASK_INVALID_BGMODE;

@@ -178,6 +178,7 @@ static constexpr uint32_t CONTINUOUS_TASK_ACTIVE = 1 << 2;
 static constexpr uint32_t NOTIFY_AUDIO_PLAYBACK_DELAY_TIME = 65 * 1000;
 static constexpr uint32_t ALL_MODES = 0xFF;
 static constexpr uint32_t ABILITY_TASK_MAX_NUM = 10;
+static constexpr uint32_t USB_CONNECTION_BITWISH = 2;
 #ifndef HAS_OS_ACCOUNT_PART
 constexpr int32_t DEFAULT_OS_ACCOUNT_ID = 0; // 0 is the default id when there is no os_account part
 constexpr int32_t UID_TRANSFORM_DIVISOR = 200000;
@@ -758,6 +759,9 @@ ErrCode BgContinuousTaskMgr::CheckBgmodeTypeNewApi(uint32_t configuredBgMode, ui
         return ERR_BGTASK_INVALID_BGMODE;
     }
     uint32_t recordedBgMode = BG_MODE_INDEX_HEAD << (requestedBgModeId - 1);
+    if (requestedBgModeId == BackgroundMode::USB_CONNECTION) {
+        recordedBgMode = BG_MODE_INDEX_HEAD << (requestedBgModeId - USB_CONNECTION_BITWISH);
+    }
     if (recordedBgMode == SYSTEM_APP_BGMODE_WIFI_INTERACTION && !continuousTaskRecord->IsSystem()) {
         BGTASK_LOGE("wifiInteraction background mode only support for system app");
         return ERR_BGTASK_NOT_SYSTEM_APP;

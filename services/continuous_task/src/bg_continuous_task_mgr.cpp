@@ -1044,7 +1044,6 @@ ErrCode BgContinuousTaskMgr::StartBackgroundRunning(const sptr<ContinuousTaskPar
         taskParam->abilityName_, callingUid, callingPid, taskParam->bgModeId_, taskParam->isBatchApi_,
         taskParam->bgModeIds_, taskParam->abilityId_);
     InitRecordParam(continuousTaskRecord, taskParam, userId);
-    continuousTaskRecord->isByStartContinuousTask_ = true;
     auto want = ParseWantAgent(taskParam, continuousTaskRecord);
     if (want != nullptr) {
         result = CheckSubMode(want, continuousTaskRecord);
@@ -1095,6 +1094,7 @@ ErrCode BgContinuousTaskMgr::StartContinuousTask(const sptr<ContinuousTaskParam>
         taskParam->abilityName_, callingUid, callingPid, taskParam->bgModeId_, taskParam->isBatchApi_,
         taskParam->bgModeIds_, taskParam->abilityId_);
     InitRecordParam(continuousTaskRecord, taskParam, userId);
+    continuousTaskRecord->isByStartContinuousTask_ = true;
     auto want = ParseWantAgent(taskParam, continuousTaskRecord);
     if (want != nullptr) {
         result = CheckSubMode(want, continuousTaskRecord);
@@ -3704,7 +3704,7 @@ std::shared_ptr<ContinuousTaskRecord> BgContinuousTaskMgr::CreateSubRecordForLiv
     subRecord->bgModeIds_.clear();
     subRecord->bgModeId_ = BackgroundMode::DATA_TRANSFER;
     subRecord->bgModeIds_.push_back(BackgroundMode::DATA_TRANSFER);
-    subRecord->isByStartContinuousTask_ = true;
+    subRecord->isByStartContinuousTask_ = record->isByStartContinuousTask_;
     return subRecord;
 }
 
@@ -4341,13 +4341,17 @@ bool BgContinuousTaskMgr::CheckNavigationAndProgressLiveView(std::shared_ptr<Con
         CommonUtils::CheckExistMode(record->bgModeIds_, BackgroundMode::VOIP)) {
         return false;
     }
+    if (CommonUtils::CheckExistMode(record->bgModeIds_, BackgroundMode::SPECIAL_SCENARIO_PROCESSING)) {
+        BGTASK_LOGD("SPECIAL_SCENARIO_PROCESSING continuous task has PROGRESS and NAVIGATION liveView");
+        return true;
+    }
     if (CommonUtils::CheckExistMode(record->bgModeIds_, BackgroundMode::LOCATION)) {
-        BGTASK_LOGD("SPECIAL_SCENARIO_PROCESSING continuous task has PROGRESS and  NAVIGATION liveView");
+        BGTASK_LOGD("LOCATION continuous task has PROGRESS and NAVIGATION liveView");
         return true;
     }
     if (record->isByStartContinuousTask_ && record->progressInfo_ != nullptr &&
         CommonUtils::CheckExistMode(record->bgModeIds_, BackgroundMode::DATA_TRANSFER)) {
-        BGTASK_LOGD("DATA_TRANSFER continuous task has PROGRESS and  NAVIGATION liveView");
+        BGTASK_LOGD("DATA_TRANSFER continuous task has PROGRESS and NAVIGATION liveView");
         return true;
     }
     return false;

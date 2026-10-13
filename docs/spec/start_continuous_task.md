@@ -76,9 +76,9 @@ sequenceDiagram
 
 | 实况窗事件 | 任务模式 | 抑制条件 | 抑制结果 |
 |-----------|---------|---------|---------|
-| NAVIGATION only | LOCATION 且无其他 liveViewType | 满足 | 抑制通知 |
-| PROGRESS only | SPECIAL_SCENARIO_PROCESSING 且无其他 liveViewType | 满足 | 抑制通知 |
-| PROGRESS only | DATA_TRANSFER 且 `isByStartContinuousTask_=true` 且 `progressInfo_!=nullptr` 且无其他 liveViewType | 满足 | 抑制通知 |
+| NAVIGATION only | LOCATION 且无其它 liveViewType | 满足 | 抑制通知 |
+| PROGRESS only | SPECIAL_SCENARIO_PROCESSING 且无其它 liveViewType | 满足 | 抑制通知 |
+| PROGRESS only | DATA_TRANSFER 且 `isByStartContinuousTask_=true` 且 `progressInfo_!=nullptr` 且无其它 liveViewType | 满足 | 抑制通知 |
 | NAVIGATION + PROGRESS | LOCATION（无 AUDIO_RECORDING/VOIP） | 满足 | 抑制通知 |
 | NAVIGATION + PROGRESS | DATA_TRANSFER 且 `isByStartContinuousTask_=true` 且 `progressInfo_!=nullptr` | 满足 | 抑制通知 |
 | NAVIGATION + PROGRESS | AUDIO_RECORDING 或 VOIP | 不抑制 | 发送通知 |
@@ -95,8 +95,8 @@ sequenceDiagram
 
 | 条件 | 补发路径 | 行为 |
 |------|---------|------|
-| `isByStartContinuousTask_=true` 且 `bgModeIds_.size() > 1` 且包含 `DATA_TRANSFER` | `SendLiveViewAndOtherNotification` | 发送主通知（DATA_TRANSFER 实况通知）+ 子通知（其他模式标准通知） |
-| 其他情况 | `SendContinuousTaskNotification` | 发送单条标准通知 |
+| `isByStartContinuousTask_=true` 且 `bgModeIds_.size() > 1` 且包含 `DATA_TRANSFER` | `SendLiveViewAndOtherNotification` | 发送主通知（DATA_TRANSFER 实况通知）+ 子通知（其它模式标准通知） |
+| 其它情况 | `SendContinuousTaskNotification` | 发送单条标准通知 |
 
 `SendLiveViewAndOtherNotification` 内部行为：
 1. 顶层通过 `CheckLiveViewInfo(record)` 对完整 record 做抑制判断，若仍被抑制则不发送

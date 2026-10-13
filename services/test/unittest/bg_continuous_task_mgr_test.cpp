@@ -4242,7 +4242,7 @@ HWTEST_F(BgContinuousTaskMgrTest, CheckNotificationText_SkipLiveViewCheck_002, T
 
 /**
  * @tc.name: SendNotificationByLiveViewCancel_002
- * @tc.desc: SendNotificationByLiveViewCancelInner routes to SendLiveViewAndOtherNotification for multi-mode DATA_TRANSFER.
+ * @tc.desc: SendNotificationByLiveViewCancelInner routes to SendLiveViewAndOtherNotification.
  * @tc.type: FUNC
  * @tc.require: issueIBOIHY
  */
@@ -4297,7 +4297,7 @@ HWTEST_F(BgContinuousTaskMgrTest, SendNotificationByLiveViewCancel_003, TestSize
 
 /**
  * @tc.name: CancelBgTaskNotification_002
- * @tc.desc: CancelBgTaskNotificationInner cancels sub-notification when isByStartContinuousTask_ and subNotificationId_ set.
+ * @tc.desc: CancelBgTaskNotificationInner cancels sub-notification.
  * @tc.type: FUNC
  * @tc.require: issueIBOIHY
  */

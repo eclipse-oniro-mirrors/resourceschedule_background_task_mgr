@@ -266,12 +266,12 @@ flowchart TD
     B -->|否| D{liveViewInfo_ 中存在 uid?}
     D -->|否| E[return false]
     D -->|是| F{实况窗事件类型组合}
-    F -->|NAVIGATION only| G{LOCATION 且无其他 liveViewType?}
+    F -->|NAVIGATION only| G{LOCATION 且无其它 liveViewType?}
     G -->|是| H[return true 抑制]
     G -->|否| I[return false]
-    F -->|PROGRESS only| J{SPECIAL_SCENARIO_PROCESSING 且无其他 liveViewType?}
+    F -->|PROGRESS only| J{SPECIAL_SCENARIO_PROCESSING 且无其它 liveViewType?}
     J -->|是| H
-    J -->|否| K{isByStartContinuousTask_ 且 progressInfo_ 且 DATA_TRANSFER 且无其他 liveViewType?}
+    J -->|否| K{isByStartContinuousTask_ 且 progressInfo_ 且 DATA_TRANSFER 且无其它 liveViewType?}
     K -->|是| H
     K -->|否| I
     F -->|NAVIGATION + PROGRESS| L{AUDIO_RECORDING 或 VOIP?}
@@ -318,7 +318,7 @@ flowchart TD
 
 2. **`SendLiveViewAndOtherNotification` 顶层增加 `CheckLiveViewInfo` 守卫**：
    - 在发送主/子通知前，先对完整 record 调用 `CheckLiveViewInfo`
-   - 若仍被抑制（如实况窗部分删除但仍有其他实况窗覆盖），则不补发通知
+   - 若仍被抑制（如实况窗部分删除但仍有其它实况窗覆盖），则不补发通知
 
 3. **`CancelBgTaskNotificationInner` 增加子通知取消**：
    - 实况窗生效取消主通知时，若 `subNotificationId_ != -1` 且 `isByStartContinuousTask_=true`，同时取消子通知

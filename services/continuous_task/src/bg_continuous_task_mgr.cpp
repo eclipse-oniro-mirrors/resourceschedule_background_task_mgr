@@ -2628,7 +2628,7 @@ ErrCode BgContinuousTaskMgr::AVSessionNotifyUpdateNotificationInner(int32_t uid,
     }
 
     // 只有播音类型长时任务，并且没有AVSession通知
-    if (!isPublish && record->bgModeIds_.size() == 1 && record->bgModeIds_[0] == BackgroundMode::AUDIO_PLAYBACK) {
+    if (!isPublish && CheckPublishTaskNotification(record)) {
         result = SendContinuousTaskNotification(record);
         RefreshTaskRecord();
         RemoveAudioPlaybackDelayTask(uid);
@@ -2650,6 +2650,17 @@ ErrCode BgContinuousTaskMgr::AVSessionNotifyUpdateNotificationInner(int32_t uid,
     }
     RemoveAudioPlaybackDelayTask(uid);
     return result;
+}
+
+bool BgContinuousTaskMgr::CheckPublishTaskNotification(const std::shared_ptr<ContinuousTaskRecord> record)
+{
+    // 发送播音类型任务通知
+    bool sendAudioNofication = record->bgModeIds_.size() == 1 &&
+        record->bgModeIds_[0] == BackgroundMode::AUDIO_PLAYBACK;
+    // 发送包含USB类型任务通知
+    bool sendUsbNotification = CommonUtils::CheckExistMode(record->bgModeIds_, BackgroundMode::USB_CONNECTION) &&
+        record->notificationId_ == -1;
+    return sendAudioNofication || sendUsbNotification;
 }
 
 void BgContinuousTaskMgr::RemoveAudioPlaybackDelayTask(int32_t uid)

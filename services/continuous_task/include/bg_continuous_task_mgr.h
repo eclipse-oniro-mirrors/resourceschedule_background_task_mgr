@@ -323,6 +323,7 @@ private:
     void HandleActiveContinuousTaskByStandby(int32_t uid, int32_t pid, const std::string &key);
     std::string GetAbilityNamePid(const sptr<ContinuousTaskParamForInner> &taskParam, int32_t pid, int32_t callingUid);
     void GetLiveViewAndMediaControllerByUid(int32_t uid, bool &liveViewState, bool &mediaControllerState);
+    bool CheckPublishTaskNotification(const std::shared_ptr<ContinuousTaskRecord> record);
     void ReportTaskAdjustEventByTask(const std::shared_ptr<ContinuousTaskRecord> record,
         ContinuousTaskEventTriggerType changeEventType);
     bool CheckReportTaskAdjustEvent(int32_t uid);

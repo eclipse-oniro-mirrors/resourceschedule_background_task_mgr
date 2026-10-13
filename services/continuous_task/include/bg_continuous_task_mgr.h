@@ -253,7 +253,7 @@ private:
         std::shared_ptr<ContinuousTaskRecord> &continuousTaskRecord);
     ErrCode CheckSubMode(const std::shared_ptr<AAFwk::Want> want, std::shared_ptr<ContinuousTaskRecord> record);
     ErrCode CheckNotificationText(std::string &notificationText,
-        const std::shared_ptr<ContinuousTaskRecord> continuousTaskRecord);
+        const std::shared_ptr<ContinuousTaskRecord> continuousTaskRecord, bool skipLiveViewCheck = false);
     ErrCode CheckSpecialNotificationText(std::string &notificationText,
         const std::shared_ptr<ContinuousTaskRecord> continuousTaskRecord, uint32_t mode);
     int32_t RefreshTaskRecord();
@@ -329,6 +329,9 @@ private:
     bool CheckReportTaskAdjustEvent(int32_t uid);
     void ReportTaskAdjustEventByUid(int32_t uid);
     void ReportTaskAdjustEvent(const std::map<pid_t, std::set<uint32_t>> &pidModeMap, nlohmann::json &payload);
+    bool CheckOnlyNavigationOnlyLiveView(std::shared_ptr<ContinuousTaskRecord> record);
+    bool CheckOnlyProgressLiveView(std::shared_ptr<ContinuousTaskRecord> record);
+    bool CheckNavigationAndProgressLiveView(std::shared_ptr<ContinuousTaskRecord> record);
 
 #ifdef HAS_OS_ACCOUNT_CAR
     void ClearBgOsAccountTaskInCar();

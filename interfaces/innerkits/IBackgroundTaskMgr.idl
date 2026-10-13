@@ -34,7 +34,6 @@ interface OHOS.BackgroundTaskMgr.IBackgroundTaskMgr {
     void GetRemainingDelayTime([in] int requestId, [out] int delayTime);
     void GetAllTransientTasks([out] int remainingQuota, [out] sharedptr<DelaySuspendInfo>[] list);
     void StartBackgroundRunning([in] ContinuousTaskParam taskParam, [out] int notificationId, [out] int continuousTaskId);
-    void StartContinuousTask([in] ContinuousTaskParam taskParam, [out] int continuousTaskId);
     void UpdateBackgroundRunning([in] ContinuousTaskParam taskParam, [out] int notificationId, [out] int continuousTaskId);
     void StopBackgroundRunning([in] String abilityName, [in] IRemoteObject abilityToken, [in] int abilityId, [in] int continuousTaskId);
     void GetAllContinuousTasks([out] ContinuousTaskInfo[] list);
@@ -72,4 +71,5 @@ interface OHOS.BackgroundTaskMgr.IBackgroundTaskMgr {
     [oneway] void SendNotificationByDeteTask([in] Set<String> taskKeys);
     void RemoveAuthRecord([in] ContinuousTaskParam taskParam);
     void UpdateDataTransferProgress([in] DataTransferProgress progressInfo);
+    void StartContinuousTask([in] ContinuousTaskParam taskParam, [out] int continuousTaskId);
 }

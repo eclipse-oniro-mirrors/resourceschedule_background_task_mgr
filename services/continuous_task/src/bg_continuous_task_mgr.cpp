@@ -176,6 +176,7 @@ static constexpr uint32_t AVSESSION_SA_UID = 6700;
 static constexpr uint32_t CONTINUOUS_TASK_SUSPEND = 2;
 static constexpr uint32_t CONTINUOUS_TASK_ACTIVE = 1 << 2;
 static constexpr uint32_t NOTIFY_AUDIO_PLAYBACK_DELAY_TIME = 65 * 1000;
+static constexpr uint32_t LIVE_VIEW_CANCEL_NOTIFY_DELAY_TIME = 3000;
 static constexpr uint32_t ALL_MODES = 0xFF;
 static constexpr uint32_t ABILITY_TASK_MAX_NUM = 10;
 static constexpr uint32_t USB_CONNECTION_BITWISH = 2;
@@ -406,12 +407,12 @@ void BgContinuousTaskMgr::CheckPersistenceData(const std::vector<AppExecFwk::Run
         }
 
         if (pidIsAlive) {
+            SetCachedBundleInfo(record);
             if (record->GetNotificationId() == -1) {
                 BGTASK_LOGI("notification id is -1, continue");
                 iter++;
                 continue;
             }
-            SetCachedBundleInfo(record);
             HandleActiveNotification(record);
             BGTASK_LOGI("restore uid: %{public}d, bundleName: %{public}s, notification id: %{public}d",
                 record->GetUid(), record->GetBundleName().c_str(), record->GetNotificationId());
@@ -1093,6 +1094,7 @@ ErrCode BgContinuousTaskMgr::StartContinuousTask(const sptr<ContinuousTaskParam>
         taskParam->abilityName_, callingUid, callingPid, taskParam->bgModeId_, taskParam->isBatchApi_,
         taskParam->bgModeIds_, taskParam->abilityId_);
     InitRecordParam(continuousTaskRecord, taskParam, userId);
+    continuousTaskRecord->isByStartContinuousTask_ = true;
     auto want = ParseWantAgent(taskParam, continuousTaskRecord);
     if (want != nullptr) {
         result = CheckSubMode(want, continuousTaskRecord);
@@ -1759,9 +1761,9 @@ void BgContinuousTaskMgr::FilterNotificationMode(const std::shared_ptr<Continuou
 }
 
 ErrCode BgContinuousTaskMgr::CheckNotificationText(std::string &notificationText,
-    const std::shared_ptr<ContinuousTaskRecord> continuousTaskRecord)
+    const std::shared_ptr<ContinuousTaskRecord> continuousTaskRecord, bool skipLiveViewCheck)
 {
-    if (CheckLiveViewInfo(continuousTaskRecord)) {
+    if (!skipLiveViewCheck && CheckLiveViewInfo(continuousTaskRecord)) {
         BGTASK_LOGI("LiveView Notification isPublish. uid: %{public}d", continuousTaskRecord->uid_);
         return ERR_OK;
     }
@@ -3713,6 +3715,7 @@ std::shared_ptr<ContinuousTaskRecord> BgContinuousTaskMgr::CreateSubRecordForLiv
     subRecord->bgModeIds_.clear();
     subRecord->bgModeId_ = BackgroundMode::DATA_TRANSFER;
     subRecord->bgModeIds_.push_back(BackgroundMode::DATA_TRANSFER);
+    subRecord->isByStartContinuousTask_ = record->isByStartContinuousTask_;
     return subRecord;
 }
 
@@ -3729,6 +3732,10 @@ ErrCode BgContinuousTaskMgr::SendLiveViewAndOtherNotification(std::shared_ptr<Co
     if (appName.empty()) {
         BGTASK_LOGE("appName is empty");
         return ERR_BGTASK_NOTIFICATION_VERIFY_FAILED;
+    }
+    if (CheckLiveViewInfo(record)) {
+        BGTASK_LOGD("LiveView Notification isPublish. uid: %{public}d", record->uid_);
+        return ERR_OK;
     }
     std::shared_ptr<ContinuousTaskRecord> subRecord = CreateSubRecordForLiveView(record);
     ErrCode ret = SendNotification(subRecord, record, appName, false);
@@ -4312,6 +4319,55 @@ void BgContinuousTaskMgr::SetLiveViewInfo(int32_t uid, bool isLiveViewPublish, c
     }
 }
 
+bool BgContinuousTaskMgr::CheckOnlyNavigationOnlyLiveView(std::shared_ptr<ContinuousTaskRecord> record)
+{
+    if (CommonUtils::CheckExistMode(record->bgModeIds_, BackgroundMode::LOCATION) &&
+        !CommonUtils::CheckExistOtherMode(record->bgModeIds_, BackgroundMode::LOCATION, g_liveViewTypes)) {
+        BGTASK_LOGD("continuous task has NAVIGATION liveView");
+        return true;
+    }
+    return false;
+}
+
+bool BgContinuousTaskMgr::CheckOnlyProgressLiveView(std::shared_ptr<ContinuousTaskRecord> record)
+{
+    if (CommonUtils::CheckExistMode(record->bgModeIds_, BackgroundMode::SPECIAL_SCENARIO_PROCESSING) &&
+        !CommonUtils::CheckExistOtherMode(record->bgModeIds_,
+            BackgroundMode::SPECIAL_SCENARIO_PROCESSING, g_liveViewTypes)) {
+        BGTASK_LOGD("SPECIAL_SCENARIO_PROCESSING continuous task has PROGRESS liveView ");
+        return true;
+    }
+    if (record->isByStartContinuousTask_ && record->progressInfo_ != nullptr &&
+        CommonUtils::CheckExistMode(record->bgModeIds_, BackgroundMode::DATA_TRANSFER) &&
+        !CommonUtils::CheckExistOtherMode(record->bgModeIds_, BackgroundMode::DATA_TRANSFER, g_liveViewTypes)) {
+        BGTASK_LOGD("DATA_TRANSFER continuous task has PROGRESS liveView");
+        return true;
+    }
+    return false;
+}
+
+bool BgContinuousTaskMgr::CheckNavigationAndProgressLiveView(std::shared_ptr<ContinuousTaskRecord> record)
+{
+    if (CommonUtils::CheckExistMode(record->bgModeIds_, BackgroundMode::AUDIO_RECORDING) ||
+        CommonUtils::CheckExistMode(record->bgModeIds_, BackgroundMode::VOIP)) {
+        return false;
+    }
+    if (CommonUtils::CheckExistMode(record->bgModeIds_, BackgroundMode::SPECIAL_SCENARIO_PROCESSING)) {
+        BGTASK_LOGD("SPECIAL_SCENARIO_PROCESSING continuous task has PROGRESS and NAVIGATION liveView");
+        return true;
+    }
+    if (CommonUtils::CheckExistMode(record->bgModeIds_, BackgroundMode::LOCATION)) {
+        BGTASK_LOGD("LOCATION continuous task has PROGRESS and NAVIGATION liveView");
+        return true;
+    }
+    if (record->isByStartContinuousTask_ && record->progressInfo_ != nullptr &&
+        CommonUtils::CheckExistMode(record->bgModeIds_, BackgroundMode::DATA_TRANSFER)) {
+        BGTASK_LOGD("DATA_TRANSFER continuous task has PROGRESS and NAVIGATION liveView");
+        return true;
+    }
+    return false;
+}
+
 bool BgContinuousTaskMgr::CheckLiveViewInfo(std::shared_ptr<ContinuousTaskRecord> record)
 {
     if (CommonUtils::CheckExistMode(record->bgModeIds_, BackgroundMode::USB_CONNECTION)) {
@@ -4330,21 +4386,18 @@ bool BgContinuousTaskMgr::CheckLiveViewInfo(std::shared_ptr<ContinuousTaskRecord
         return false;
     }
     const auto &eventNames = iter->second;
-    if (eventNames.find(NAVIGATION) != eventNames.end()) {
-        if (CommonUtils::CheckExistMode(record->bgModeIds_, BackgroundMode::LOCATION) &&
-            !CommonUtils::CheckExistOtherMode(record->bgModeIds_, BackgroundMode::LOCATION, g_liveViewTypes)) {
-            BGTASK_LOGD("continuous task has NAVIGATION liveView");
-            return true;
-        }
+    bool hasNavigation = (eventNames.find(NAVIGATION) != eventNames.end());
+    bool hasProgress = (eventNames.find(PROGRESS) != eventNames.end());
+    if (hasNavigation && !hasProgress) {
+        return CheckOnlyNavigationOnlyLiveView(record);
     }
 
-    if (eventNames.find(PROGRESS) != eventNames.end()) {
-        if (CommonUtils::CheckExistMode(record->bgModeIds_, BackgroundMode::SPECIAL_SCENARIO_PROCESSING) &&
-            !CommonUtils::CheckExistOtherMode(record->bgModeIds_,
-                BackgroundMode::SPECIAL_SCENARIO_PROCESSING, g_liveViewTypes)) {
-            BGTASK_LOGD("continuous task has PROGRESS liveView");
-            return true;
-        }
+    if (!hasNavigation && hasProgress) {
+        return CheckOnlyProgressLiveView(record);
+    }
+
+    if (hasNavigation && hasProgress) {
+        return CheckNavigationAndProgressLiveView(record);
     }
     return false;
 }
@@ -4362,6 +4415,11 @@ void BgContinuousTaskMgr::CancelBgTaskNotificationInner(int32_t uid)
             NotificationTools::GetInstance()->CancelNotification(
                 task.second->GetNotificationLabel(), task.second->GetNotificationId());
             task.second->notificationId_ = -1;
+            if (task.second->subNotificationId_ != -1 && task.second->isByStartContinuousTask_) {
+                NotificationTools::GetInstance()->CancelNotification(
+                    task.second->subNotificationLabel_, task.second->subNotificationId_);
+                task.second->subNotificationId_ = -1;
+            }
             RefreshTaskRecord();
             BGTASK_LOGI("uid: %{public}d has live view notification , cancel continuous notification", uid);
             continue;
@@ -4384,12 +4442,17 @@ void BgContinuousTaskMgr::CancelBgTaskNotification(int32_t uid)
 void BgContinuousTaskMgr::SendNotificationByLiveViewCancelInner(int32_t uid)
 {
     for (const auto &task : continuousTaskInfosMap_) {
-        if (!task.second || task.second->GetUid() != uid) {
+        auto record = task.second;
+        if (!record || record->GetUid() != uid) {
             continue;
         }
-        if (task.second->GetNotificationId() == -1) {
-            auto record = task.second;
-            SendContinuousTaskNotification(record);
+        if (record->GetNotificationId() == -1) {
+            if (record->isByStartContinuousTask_ && record->bgModeIds_.size() > 1 &&
+                CommonUtils::CheckExistMode(record->bgModeIds_, BackgroundMode::DATA_TRANSFER)) {
+                SendLiveViewAndOtherNotification(record);
+            } else {
+                SendContinuousTaskNotification(record);
+            }
             RefreshTaskRecord();
         }
     }
@@ -4402,9 +4465,9 @@ void BgContinuousTaskMgr::SendNotificationByLiveViewCancel(int32_t uid)
         return;
     }
 
-    handler_->PostSyncTask([this, uid]() {
+    handler_->PostTask([this, uid]() {
         this->SendNotificationByLiveViewCancelInner(uid);
-        }, AppExecFwk::EventQueue::Priority::HIGH);
+        }, LIVE_VIEW_CANCEL_NOTIFY_DELAY_TIME);
 }
 
 ErrCode BgContinuousTaskMgr::OnBackup(MessageParcel& data, MessageParcel& reply)

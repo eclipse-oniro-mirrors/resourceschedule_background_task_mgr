@@ -4052,5 +4052,349 @@ HWTEST_F(BgContinuousTaskMgrTest, StartContinuousTask_004, TestSize.Level1)
     EXPECT_EQ((int32_t)bgContinuousTaskMgr_->StartContinuousTask(taskParam), (int32_t)ERR_OK);
     EXPECT_GE(taskParam->continuousTaskId_, 0);
 }
+
+/**
+ * @tc.name: CheckLiveViewInfo_003
+ * @tc.desc: CheckLiveViewInfo PROGRESS only with DATA_TRANSFER + isByStartContinuousTask_ + progressInfo.
+ * @tc.type: FUNC
+ * @tc.require: issueIBOIHY
+ */
+HWTEST_F(BgContinuousTaskMgrTest, CheckLiveViewInfo_003, TestSize.Level1)
+{
+    bgContinuousTaskMgr_->isSysReady_.store(true);
+    bgContinuousTaskMgr_->liveViewInfo_.clear();
+    int32_t uid = 200;
+
+    std::shared_ptr<ContinuousTaskRecord> record = std::make_shared<ContinuousTaskRecord>();
+    record->uid_ = uid;
+    record->isByStartContinuousTask_ = true;
+    record->progressInfo_ = std::make_shared<ProgressInfo>();
+    record->progressInfo_->SetTitle("test_download");
+    record->bgModeIds_ = {BackgroundMode::DATA_TRANSFER};
+
+    // PROGRESS only + DATA_TRANSFER + isByStartContinuousTask_ + progressInfo -> suppressed
+    bgContinuousTaskMgr_->SetLiveViewInfo(uid, true, "PROGRESS");
+    EXPECT_TRUE(bgContinuousTaskMgr_->CheckLiveViewInfo(record));
+
+    // PROGRESS only + DATA_TRANSFER + isByStartContinuousTask_ but no progressInfo -> NOT suppressed
+    record->progressInfo_ = nullptr;
+    bgContinuousTaskMgr_->liveViewInfo_.clear();
+    bgContinuousTaskMgr_->SetLiveViewInfo(uid, true, "PROGRESS");
+    EXPECT_FALSE(bgContinuousTaskMgr_->CheckLiveViewInfo(record));
+
+    // PROGRESS only + DATA_TRANSFER but isByStartContinuousTask_=false -> NOT suppressed
+    record->progressInfo_ = std::make_shared<ProgressInfo>();
+    record->isByStartContinuousTask_ = false;
+    bgContinuousTaskMgr_->liveViewInfo_.clear();
+    bgContinuousTaskMgr_->SetLiveViewInfo(uid, true, "PROGRESS");
+    EXPECT_FALSE(bgContinuousTaskMgr_->CheckLiveViewInfo(record));
+
+    // PROGRESS only + DATA_TRANSFER + isByStartContinuousTask_ + progressInfo + LOCATION -> NOT suppressed
+    record->isByStartContinuousTask_ = true;
+    record->bgModeIds_ = {BackgroundMode::DATA_TRANSFER, BackgroundMode::LOCATION};
+    bgContinuousTaskMgr_->liveViewInfo_.clear();
+    bgContinuousTaskMgr_->SetLiveViewInfo(uid, true, "PROGRESS");
+    EXPECT_FALSE(bgContinuousTaskMgr_->CheckLiveViewInfo(record));
+
+    bgContinuousTaskMgr_->liveViewInfo_.clear();
+}
+
+/**
+ * @tc.name: CheckLiveViewInfo_004
+ * @tc.desc: CheckLiveViewInfo NAVIGATION + PROGRESS both events.
+ * @tc.type: FUNC
+ * @tc.require: issueIBOIHY
+ */
+HWTEST_F(BgContinuousTaskMgrTest, CheckLiveViewInfo_004, TestSize.Level1)
+{
+    bgContinuousTaskMgr_->isSysReady_.store(true);
+    bgContinuousTaskMgr_->liveViewInfo_.clear();
+    int32_t uid = 300;
+
+    std::shared_ptr<ContinuousTaskRecord> record = std::make_shared<ContinuousTaskRecord>();
+    record->uid_ = uid;
+    record->isByStartContinuousTask_ = true;
+    record->progressInfo_ = std::make_shared<ProgressInfo>();
+    record->progressInfo_->SetTitle("test_download");
+
+    // NAVIGATION + PROGRESS + LOCATION -> suppressed
+    bgContinuousTaskMgr_->SetLiveViewInfo(uid, true, "NAVIGATION");
+    bgContinuousTaskMgr_->SetLiveViewInfo(uid, true, "PROGRESS");
+    record->bgModeIds_ = {BackgroundMode::DATA_TRANSFER, BackgroundMode::LOCATION};
+    EXPECT_TRUE(bgContinuousTaskMgr_->CheckLiveViewInfo(record));
+
+    // NAVIGATION + PROGRESS + AUDIO_RECORDING -> NOT suppressed
+    record->bgModeIds_ = {BackgroundMode::DATA_TRANSFER, BackgroundMode::AUDIO_RECORDING};
+    EXPECT_FALSE(bgContinuousTaskMgr_->CheckLiveViewInfo(record));
+
+    // NAVIGATION + PROGRESS + VOIP -> NOT suppressed
+    record->bgModeIds_ = {BackgroundMode::DATA_TRANSFER, BackgroundMode::VOIP};
+    EXPECT_FALSE(bgContinuousTaskMgr_->CheckLiveViewInfo(record));
+
+    // NAVIGATION + PROGRESS + DATA_TRANSFER (isByStartContinuousTask_ + progressInfo) -> suppressed
+    record->bgModeIds_ = {BackgroundMode::DATA_TRANSFER};
+    EXPECT_TRUE(bgContinuousTaskMgr_->CheckLiveViewInfo(record));
+
+    // NAVIGATION + PROGRESS + DATA_TRANSFER but no progressInfo -> NOT suppressed
+    record->progressInfo_ = nullptr;
+    EXPECT_FALSE(bgContinuousTaskMgr_->CheckLiveViewInfo(record));
+
+    bgContinuousTaskMgr_->liveViewInfo_.clear();
+}
+
+/**
+ * @tc.name: CheckLiveViewInfo_005
+ * @tc.desc: CheckLiveViewInfo NAVIGATION + PROGRESS both events, subRecord scenario.
+ * @tc.type: FUNC
+ * @tc.require: issueIBOIHY
+ */
+HWTEST_F(BgContinuousTaskMgrTest, CheckLiveViewInfo_005, TestSize.Level1)
+{
+    bgContinuousTaskMgr_->isSysReady_.store(true);
+    bgContinuousTaskMgr_->liveViewInfo_.clear();
+    int32_t uid = 400;
+
+    // Simulate subRecord with only LOCATION (sub notification record)
+    std::shared_ptr<ContinuousTaskRecord> subRecord = std::make_shared<ContinuousTaskRecord>();
+    subRecord->uid_ = uid;
+    subRecord->isByStartContinuousTask_ = true;
+    subRecord->bgModeIds_ = {BackgroundMode::LOCATION};
+
+    // NAVIGATION + PROGRESS both set, subRecord has only LOCATION -> suppressed
+    bgContinuousTaskMgr_->SetLiveViewInfo(uid, true, "NAVIGATION");
+    bgContinuousTaskMgr_->SetLiveViewInfo(uid, true, "PROGRESS");
+    EXPECT_TRUE(bgContinuousTaskMgr_->CheckLiveViewInfo(subRecord));
+
+    // PROGRESS only, subRecord has only LOCATION -> NOT suppressed (no matching mode)
+    bgContinuousTaskMgr_->liveViewInfo_.clear();
+    bgContinuousTaskMgr_->SetLiveViewInfo(uid, true, "PROGRESS");
+    EXPECT_FALSE(bgContinuousTaskMgr_->CheckLiveViewInfo(subRecord));
+
+    bgContinuousTaskMgr_->liveViewInfo_.clear();
+}
+
+/**
+ * @tc.name: CheckNotificationText_SkipLiveViewCheck_001
+ * @tc.desc: CheckNotificationText with skipLiveViewCheck=true skips live view suppression.
+ * @tc.type: FUNC
+ * @tc.require: issueIBOIHY
+ */
+HWTEST_F(BgContinuousTaskMgrTest, CheckNotificationText_SkipLiveViewCheck_001, TestSize.Level1)
+{
+    bgContinuousTaskMgr_->isSysReady_.store(true);
+    bgContinuousTaskMgr_->liveViewInfo_.clear();
+    int32_t uid = 500;
+
+    std::shared_ptr<ContinuousTaskRecord> record = std::make_shared<ContinuousTaskRecord>();
+    record->uid_ = uid;
+    record->bgModeIds_ = {BackgroundMode::LOCATION};
+
+    // Set NAVIGATION live view to suppress LOCATION
+    bgContinuousTaskMgr_->SetLiveViewInfo(uid, true, "NAVIGATION");
+
+    // skipLiveViewCheck=false (default) -> suppressed (text unchanged, ERR_OK)
+    std::string notificationText;
+    EXPECT_EQ(bgContinuousTaskMgr_->CheckNotificationText(notificationText, record), ERR_OK);
+    EXPECT_TRUE(notificationText.empty());
+
+    // skipLiveViewCheck=true -> NOT suppressed, generates text
+    notificationText = "";
+    EXPECT_EQ(bgContinuousTaskMgr_->CheckNotificationText(notificationText, record, true), ERR_OK);
+    EXPECT_FALSE(notificationText.empty());
+
+    bgContinuousTaskMgr_->liveViewInfo_.clear();
+}
+
+/**
+ * @tc.name: CheckNotificationText_SkipLiveViewCheck_002
+ * @tc.desc: CheckNotificationText with skipLiveViewCheck=false still suppresses when live view active.
+ * @tc.type: FUNC
+ * @tc.require: issueIBOIHY
+ */
+HWTEST_F(BgContinuousTaskMgrTest, CheckNotificationText_SkipLiveViewCheck_002, TestSize.Level1)
+{
+    bgContinuousTaskMgr_->isSysReady_.store(true);
+    bgContinuousTaskMgr_->liveViewInfo_.clear();
+    int32_t uid = 600;
+
+    std::shared_ptr<ContinuousTaskRecord> record = std::make_shared<ContinuousTaskRecord>();
+    record->uid_ = uid;
+    record->isByStartContinuousTask_ = true;
+    record->progressInfo_ = std::make_shared<ProgressInfo>();
+    record->progressInfo_->SetTitle("test");
+    record->bgModeIds_ = {BackgroundMode::DATA_TRANSFER};
+
+    // PROGRESS live view suppresses DATA_TRANSFER with isByStartContinuousTask_
+    bgContinuousTaskMgr_->SetLiveViewInfo(uid, true, "PROGRESS");
+
+    // Default (skipLiveViewCheck=false) -> suppressed (text unchanged)
+    std::string notificationText;
+    EXPECT_EQ(bgContinuousTaskMgr_->CheckNotificationText(notificationText, record), ERR_OK);
+    EXPECT_TRUE(notificationText.empty());
+
+    // skipLiveViewCheck=true -> not suppressed
+    notificationText = "";
+    EXPECT_EQ(bgContinuousTaskMgr_->CheckNotificationText(notificationText, record, true), ERR_OK);
+    EXPECT_FALSE(notificationText.empty());
+
+    bgContinuousTaskMgr_->liveViewInfo_.clear();
+}
+
+/**
+ * @tc.name: SendNotificationByLiveViewCancel_002
+ * @tc.desc: SendNotificationByLiveViewCancelInner routes to SendLiveViewAndOtherNotification.
+ * @tc.type: FUNC
+ * @tc.require: issueIBOIHY
+ */
+HWTEST_F(BgContinuousTaskMgrTest, SendNotificationByLiveViewCancel_002, TestSize.Level1)
+{
+    bgContinuousTaskMgr_->isSysReady_.store(true);
+    bgContinuousTaskMgr_->continuousTaskInfosMap_.clear();
+    bgContinuousTaskMgr_->liveViewInfo_.clear();
+    int32_t uid = 700;
+
+    // Case 1: isByStartContinuousTask_ + multi-mode + DATA_TRANSFER -> routes to SendLiveViewAndOtherNotification
+    std::shared_ptr<ContinuousTaskRecord> record1 = std::make_shared<ContinuousTaskRecord>();
+    record1->uid_ = uid;
+    record1->notificationId_ = -1;
+    record1->isByStartContinuousTask_ = true;
+    record1->progressInfo_ = std::make_shared<ProgressInfo>();
+    record1->progressInfo_->SetTitle("test");
+    record1->bgModeIds_ = {BackgroundMode::DATA_TRANSFER, BackgroundMode::LOCATION};
+    bgContinuousTaskMgr_->continuousTaskInfosMap_["key1"] = record1;
+    // No live view set -> CheckLiveViewInfo returns false -> should attempt to send
+    bgContinuousTaskMgr_->SendNotificationByLiveViewCancel(uid);
+    EXPECT_EQ(record1->GetNotificationId(), -1);
+
+    bgContinuousTaskMgr_->continuousTaskInfosMap_.clear();
+}
+
+/**
+ * @tc.name: SendNotificationByLiveViewCancel_003
+ * @tc.desc: SendNotificationByLiveViewCancelInner routes to SendContinuousTaskNotification for single mode.
+ * @tc.type: FUNC
+ * @tc.require: issueIBOIHY
+ */
+HWTEST_F(BgContinuousTaskMgrTest, SendNotificationByLiveViewCancel_003, TestSize.Level1)
+{
+    bgContinuousTaskMgr_->isSysReady_.store(true);
+    bgContinuousTaskMgr_->continuousTaskInfosMap_.clear();
+    bgContinuousTaskMgr_->liveViewInfo_.clear();
+    int32_t uid = 800;
+
+    // Single mode, not isByStartContinuousTask_ -> routes to SendContinuousTaskNotification
+    std::shared_ptr<ContinuousTaskRecord> record = std::make_shared<ContinuousTaskRecord>();
+    record->uid_ = uid;
+    record->notificationId_ = -1;
+    record->isByStartContinuousTask_ = false;
+    record->bgModeIds_ = {BackgroundMode::LOCATION};
+    bgContinuousTaskMgr_->continuousTaskInfosMap_["key1"] = record;
+    bgContinuousTaskMgr_->SendNotificationByLiveViewCancel(uid);
+    EXPECT_EQ(record->GetNotificationId(), -1);
+
+    bgContinuousTaskMgr_->continuousTaskInfosMap_.clear();
+}
+
+/**
+ * @tc.name: CancelBgTaskNotification_002
+ * @tc.desc: CancelBgTaskNotificationInner cancels sub-notification.
+ * @tc.type: FUNC
+ * @tc.require: issueIBOIHY
+ */
+HWTEST_F(BgContinuousTaskMgrTest, CancelBgTaskNotification_002, TestSize.Level1)
+{
+    bgContinuousTaskMgr_->isSysReady_.store(true);
+    bgContinuousTaskMgr_->continuousTaskInfosMap_.clear();
+    bgContinuousTaskMgr_->liveViewInfo_.clear();
+    int32_t uid = 900;
+
+    std::shared_ptr<ContinuousTaskRecord> record = std::make_shared<ContinuousTaskRecord>();
+    record->uid_ = uid;
+    record->notificationId_ = 100;
+    record->subNotificationId_ = 200;
+    record->isByStartContinuousTask_ = true;
+    record->bgModeIds_ = {BackgroundMode::LOCATION};
+    bgContinuousTaskMgr_->continuousTaskInfosMap_["key1"] = record;
+
+    // Set NAVIGATION live view to trigger suppression -> cancel notification
+    bgContinuousTaskMgr_->SetLiveViewInfo(uid, true, "NAVIGATION");
+    bgContinuousTaskMgr_->CancelBgTaskNotification(uid);
+
+    // After cancel, notificationId should be -1 and subNotificationId should be -1
+    EXPECT_EQ(record->notificationId_, -1);
+    EXPECT_EQ(record->subNotificationId_, -1);
+
+    bgContinuousTaskMgr_->liveViewInfo_.clear();
+    bgContinuousTaskMgr_->continuousTaskInfosMap_.clear();
+}
+
+/**
+ * @tc.name: CancelBgTaskNotification_003
+ * @tc.desc: CancelBgTaskNotificationInner does NOT cancel sub-notification when isByStartContinuousTask_=false.
+ * @tc.type: FUNC
+ * @tc.require: issueIBOIHY
+ */
+HWTEST_F(BgContinuousTaskMgrTest, CancelBgTaskNotification_003, TestSize.Level1)
+{
+    bgContinuousTaskMgr_->isSysReady_.store(true);
+    bgContinuousTaskMgr_->continuousTaskInfosMap_.clear();
+    bgContinuousTaskMgr_->liveViewInfo_.clear();
+    int32_t uid = 1000;
+
+    std::shared_ptr<ContinuousTaskRecord> record = std::make_shared<ContinuousTaskRecord>();
+    record->uid_ = uid;
+    record->notificationId_ = 100;
+    record->subNotificationId_ = 200;
+    record->isByStartContinuousTask_ = false;
+    record->bgModeIds_ = {BackgroundMode::LOCATION};
+    bgContinuousTaskMgr_->continuousTaskInfosMap_["key1"] = record;
+
+    // Set NAVIGATION live view to trigger suppression
+    bgContinuousTaskMgr_->SetLiveViewInfo(uid, true, "NAVIGATION");
+    bgContinuousTaskMgr_->CancelBgTaskNotification(uid);
+
+    // notificationId cancelled, but subNotificationId NOT cancelled (isByStartContinuousTask_=false)
+    EXPECT_EQ(record->notificationId_, -1);
+    EXPECT_EQ(record->subNotificationId_, 200);
+
+    bgContinuousTaskMgr_->liveViewInfo_.clear();
+    bgContinuousTaskMgr_->continuousTaskInfosMap_.clear();
+}
+
+/**
+ * @tc.name: ContinuousTaskRecord_IsByStartContinuousTask_Persist
+ * @tc.desc: Test isByStartContinuousTask_ field JSON serialization/deserialization.
+ * @tc.type: FUNC
+ * @tc.require: issueIBOIHY
+ */
+HWTEST_F(BgContinuousTaskMgrTest, ContinuousTaskRecord_IsByStartContinuousTask_Persist, TestSize.Level1)
+{
+    std::shared_ptr<ContinuousTaskRecord> record = std::make_shared<ContinuousTaskRecord>();
+    record->uid_ = 1100;
+    record->bundleName_ = "com.test.app";
+    record->abilityName_ = "MainAbility";
+    record->bgModeId_ = BackgroundMode::DATA_TRANSFER;
+    record->bgModeIds_ = {BackgroundMode::DATA_TRANSFER};
+    record->isByStartContinuousTask_ = true;
+
+    // Serialize to JSON
+    std::string jsonStr = record->ParseToJsonStr();
+    EXPECT_FALSE(jsonStr.empty());
+    EXPECT_NE(jsonStr.find("isByStartContinuousTask"), std::string::npos);
+
+    // Deserialize from JSON
+    nlohmann::json root = nlohmann::json::parse(jsonStr);
+    std::shared_ptr<ContinuousTaskRecord> restored = std::make_shared<ContinuousTaskRecord>();
+    EXPECT_TRUE(restored->ParseFromJson(root));
+    EXPECT_TRUE(restored->isByStartContinuousTask_);
+
+    // Test with isByStartContinuousTask_ = false
+    record->isByStartContinuousTask_ = false;
+    jsonStr = record->ParseToJsonStr();
+    root = nlohmann::json::parse(jsonStr);
+    restored = std::make_shared<ContinuousTaskRecord>();
+    EXPECT_TRUE(restored->ParseFromJson(root));
+    EXPECT_FALSE(restored->isByStartContinuousTask_);
+}
 }  // namespace BackgroundTaskMgr
 }  // namespace OHOS

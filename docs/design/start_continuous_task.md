@@ -255,6 +255,75 @@ flowchart TD
     F --> G[返回成功]
 ```
 
+### 5.3 通知抑制与实况窗互斥流程
+
+`CheckLiveViewInfo` 方法重构为三分支结构，根据实况窗事件类型组合（NAVIGATION / PROGRESS / Both）分别处理：
+
+```mermaid
+flowchart TD
+    A[CheckLiveViewInfo] --> B{USB_CONNECTION?}
+    B -->|是| C[USB 专有逻辑]
+    B -->|否| D{liveViewInfo_ 中存在 uid?}
+    D -->|否| E[return false]
+    D -->|是| F{实况窗事件类型组合}
+    F -->|NAVIGATION only| G{LOCATION 且无其它 liveViewType?}
+    G -->|是| H[return true 抑制]
+    G -->|否| I[return false]
+    F -->|PROGRESS only| J{SPECIAL_SCENARIO_PROCESSING 且无其它 liveViewType?}
+    J -->|是| H
+    J -->|否| K{isByStartContinuousTask_ 且 progressInfo_ 且 DATA_TRANSFER 且无其它 liveViewType?}
+    K -->|是| H
+    K -->|否| I
+    F -->|NAVIGATION + PROGRESS| L{AUDIO_RECORDING 或 VOIP?}
+    L -->|是| I
+    L -->|否| M{LOCATION?}
+    M -->|是| H
+    M -->|否| N{isByStartContinuousTask_ 且 progressInfo_ 且 DATA_TRANSFER?}
+    N -->|是| H
+    N -->|否| I
+```
+
+**新增字段 `isByStartContinuousTask_`**：
+- 文件：`services/continuous_task/include/continuous_task_record.h`
+- 类型：`bool`，默认 `false`
+- 设置位置：`StartContinuousTask` 方法创建 record 时设为 `true`；`CreateSubRecordForLiveView` 创建主通知 subRecord 时设为 `true`
+- 持久化：`ParseToJsonStr` / `ParseFromJson` / `SetRecordValue` / `CheckContinuousRecod` 均已适配
+- 作用：在 `CheckLiveViewInfo` 的 PROGRESS 分支和 NAVIGATION+PROGRESS 分支中，控制 DATA_TRANSFER 模式的抑制路径
+
+### 5.4 实况窗删除后通知补发流程
+
+```mermaid
+flowchart TD
+    A[实况窗删除] --> B[SendNotificationByLiveViewCancelInner]
+    B --> C{notificationId == -1?}
+    C -->|否| D[跳过]
+    C -->|是| E{isByStartContinuousTask_ 且 bgModeIds_.size > 1 且含 DATA_TRANSFER?}
+    E -->|是| F[SendLiveViewAndOtherNotification]
+    E -->|否| G[SendContinuousTaskNotification]
+    F --> H{CheckLiveViewInfo record 仍抑制?}
+    H -->|是| I[return ERR_OK 不补发]
+    H -->|否| J[CreateSubRecordForLiveView 主通知 DATA_TRANSFER]
+    J --> K[SendNotification 主通知 skipLiveViewCheck=true]
+    K --> L[创建子通知 subRecord 非 DATA_TRANSFER 模式]
+    L --> M[SendNotification 子通知 skipLiveViewCheck=true]
+```
+
+**关键设计决策**：
+
+1. **`CheckNotificationText` 新增 `skipLiveViewCheck` 参数**：
+   - 文件：`services/continuous_task/include/bg_continuous_task_mgr.h` + `services/continuous_task/src/bg_continuous_task_mgr.cpp`
+   - 默认 `false`，保持现有调用点行为不变
+   - `SendNotification`（由 `SendLiveViewAndOtherNotification` 调用）传 `true`
+   - 原因：`SendLiveViewAndOtherNotification` 顶层已通过 `CheckLiveViewInfo(record)` 对完整 record 做抑制判断。拆分发送时 subRecord 模式列表与原始 record 不同（主通知=[DATA_TRANSFER]，子通知=[LOCATION]），`CheckExistOtherMode` 结果不一致会导致子通知被误抑制
+
+2. **`SendLiveViewAndOtherNotification` 顶层增加 `CheckLiveViewInfo` 守卫**：
+   - 在发送主/子通知前，先对完整 record 调用 `CheckLiveViewInfo`
+   - 若仍被抑制（如实况窗部分删除但仍有其它实况窗覆盖），则不补发通知
+
+3. **`CancelBgTaskNotificationInner` 增加子通知取消**：
+   - 实况窗生效取消主通知时，若 `subNotificationId_ != -1` 且 `isByStartContinuousTask_=true`，同时取消子通知
+   - 确保实况窗抑制状态下主/子通知状态一致
+
 ---
 
 ## 6. 风险与缓解
@@ -264,6 +333,9 @@ flowchart TD
 | `startBackgroundRunning` 新增 progressInfo 静默忽略处理 | 低 | 低 | progressInfo 非空时静默置 null，接口正常返回，不影响现有应用 |
 | NAPI 层复用 `StartBackgroundRunningCheckRequest` 可能遗漏差异 | 低 | 中 | 参数解析逻辑完全一致，仅在执行回调和返回值构造上区分 |
 | IPC 新增方法导致 Stub 码值冲突 | 低 | 高 | IDL 编译自动分配码值，遵循现有生成规则 |
+| `CheckLiveViewInfo` 三分支重构影响现有抑制逻辑 | 中 | 中 | NAVIGATION-only 和 PROGRESS-only 分支保持原有条件不变，新增条件仅在 `isByStartContinuousTask_=true` 时生效 |
+| `skipLiveViewCheck=true` 导致非抑制通知误发 | 低 | 中 | 仅在 `SendLiveViewAndOtherNotification` 顶层 `CheckLiveViewInfo` 通过后使用，不绕过顶层抑制判断 |
+| `isByStartContinuousTask_` 持久化兼容性 | 低 | 低 | JSON 序列化新增字段，旧版本反序列化时 `CheckContinuousRecod` 校验失败会跳过该 record（需确认兼容性） |
 
 ---
 

@@ -1785,8 +1785,7 @@ HWTEST_F(BgContinuousTaskMgrTest, BgTaskManagerUnitTest_063, TestSize.Level1)
     continuousTaskRecord->abilityName_ = "ability1";
     continuousTaskRecord->bundleName_ = "Entry";
     bgContinuousTaskMgr_->continuousTaskInfosMap_["key1"] = continuousTaskRecord;
-    // 前后任务包含上传下载，更新失败
-    EXPECT_EQ(bgContinuousTaskMgr_->UpdateBackgroundRunning(taskParam), ERR_BGTASK_CONTINUOUS_DATA_TRANSFER_NOT_UPDATE);
+    EXPECT_EQ(bgContinuousTaskMgr_->UpdateBackgroundRunning(taskParam), ERR_OK);
 }
 
 /**

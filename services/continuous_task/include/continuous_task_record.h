@@ -68,6 +68,9 @@ public:
     std::shared_ptr<ProgressInfo> GetProgressInfo() const;
     bool NeedNotificationForInnerApi() const;
     bool IsFromComponent() const;
+    void ResetModeDataTransfer();
+    void RemoveModeDataTransfer(const std::vector<uint32_t> &modes, const std::vector<uint32_t> &subModes);
+    void RecoverTaskMode(const std::vector<uint32_t> &modes, const std::vector<uint32_t> &subModes, uint32_t bgModeId);
 
 private:
     std::vector<uint32_t> ToVector(std::string &str);

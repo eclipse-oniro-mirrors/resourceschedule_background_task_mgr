@@ -116,8 +116,6 @@ const std::unordered_map<int32_t, std::string> SA_ERRCODE_MSG_MAP = {
     {ERR_BGTASK_CONTINUOUS_NOT_APPLY_MAX_TASK,
         "Continuous Task verification failed. "
         "The current ability to apply for continuous tasks has exceeded the maximum limit."},
-    {ERR_BGTASK_CONTINUOUS_DATA_TRANSFER_NOT_UPDATE,
-        "Continuous Task verification failed. The background task mode: DATA_TRANSFER type do not support update."},
     {ERR_BGTASK_CONTINUOUS_NOT_APPLY_ONBACKGROUND,
         "Continuous Task verification failed. The continuous task are not allowed to be applied on background."},
     {ERR_BGTASK_SPECIAL_SCENARIO_PROCESSING_ONLY_ALLOW_ONE_APPLICATION,
@@ -170,7 +168,10 @@ const std::unordered_map<int32_t, std::string> SA_ERRCODE_MSG_MAP = {
         "Notification verification failed for a continuous task. The updateDataTransferProgres param is invalid."},
     {ERR_BGTASK_CONTINUOUS_MODE_USB_NOT_SUPPORT_DEVICETYPE,
         "The requested continuous task is not supported on this device type. "
-        "This task mode: MODE_USB_CONNECTION type do not support."}
+        "This task mode: MODE_USB_CONNECTION type do not support."},
+    {ERR_BGTASK_CONTINUOUS_UPDATE_TYPE_NOT_ALLOWED,
+        "Continuous Task verification failed. "
+        "The background task mode: AUDIO_RECORDING/LOCATION/VOIP type do not support update on background."},
 };
 
 const std::unordered_map<int32_t, std::string> PARAM_ERRCODE_MSG_MAP = {

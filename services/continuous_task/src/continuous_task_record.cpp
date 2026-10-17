@@ -19,6 +19,8 @@
 #include "iremote_object.h"
 #include "background_mode.h"
 #include "continuous_task_log.h"
+#include "background_task_mode.h"
+#include "background_task_submode.h"
 
 namespace OHOS {
 namespace BackgroundTaskMgr {
@@ -167,6 +169,52 @@ bool ContinuousTaskRecord::NeedNotificationForInnerApi() const
 bool ContinuousTaskRecord::IsFromComponent() const
 {
     return isFromComponent_;
+}
+
+void ContinuousTaskRecord::ResetModeDataTransfer()
+{
+    bgModeIds_ = {BackgroundTaskMode::MODE_DATA_TRANSFER};
+    bgSubModeIds_ = {BackgroundTaskSubmode::SUBMODE_LIVE_VIEW_NOTIFICATION};
+    bgModeId_ = BackgroundTaskMode::MODE_DATA_TRANSFER;
+}
+ 
+void ContinuousTaskRecord::RemoveModeDataTransfer(const std::vector<uint32_t> &modes,
+    const std::vector<uint32_t> &subModes)
+{
+    if (modes.size() != subModes.size()) {
+        BGTASK_LOGE("mode size not equal subMode size");
+        return;
+    }
+    std::vector<uint32_t> tempModes {};
+    std::vector<uint32_t> tempSubModes {};
+    for (size_t index = 0; index < modes.size(); index++) {
+        uint32_t mode = modes[index];
+        if (mode == BackgroundTaskMode::MODE_DATA_TRANSFER) {
+            continue;
+        }
+        tempModes.push_back(mode);
+        uint32_t subMode = subModes[index];
+        tempSubModes.push_back(subMode);
+    }
+    bgModeIds_ = tempModes;
+    bgSubModeIds_ = tempSubModes;
+    if (!tempModes.empty()) {
+        bgModeId_ = tempModes[0];
+    }
+}
+ 
+void ContinuousTaskRecord::RecoverTaskMode(const std::vector<uint32_t> &modes,
+    const std::vector<uint32_t> &subModes, uint32_t bgModeId)
+{
+    if (modes.size() != subModes.size() || modes.empty() || subModes.empty()) {
+        return;
+    }
+    if (bgModeId < BackgroundTaskMode::MODE_DATA_TRANSFER || bgModeId >= BackgroundTaskMode::END) {
+        return;
+    }
+    bgModeIds_ = modes;
+    bgSubModeIds_ = subModes;
+    bgModeId_ = bgModeId;
 }
 
 std::string ContinuousTaskRecord::ParseToJsonStr()

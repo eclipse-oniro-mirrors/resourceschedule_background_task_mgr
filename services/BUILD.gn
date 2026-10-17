@@ -152,7 +152,7 @@ ohos_shared_library("bgtaskmgr_service") {
   if (target_platform == "phone") {
     cflags_cc += [
       "-DSUPPORT_AUTH",
-      "-DSUPPORT_USB_CONNECTIN"
+      "-DSUPPORT_USB_CONNECTION"
     ]
     defines = [ "FEATURE_PRODUCT_PHONE" ]
   } else if (target_platform == "watch") {
@@ -160,17 +160,17 @@ ohos_shared_library("bgtaskmgr_service") {
   } else if (target_platform == "pc") {
     cflags_cc += [
       "-DSUPPORT_AUTH",
-      "-DSUPPORT_USB_CONNECTIN"
+      "-DSUPPORT_USB_CONNECTION"
     ]
   } else if (target_platform == "tablet") {
     cflags_cc += [
       "-DSUPPORT_AUTH",
-      "-DSUPPORT_USB_CONNECTIN"
+      "-DSUPPORT_USB_CONNECTION"
     ]
   } else if (target_platform == "car") {
     cflags_cc += [ "-DHAS_OS_ACCOUNT_CAR" ]
   } else if (target_platform == "tv") {
-    cflags_cc += [ "-DSUPPORT_USB_CONNECTIN" ]
+    cflags_cc += [ "-DSUPPORT_USB_CONNECTION" ]
   }
 
   if (game_pre_launch_enable) {
@@ -251,7 +251,7 @@ ohos_static_library("bgtaskmgr_service_static") {
   if (target_platform == "phone") {
     cflags_cc += [
       "-DSUPPORT_AUTH",
-      "-DSUPPORT_USB_CONNECTIN"
+      "-DSUPPORT_USB_CONNECTION"
     ]
     defines = [ "FEATURE_PRODUCT_PHONE" ]
   } else if (target_platform == "watch") {
@@ -259,17 +259,17 @@ ohos_static_library("bgtaskmgr_service_static") {
   } else if (target_platform == "pc") {
     cflags_cc += [
       "-DSUPPORT_AUTH",
-      "-DSUPPORT_USB_CONNECTIN"
+      "-DSUPPORT_USB_CONNECTION"
     ]
   } else if (target_platform == "tablet") {
     cflags_cc += [
       "-DSUPPORT_AUTH",
-      "-DSUPPORT_USB_CONNECTIN"
+      "-DSUPPORT_USB_CONNECTION"
     ]
   } else if (target_platform == "car") {
     cflags_cc += [ "-DHAS_OS_ACCOUNT_CAR" ]
   } else if (target_platform == "tv") {
-    cflags_cc += [ "-DSUPPORT_USB_CONNECTIN" ]
+    cflags_cc += [ "-DSUPPORT_USB_CONNECTION" ]
   }
 
   if (game_pre_launch_enable) {

@@ -73,7 +73,6 @@ enum class ContinuousTaskEventTriggerType: uint32_t {
     TASK_ACTIVE,
 };
 
-
 struct CachedBundleInfo {
     std::unordered_map<std::string, uint32_t> abilityBgMode_ {};
     std::string appName_ {""};
@@ -332,6 +331,21 @@ private:
     bool CheckOnlyNavigationOnlyLiveView(std::shared_ptr<ContinuousTaskRecord> record);
     bool CheckOnlyProgressLiveView(std::shared_ptr<ContinuousTaskRecord> record);
     bool CheckNavigationAndProgressLiveView(std::shared_ptr<ContinuousTaskRecord> record);
+    ErrCode CheckUpdateTypeNotAllowed(int32_t uid, const std::vector<uint32_t> &oldModes,
+        const std::vector<uint32_t> &newModes);
+    ErrCode UpdateNotificationByTask(const std::vector<uint32_t> &oldModes, const std::vector<uint32_t> &oldSubModes,
+        std::shared_ptr<ContinuousTaskRecord> record);
+    ErrCode UpdateNotificationForNoDtMode(const std::vector<uint32_t> &oldModes,
+        const std::vector<uint32_t> &oldSubModes, std::shared_ptr<ContinuousTaskRecord> record,
+        const std::vector<uint32_t> &newModes);
+    ErrCode UpdateNotificationForNewHaveDtMode(const std::vector<uint32_t> &oldModes,
+        std::shared_ptr<ContinuousTaskRecord> record, const std::vector<uint32_t> &newModes,
+        const std::vector<uint32_t> &newSubModes);
+    ErrCode UpdateNotificationForOldHaveDtMode(const std::vector<uint32_t> &oldModes,
+        std::shared_ptr<ContinuousTaskRecord> record);
+    ErrCode UpdateNotificationForAllDtMode(const std::vector<uint32_t> &oldModes,
+        std::shared_ptr<ContinuousTaskRecord> record, const std::vector<uint32_t> &newModes,
+        const std::vector<uint32_t> &newSubModes);
 
 #ifdef HAS_OS_ACCOUNT_CAR
     void ClearBgOsAccountTaskInCar();

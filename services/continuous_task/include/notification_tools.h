@@ -50,6 +50,8 @@ public:
         int32_t serviceUid);
     std::string CreateBannerNotificationLabel(const std::string &bundleName, int32_t userId,
         int32_t appIndex);
+    ErrCode RefreshSubNotification(const std::string &appName, const std::string &prompt,
+        int32_t serviceUid, const std::shared_ptr<ContinuousTaskRecord> record);
 
 private:
     static int32_t notificationIdIndex_;

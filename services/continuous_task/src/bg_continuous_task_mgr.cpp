@@ -786,7 +786,7 @@ ErrCode BgContinuousTaskMgr::CheckBgmodeTypeNewApi(uint32_t configuredBgMode, ui
         }
     }
     if (recordedBgMode == BGMODE_USB_CONNECTION) {
-#ifndef SUPPORT_USB_CONNECTIN
+#ifndef SUPPORT_USB_CONNECTION
         return ERR_BGTASK_CONTINUOUS_MODE_USB_NOT_SUPPORT_DEVICETYPE;
 #endif
     }
@@ -1219,6 +1219,7 @@ ErrCode BgContinuousTaskMgr::UpdateTaskNotification(std::shared_ptr<ContinuousTa
     const sptr<ContinuousTaskParam> &taskParam)
 {
     auto oldModes = record->bgModeIds_;
+    auto oldSubModes = record->bgSubModeIds_;
     std::string mainAbilityLabel = GetMainAbilityLabel(record->bundleName_, record->userId_);
     if (mainAbilityLabel == "") {
         BGTASK_LOGE("uid: %{public}d get main ability label or notification text fail.", record->uid_);
@@ -1250,17 +1251,224 @@ ErrCode BgContinuousTaskMgr::UpdateTaskNotification(std::shared_ptr<ContinuousTa
             return ERR_BGTASK_CONTINUOUS_UPDATE_FAIL_SAME_MODE_AND_MERGED;
         }
     } else {
-        std::string notificationText = GetNotificationText(record);
-        if (notificationText.empty()) {
-            BGTASK_LOGE("notificationText is empty, uid: %{public}d", record->uid_);
-        } else if (record->notificationId_ == -1) {
-            // 原始任务没有通知，更新新任务时需要新发通知
-            return SendContinuousTaskNotification(record);
-        } else {
-            newPromptInfos.emplace(record->notificationLabel_, std::make_pair(mainAbilityLabel, notificationText));
-            return NotificationTools::GetInstance()->RefreshContinuousNotificationWantAndContext(bgTaskUid_,
-                newPromptInfos, record, true);
+        return UpdateNotificationByTask(oldModes, oldSubModes, record);
+    }
+    return ERR_OK;
+}
+
+ErrCode BgContinuousTaskMgr::UpdateNotificationForAllDtMode(const std::vector<uint32_t> &oldModes,
+    std::shared_ptr<ContinuousTaskRecord> record, const std::vector<uint32_t> &newModes,
+    const std::vector<uint32_t> &newSubModes)
+{
+    ErrCode ret = ERR_OK;
+    std::string notificationText {""};
+    // 1、子通知类型一样时候。子通知也保持不变
+    if (CommonUtils::CheckModesSame(oldModes, newModes)) {
+        std::map<std::string, std::pair<std::string, std::string>> newPromptInfos;
+        newPromptInfos.emplace(record->notificationLabel_, std::make_pair(record->appName_, ""));
+        return NotificationTools::GetInstance()->RefreshContinuousNotificationWantAndContext(bgTaskUid_,
+            newPromptInfos, record);
+    }
+    // 2、子通知类型不一致
+    record->RemoveModeDataTransfer(newModes, newSubModes);
+    ret = CheckNotificationText(notificationText, record);
+    if (ret != ERR_OK) {
+        return ret;
+    }
+    if (notificationText != "") {
+        // 有子通知就更新，没有就新发
+        ret = NotificationTools::GetInstance()->RefreshSubNotification(record->appName_,
+            notificationText, bgTaskUid_, record);
+        if (ret != ERR_OK) {
+            return ret;
         }
+    } else {
+        // 新任务没有子通知，如果旧任务有就取消
+        if (record->subNotificationId_ != -1 && record->subNotificationLabel_ != "") {
+            ret = NotificationTools::GetInstance()->CancelNotification(record->subNotificationLabel_,
+                record->subNotificationId_);
+            if (ret != ERR_OK) {
+                return ret;
+            }
+            record->subNotificationId_ = -1;
+            record->subNotificationLabel_ = "";
+        }
+    }
+    return ERR_OK;
+}
+
+ErrCode BgContinuousTaskMgr::UpdateNotificationForOldHaveDtMode(const std::vector<uint32_t> &oldModes,
+    std::shared_ptr<ContinuousTaskRecord> record)
+{
+    ErrCode ret = ERR_OK;
+    // 取消旧任务的子通知
+    if (record->subNotificationId_ != -1 && record->subNotificationLabel_ != "") {
+        ret = NotificationTools::GetInstance()->CancelNotification(record->subNotificationLabel_,
+            record->subNotificationId_);
+        if (ret != ERR_OK) {
+            return ret;
+        }
+        record->subNotificationId_ = -1;
+        record->subNotificationLabel_ = "";
+    }
+    // 将旧任务的主通知更新为新任务的其他类型，因为主通知之前必定为DATA_TRANSFER
+    std::string notificationText {""};
+    ret = CheckNotificationText(notificationText, record);
+    if (ret != ERR_OK) {
+        return ret;
+    }
+    // 新任务类型存在跳过或不需要发送场景、取消主通知
+    if (notificationText == "" && record->notificationId_ != -1 && record->notificationLabel_ != "") {
+        ret = NotificationTools::GetInstance()->CancelNotification(record->notificationLabel_,
+            record->notificationId_);
+        if (ret != ERR_OK) {
+            return ret;
+        }
+        record->notificationId_ = -1;
+        record->notificationLabel_ = "";
+    }
+    // 否则补发更新主通知
+    if (notificationText != "") {
+        ret = NotificationTools::GetInstance()->PublishNotification(record,
+            record->appName_, notificationText, bgTaskUid_);
+        if (ret != ERR_OK) {
+            return ret;
+        }
+    }
+    return ERR_OK;
+}
+
+ErrCode BgContinuousTaskMgr::UpdateNotificationForNewHaveDtMode(const std::vector<uint32_t> &oldModes,
+    std::shared_ptr<ContinuousTaskRecord> record, const std::vector<uint32_t> &newModes,
+    const std::vector<uint32_t> &newSubModes)
+{
+    ErrCode ret = ERR_OK;
+    // 1、将旧任务的通知直接更新为DATA_TRANSFER类型，需考虑与实况、新接口互斥场景
+    record->ResetModeDataTransfer();
+    std::string notificationText {""};
+    ret = CheckNotificationText(notificationText, record);
+    if (ret != ERR_OK) {
+        return ret;
+    }
+    if (notificationText != "") {
+        ret = NotificationTools::GetInstance()->PublishNotification(record,
+            record->appName_, notificationText, bgTaskUid_);
+        if (ret != ERR_OK) {
+            return ret;
+        }
+    }
+    // 2、去除新任务的数据传输类型，将剩余类型发送子通知
+    record->RemoveModeDataTransfer(newModes, newSubModes);
+    std::string subNotificationText {""};
+    ret = CheckNotificationText(subNotificationText, record);
+    if (ret != ERR_OK) {
+        return ret;
+    }
+    if (subNotificationText != "") {
+        ret = NotificationTools::GetInstance()->RefreshSubNotification(record->appName_,
+            subNotificationText, bgTaskUid_, record);
+        if (ret != ERR_OK) {
+            return ret;
+        }
+    }
+    return ERR_OK;
+}
+
+ErrCode BgContinuousTaskMgr::UpdateNotificationForNoDtMode(const std::vector<uint32_t> &oldModes,
+    const std::vector<uint32_t> &oldSubModes, std::shared_ptr<ContinuousTaskRecord> record,
+    const std::vector<uint32_t> &newModes)
+{
+    ErrCode ret = ERR_OK;
+    if (CommonUtils::CheckModesSame(oldModes, newModes)) {
+        std::map<std::string, std::pair<std::string, std::string>> newPromptInfos;
+        newPromptInfos.emplace(record->notificationLabel_, std::make_pair(record->appName_, ""));
+        if (CommonUtils::CheckExistMode(record->bgModeIds_, BackgroundMode::SPECIAL_SCENARIO_PROCESSING)) {
+            if (CommonUtils::CheckModesSame(oldSubModes, record->bgSubModeIds_)) {
+                return NotificationTools::GetInstance()->RefreshContinuousNotificationWantAndContext(bgTaskUid_,
+                    newPromptInfos, record);
+            }
+        } else {
+            return NotificationTools::GetInstance()->RefreshContinuousNotificationWantAndContext(bgTaskUid_,
+                newPromptInfos, record);
+        }
+    }
+    std::string notificationText {""};
+    ret = CheckNotificationText(notificationText, record);
+    if (ret != ERR_OK) {
+        return ret;
+    }
+    if (notificationText != "") {
+        ret = NotificationTools::GetInstance()->PublishNotification(record, record->appName_,
+            notificationText, bgTaskUid_);
+        if (ret != ERR_OK) {
+            return ret;
+        }
+    } else {
+        if (record->notificationId_ != -1 && record->notificationLabel_ != "") {
+            ret = NotificationTools::GetInstance()->CancelNotification(record->notificationLabel_,
+                record->notificationId_);
+            if (ret == ERR_OK) {
+                record->notificationId_ = -1;
+                record->notificationLabel_ = "";
+            }
+        }
+    }
+    return ERR_OK;
+}
+
+ErrCode BgContinuousTaskMgr::UpdateNotificationByTask(const std::vector<uint32_t> &oldModes,
+    const std::vector<uint32_t> &oldSubModes, std::shared_ptr<ContinuousTaskRecord> record)
+{
+    const std::vector<uint32_t> newModes = record->bgModeIds_;
+    const std::vector<uint32_t> newSubModes = record->bgSubModeIds_;
+    uint32_t bgModeId = record->bgModeId_;
+    bool oldTaskHaveDataTransfer = CommonUtils::CheckExistMode(oldModes, BackgroundMode::DATA_TRANSFER);
+    bool newTaskHaveDataTransfer = CommonUtils::CheckExistMode(newModes, BackgroundMode::DATA_TRANSFER);
+    ErrCode ret = ERR_OK;
+    if (oldTaskHaveDataTransfer && newTaskHaveDataTransfer) {
+        ret = UpdateNotificationForAllDtMode(oldModes, record, newModes, newSubModes);
+        record->RecoverTaskMode(newModes, newSubModes, bgModeId);
+        return ret;
+    }
+    if (!oldTaskHaveDataTransfer && !newTaskHaveDataTransfer) {
+        return UpdateNotificationForNoDtMode(oldModes, oldSubModes, record, newModes);
+    }
+    if (!oldTaskHaveDataTransfer && newTaskHaveDataTransfer) {
+        ret = UpdateNotificationForNewHaveDtMode(oldModes, record, newModes, newSubModes);
+        record->RecoverTaskMode(newModes, newSubModes, bgModeId);
+        return ret;
+    }
+    if (oldTaskHaveDataTransfer && !newTaskHaveDataTransfer) {
+        return UpdateNotificationForOldHaveDtMode(oldModes, record);
+    }
+    return ERR_OK;
+}
+
+ErrCode BgContinuousTaskMgr::CheckUpdateTypeNotAllowed(int32_t uid, const std::vector<uint32_t> &oldModes,
+    const std::vector<uint32_t> &newModes)
+{
+    // 前台不拦截
+    if (appOnForeground_.count(uid) != 0) {
+        return ERR_OK;
+    }
+    // 新类型不包含DATA_TRANSFER，不拦截VOIP/AUDIO_RECORDING/LOCATION
+    if (!CommonUtils::CheckExistMode(newModes, BackgroundMode::DATA_TRANSFER)) {
+        return ERR_OK;
+    }
+    if (CommonUtils::CheckExistMode(newModes, BackgroundMode::AUDIO_RECORDING) &&
+        !CommonUtils::CheckExistMode(oldModes, BackgroundMode::AUDIO_RECORDING)) {
+        BGTASK_LOGE("not allow add AUDIO_RECORDING on background.");
+        return ERR_BGTASK_CONTINUOUS_UPDATE_TYPE_NOT_ALLOWED;
+    }
+    if (CommonUtils::CheckExistMode(newModes, BackgroundMode::LOCATION) &&
+        !CommonUtils::CheckExistMode(oldModes, BackgroundMode::LOCATION)) {
+        BGTASK_LOGE("not allow add LOCATION on background.");
+        return ERR_BGTASK_CONTINUOUS_UPDATE_TYPE_NOT_ALLOWED;
+    }
+    if (CommonUtils::CheckExistMode(newModes, BackgroundMode::VOIP) &&
+        !CommonUtils::CheckExistMode(oldModes, BackgroundMode::VOIP)) {
+        BGTASK_LOGE("not allow add VOIP on background.");
+        return ERR_BGTASK_CONTINUOUS_UPDATE_TYPE_NOT_ALLOWED;
     }
     return ERR_OK;
 }
@@ -1293,10 +1501,9 @@ ErrCode BgContinuousTaskMgr::UpdateBackgroundRunningByTaskIdInner(int32_t uid,
             return ret;
         }
     }
-    if (CommonUtils::CheckExistMode(record->bgModeIds_, BackgroundMode::DATA_TRANSFER) ||
-        CommonUtils::CheckExistMode(taskParam->bgModeIds_, BackgroundMode::DATA_TRANSFER)) {
-        BGTASK_LOGE("have mode: DATA_TRANSFER, not support update, taskId: %{public}d", continuousTaskId);
-        return ERR_BGTASK_CONTINUOUS_DATA_TRANSFER_NOT_UPDATE;
+    ret = CheckUpdateTypeNotAllowed(uid, record->bgModeIds_, taskParam->bgModeIds_);
+    if (ret != ERR_OK) {
+        return ret;
     }
     if (taskParam->progressInfo_ != nullptr) {
         BGTASK_LOGE("not support progressInfo, taskId: %{public}d", continuousTaskId);

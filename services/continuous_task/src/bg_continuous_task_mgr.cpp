@@ -1451,8 +1451,9 @@ ErrCode BgContinuousTaskMgr::CheckUpdateTypeNotAllowed(int32_t uid, const std::v
     if (appOnForeground_.count(uid) != 0) {
         return ERR_OK;
     }
-    // 新类型不包含DATA_TRANSFER，不拦截VOIP/AUDIO_RECORDING/LOCATION
-    if (!CommonUtils::CheckExistMode(newModes, BackgroundMode::DATA_TRANSFER)) {
+    // 不包含DATA_TRANSFER，支持更新
+    if (!CommonUtils::CheckExistMode(oldModes, BackgroundMode::DATA_TRANSFER) &&
+        !CommonUtils::CheckExistMode(newModes, BackgroundMode::DATA_TRANSFER)) {
         return ERR_OK;
     }
     if (CommonUtils::CheckExistMode(newModes, BackgroundMode::AUDIO_RECORDING) &&

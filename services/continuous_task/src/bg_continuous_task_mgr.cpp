@@ -4938,7 +4938,7 @@ ErrCode BgContinuousTaskMgr::RemoveAuthRecord(const sptr<ContinuousTaskParam> &t
         BGTASK_LOGW("manager is not ready");
         return ERR_BGTASK_SYS_NOT_READY;
     }
-    if (!taskParam) {
+    if (!taskParam || taskParam->bgModeIds_.empty()) {
         BGTASK_LOGE("continuous task param is null!");
         return ERR_BGTASK_CHECK_TASK_PARAM;
     }

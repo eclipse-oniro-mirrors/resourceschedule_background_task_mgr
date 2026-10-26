@@ -132,7 +132,7 @@ void EventMsgHandlerPluginAdapter::HandleAudioUsbDeviceCastEvent(const nlohmann:
     int32_t uid = -1;
     bool connectionState = false;
     if (!ResCommonUtil::ParseIntParameterFromJson("uid", uid, payload) ||
-        !ResCommonUtil::ParseIntParameterFromJson("connectionState", connectionState, payload)) {
+        !ResCommonUtil::ParseBoolParameterFromJson("connectionState", connectionState, payload)) {
         BGTASK_LOGE("HandleAudioUsbDeviceCastEvent parse payload error");
         return;
     }

@@ -169,6 +169,7 @@ public:
     ErrCode NotifyAudioStart(const int32_t uid);
     std::shared_ptr<AppExecFwk::EventHandler> GetHandler() const;
     void HandleReportAdjustEvent(int32_t uid);
+    void HandleReportAudioUsbDeviceChange(int32_t uid, bool connectionState);
 
 private:
     void HandleRemoveTaskByMode(uint32_t mode);
@@ -346,6 +347,7 @@ private:
     ErrCode UpdateNotificationForAllDtMode(const std::vector<uint32_t> &oldModes,
         std::shared_ptr<ContinuousTaskRecord> record, const std::vector<uint32_t> &newModes,
         const std::vector<uint32_t> &newSubModes);
+    void ReportAudioUsbDeviceChangeInner(int32_t uid, bool connectionState);
 
 #ifdef HAS_OS_ACCOUNT_CAR
     void ClearBgOsAccountTaskInCar();

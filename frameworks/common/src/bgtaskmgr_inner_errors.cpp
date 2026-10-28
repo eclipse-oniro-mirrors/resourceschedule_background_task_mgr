@@ -171,7 +171,7 @@ const std::unordered_map<int32_t, std::string> SA_ERRCODE_MSG_MAP = {
         "This task mode: MODE_USB_CONNECTION type do not support."},
     {ERR_BGTASK_CONTINUOUS_UPDATE_TYPE_NOT_ALLOWED,
         "Continuous Task verification failed. "
-        "The background task mode: AUDIO_RECORDING/LOCATION/VOIP type "
+        "The background task mode: MODE_AUDIO_RECORDING/MODE_LOCATION/MODE_VOIP type "
         "cannot be added when continuous task is updated in the background."},
 };
 

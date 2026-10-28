@@ -1043,6 +1043,12 @@ napi_value StartContinuousTask(napi_env env, napi_callback_info info, bool isThr
         Common::HandleParamErr(env, ERR_PARAM_NUMBER_ERR, isThrow);
         return WrapVoidToJS(env);
     }
+    if (GetAbilityContext(env, argv[0], asyncCallbackInfo->abilityContext) == nullptr) {
+        BGTASK_LOGE("Get ability context failed");
+        asyncCallbackInfo->errCode = ERR_BGTASK_CONTINUOUS_REQUEST_NULL_OR_TYPE;
+        Common::HandleErrCode(env, ERR_BGTASK_CONTINUOUS_REQUEST_NULL_OR_TYPE, isThrow);
+        return WrapVoidToJS(env);
+    }
     if (!StartBackgroundRunningCheckRequest(env, argv, argc, isThrow, asyncCallbackInfo)) {
         BGTASK_LOGE("startContinuousTask check request failed");
         return WrapVoidToJS(env);

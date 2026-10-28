@@ -78,7 +78,7 @@ const std::unordered_map<int32_t, std::string> SA_ERRCODE_MSG_MAP = {
     {ERR_BGTASK_INVALID_PROCESS_NAME, "Transient task verification failed. caller process name invalid."},
     {ERR_BGTASK_CONTINUOUS_REQUEST_NULL_OR_TYPE,
         "Continuous Task verification failed. "
-        "The continuousRequestInfo cannot be null and its type must be continuousRequestInfo object."},
+        "The context and continuousRequestInfo cannot be null, and the type of continuousRequestInfo must be object."},
     {ERR_BGTASK_CONTINUOUS_MODE_OR_SUBMODE_IS_EMPTY,
         "Continuous Task verification failed. The backgroundTaskModes or backgroundTaskSubmodes cannot be empty."},
     {ERR_BGTASK_CONTINUOUS_MODE_OR_SUBMODE_LENGTH_MISMATCH,
@@ -172,7 +172,7 @@ const std::unordered_map<int32_t, std::string> SA_ERRCODE_MSG_MAP = {
     {ERR_BGTASK_CONTINUOUS_UPDATE_TYPE_NOT_ALLOWED,
         "Continuous Task verification failed. "
         "The background task mode: AUDIO_RECORDING/LOCATION/VOIP type "
-        "cannot be added or removed when continuous task is updated in the background."},
+        "cannot be added when continuous task is updated in the background."},
 };
 
 const std::unordered_map<int32_t, std::string> PARAM_ERRCODE_MSG_MAP = {

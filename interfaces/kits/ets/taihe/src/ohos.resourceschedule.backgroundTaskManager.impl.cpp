@@ -1523,6 +1523,13 @@ int32_t StartContinuousTask(
     auto env = taihe::get_env();
     std::unique_ptr<ContinuousTaskCallbackInfo> asyncCallbackInfo = std::make_unique<ContinuousTaskCallbackInfo>();
     int32_t continuousTaskId = -1;
+    if (GetAbilityContext(env, reinterpret_cast<ani_object>(context), asyncCallbackInfo->abilityContext) != ANI_OK) {
+        BGTASK_LOGE("get ability failed");
+        asyncCallbackInfo->errCode = ERR_BGTASK_CONTINUOUS_REQUEST_NULL_OR_TYPE;
+        set_business_error(
+            Common::FindErrCode(asyncCallbackInfo->errCode), Common::FindErrMsg(asyncCallbackInfo->errCode));
+        return continuousTaskId;
+    }
     ContinuousTaskParam taskParam;
     if (!PrepareStartTaskParam(env, asyncCallbackInfo.get(), context, request, taskParam)) {
         return continuousTaskId;
@@ -1603,8 +1610,8 @@ void UpdateDataTransferProgress(
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext {nullptr};
     if (GetAbilityContext(env, reinterpret_cast<ani_object>(context), abilityContext) != ANI_OK) {
         BGTASK_LOGE("get ability context failed");
-        set_business_error(Common::FindErrCode(ERR_CONTEXT_NULL_OR_TYPE_ERR),
-            Common::FindErrMsg(ERR_CONTEXT_NULL_OR_TYPE_ERR));
+        set_business_error(Common::FindErrCode(ERR_BGTASK_CONTINUOUS_PROGRESS_INFO_INVALID),
+            Common::FindErrMsg(ERR_BGTASK_CONTINUOUS_PROGRESS_INFO_INVALID));
         return;
     }
     if (progressInfoData.continuousTaskId < 0) {

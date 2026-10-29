@@ -194,5 +194,28 @@ bool BgtaskDataMgr::CheckLiveViewInfoByUid(int32_t uid)
     auto record = allLiveViewInfo_.find(uid);
     return record != allLiveViewInfo_.end();
 }
+
+void BgtaskDataMgr::UpdateAudioUsbDevice(int32_t uid, bool connectionState)
+{
+    std::lock_guard<std::mutex> lock(dataMutex_);
+    BGTASK_LOGI("update audio usb device, uid:%{public}d, connectionState:%{public}d", uid, connectionState);
+    audioUsbDeviceInfo_[uid] = connectionState;
+}
+
+bool BgtaskDataMgr::CheckAudioUsbDeviceByUid(int32_t uid)
+{
+    std::lock_guard<std::mutex> lock(dataMutex_);
+    auto record == audioUsbDeviceInfo_.find(uid);
+    if (record != audioUsbDeviceInfo_.end()) {
+        return record->second;
+    }
+    return false;
+}
+
+void BgtaskDataMgr::ClearAudioUsbDeviceInfo()
+{
+    std::lock_guard<std::mutex> lock(dataMutex_);
+    audioUsbDeviceInfo_.clear();
+}
 }  // namespace BackgroundTaskMgr
 }  // namespace OHOS

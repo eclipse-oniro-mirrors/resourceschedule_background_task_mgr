@@ -59,6 +59,10 @@ public:
     void AddLiveViewInfo(int32_t uid, const std::string &eventName);
     void RemoveLiveViewInfo(int32_t uid, const std::string &eventName);
     bool CheckLiveViewInfoByUid(int32_t uid);
+    void UpdateAudioUsbDevice(int32_t uid, bool connectionState);
+    bool CheckAudioUsbDeviceByUid(int32_t uid);
+    void ClearAudioUsbDeviceInfo();
+
 
 private:
     void RemoveMultiDeviceInfoByUid(int32_t uid);
@@ -69,6 +73,7 @@ private:
     std::list<std::shared_ptr<AudioInfo>> audioPlayerInfos_ {};
     std::list<std::shared_ptr<MultiDeviceInfo>> multiDeviceInfo_ {};
     std::unordered_map<int32_t, std::unordered_set<std::string>> allLiveViewInfo_ {};
+    std::unordered_map<int32_t, bool> audioUsbDeviceInfo_ {};
 };
 }  // namespace BackgroundTaskMgr
 }  // namespace OHOS

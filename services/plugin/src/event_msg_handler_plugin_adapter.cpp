@@ -64,9 +64,7 @@ void EventMsgHandlerPluginAdapter::InitCbMap(CallBackMap &cbMap)
         {ResType::BgtaskInnerEvent::MULTI_DEVICE_CAST_EVENT,
             [this](const int32_t stateType, const nlohmann::json &payload) {
                 this->HandleMultiDeviceCastEvent(payload);
-            }}
-    };
-    cbMap[ResType::RES_TYPE_BGTASK_INNER_EVENT] = {
+            }},
         {ResType::BgtaskInnerEvent::AUDIO_USB_DEVICE_CAST_EVENT,
             [this](const int32_t stateType, const nlohmann::json &payload) {
                 this->HandleAudioUsbDeviceCastEvent(payload);
@@ -136,7 +134,8 @@ void EventMsgHandlerPluginAdapter::HandleAudioUsbDeviceCastEvent(const nlohmann:
         BGTASK_LOGE("HandleAudioUsbDeviceCastEvent parse payload error");
         return;
     }
-    BgContinuousTaskMgr::GetInstance()->HandleReportAudioUsbDeviceChange(uid, connectionState);
+    BgtaskDataMgr::GetInstance()->UpdateAudioUsbDevice(uid, connectionState);
+    BgContinuousTaskMgr::GetInstance()->HandleReportAdjustEvent(uid);
 }
 
 void EventMsgHandlerPluginAdapter::Init()

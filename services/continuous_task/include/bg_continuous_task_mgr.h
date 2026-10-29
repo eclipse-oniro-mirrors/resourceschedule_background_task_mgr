@@ -169,7 +169,6 @@ public:
     ErrCode NotifyAudioStart(const int32_t uid);
     std::shared_ptr<AppExecFwk::EventHandler> GetHandler() const;
     void HandleReportAdjustEvent(int32_t uid);
-    void HandleReportAudioUsbDeviceChange(int32_t uid, bool connectionState);
 
 private:
     void HandleRemoveTaskByMode(uint32_t mode);
@@ -289,6 +288,7 @@ private:
         std::string &taskInfoMapKey);
     ErrCode CheckAbilityTaskNum(const std::shared_ptr<ContinuousTaskRecord> record);
     bool CheckPermissionForInner(const sptr<ContinuousTaskParamForInner> &taskParam, int32_t callingUid);
+    ErrCode AllowApplyContinuousTaskByRequestObject(const std::shared_ptr<ContinuousTaskRecord> record);
     ErrCode AllowApplyContinuousTask(const std::shared_ptr<ContinuousTaskRecord> record);
     ErrCode SendLiveViewAndOtherNotification(std::shared_ptr<ContinuousTaskRecord> record);
     std::shared_ptr<ContinuousTaskRecord> CreateSubRecordForLiveView(

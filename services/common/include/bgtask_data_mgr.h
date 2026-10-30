@@ -63,7 +63,6 @@ public:
     bool CheckAudioUsbDeviceByUid(int32_t uid);
     void ClearAudioUsbDeviceInfo();
 
-
 private:
     void RemoveMultiDeviceInfoByUid(int32_t uid);
     void RemoveMultiDeviceInfoBySaid(int32_t said);

@@ -5259,48 +5259,6 @@ void BgContinuousTaskMgr::HandleReportAdjustEvent(int32_t uid)
     handler_->PostTask(task);
 }
 
-void BgContinuousTaskMgr::ReportAudioUsbDeviceChangeInner(int32_t uid, bool connectionState)
-{
-    if (!CheckReportTaskAdjustEvent(uid)) {
-        return;
-    }
-    bool liveViewState = false;
-    bool mediaControllerState = false;
-    GetLiveViewAndMediaControllerByUid(uid, liveViewState, mediaControllerState);
-    nlohmann::json payload = nlohmann::json::object();
-    payload["uid"] = uid;
-    payload["liveViewState"] = liveViewState;
-    payload["mediaControllerState"] = connectionState;
-    std::map<pid_t, std::set<uint32_t>> pidModeMap;
-    for (const auto &task : continuousTaskInfosMap_) {
-        if (task.second == nullptr || task.second->GetUid() != uid) {
-            continue;
-        }
-        pid_t pid = task.second->pid_;
-        const auto bgModeIds = task.second->bgModeIds_;
-        auto &modeSet = pidModeMap[pid];
-        for (uint32_t mode : bgModeIds) {
-            modeSet.insert(mode);
-        }
-    }
-    ReportTaskAdjustEvent(pidModeMap, payload);
-}
-
-void BgContinuousTaskMgr::HandleReportAudioUsbDeviceChange(int32_t uid, bool connectionState)
-{
-    if (!isSysReady_.load()) {
-        BGTASK_LOGW("manager is not ready");
-        return;
-    }
-    auto task = [weak = weak_from_this(), uid, connectionState] {
-        auto self = weak.lock();
-        if (self) {
-            self->ReportAudioUsbDeviceChangeInner(uid, connectionState);
-        }
-    };
-    handler_->PostTask(task);
-}
-
 void BgContinuousTaskMgr::HisysEventRequestAuth(const std::shared_ptr<BannerNotificationRecord> authRecord)
 {
     if (authRecord == nullptr) {

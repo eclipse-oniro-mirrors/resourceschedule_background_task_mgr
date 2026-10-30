@@ -347,7 +347,6 @@ private:
     ErrCode UpdateNotificationForAllDtMode(const std::vector<uint32_t> &oldModes,
         std::shared_ptr<ContinuousTaskRecord> record, const std::vector<uint32_t> &newModes,
         const std::vector<uint32_t> &newSubModes);
-    void ReportAudioUsbDeviceChangeInner(int32_t uid, bool connectionState);
 
 #ifdef HAS_OS_ACCOUNT_CAR
     void ClearBgOsAccountTaskInCar();

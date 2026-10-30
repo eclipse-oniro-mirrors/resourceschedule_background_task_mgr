@@ -223,6 +223,8 @@ napi_value ContinuousTaskDetailedCancelReasonInit(napi_env env, napi_value expor
         ContinuousTaskCancelReason::SYSTEM_CANCEL_NOT_USE_NEARLINK), "SYSTEM_CANCEL_NOT_USE_NEARLINK");
     SetNamedPropertyByInteger(env, obj, static_cast<uint32_t>(
         ContinuousTaskCancelReason::SYSTEM_CANCEL_NOT_USE_USB), "SYSTEM_CANCEL_NOT_USE_USB");
+    SetNamedPropertyByInteger(env, obj, static_cast<uint32_t>(
+        ContinuousTaskCancelReason::SYSTEM_CANCEL_USB_ALREADY_OCCUPIED), "SYSTEM_CANCEL_USB_ALREADY_OCCUPIED");
     napi_property_descriptor exportFuncs[] = {
         DECLARE_NAPI_PROPERTY("ContinuousTaskDetailedCancelReason", obj),
     };
@@ -274,9 +276,9 @@ napi_value ContinuousTaskSuspendReasonInit(napi_env env, napi_value exports)
         ContinuousTaskSuspendReason::SYSTEM_SUSPEND_USER_UNAUTHORIZED), "SYSTEM_SUSPEND_USER_UNAUTHORIZED");
     SetNamedPropertyByInteger(env, obj, static_cast<uint32_t>(
         ContinuousTaskSuspendReason::SYSTEM_SUSPEND_USB_NOT_USED), "SYSTEM_SUSPEND_USB_NOT_USED");
-    napi_property_descriptor exportFuncs[] = {
-        DECLARE_NAPI_PROPERTY("ContinuousTaskSuspendReason", obj),
-    };
+    SetNamedPropertyByInteger(env, obj, static_cast<uint32_t>(
+        ContinuousTaskSuspendReason::SYSTEM_SUSPEND_USB_ALREADY_OCCUPIED), "SYSTEM_SUSPEND_USB_ALREADY_OCCUPIED");
+    napi_property_descriptor exportFuncs[] = { DECLARE_NAPI_PROPERTY("ContinuousTaskSuspendReason", obj) };
     napi_define_properties(env, exports, sizeof(exportFuncs) / sizeof(*exportFuncs), exportFuncs);
     return exports;
 }

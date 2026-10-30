@@ -1026,6 +1026,120 @@ napi_value StartContinuousTaskPromise(napi_env env, AsyncCallbackInfo *asyncCall
     return promise;
 }
 
+bool StartContinuousTaskCheckSpecialModeParam(napi_env env, AsyncCallbackInfo *asyncCallbackInfo)
+{
+    std::vector<uint32_t> backgroundTaskModes = asyncCallbackInfo->request->GetBackgroundTaskModes();
+    int32_t specialModeSize = std::count(backgroundTaskModes.begin(), backgroundTaskModes.end(),
+        BackgroundTaskMode::MODE_SPECIAL_SCENARIO_PROCESSING);
+    // 数据传输与特殊场景，不支持通知合并
+    if (asyncCallbackInfo->request->IsCombinedTaskNotification()) {
+        if (specialModeSize > 0) {
+            Common::HandleIntErrCode(env,
+                ERR_BGTASK_CONTINUOUS_SPECIAL_SCENARIO_PROCESSING_NOT_MERGE_NOTIFICATION, true);
+            asyncCallbackInfo->errCode =
+                ERR_BGTASK_CONTINUOUS_SPECIAL_SCENARIO_PROCESSING_NOT_MERGE_NOTIFICATION;
+            BGTASK_LOGE("background task mode: SPECIAL_SCENARIO_PROCESSING not support merge.");
+            return false;
+        }
+        int32_t dataTransferSize = std::count(backgroundTaskModes.begin(), backgroundTaskModes.end(),
+            BackgroundTaskMode::MODE_DATA_TRANSFER);
+        if (dataTransferSize > 0) {
+            Common::HandleIntErrCode(env, ERR_BGTASK_CONTINUOUS_DATA_TRANSFER_NOT_MERGE_NOTIFICATION, true);
+            asyncCallbackInfo->errCode = ERR_BGTASK_CONTINUOUS_DATA_TRANSFER_NOT_MERGE_NOTIFICATION;
+            BGTASK_LOGE("background task mode: DATA_TRANSFER not support merge.");
+            return false;
+        }
+    }
+    // 特殊场景处理长时任务类型单次最多允许申请一个
+    if (specialModeSize > MAX_TASK_NUMS) {
+        Common::HandleIntErrCode(env, ERR_BGTASK_SPECIAL_SCENARIO_PROCESSING_ONLY_ALLOW_ONE_APPLICATION, true);
+        asyncCallbackInfo->errCode = ERR_BGTASK_SPECIAL_SCENARIO_PROCESSING_ONLY_ALLOW_ONE_APPLICATION;
+        return false;
+    }
+    // 特殊场景处理长时任务类型与其他长时任务类型互斥
+    if (specialModeSize == MAX_TASK_NUMS && backgroundTaskModes.size() > MAX_TASK_NUMS) {
+        Common::HandleIntErrCode(env, ERR_BGTASK_SPECIAL_SCENARIO_PROCESSING_CONFLICTS_WITH_OTHER_TASK, true);
+        asyncCallbackInfo->errCode = ERR_BGTASK_SPECIAL_SCENARIO_PROCESSING_CONFLICTS_WITH_OTHER_TASK;
+        return false;
+    }
+    return true;
+}
+
+bool StartContinuousTaskCheckModes(napi_env env, bool isThrow, AsyncCallbackInfo *asyncCallbackInfo)
+{
+    std::vector<uint32_t> backgroundTaskModes = asyncCallbackInfo->request->GetBackgroundTaskModes();
+    std::vector<uint32_t> backgroundTaskSubmodes = asyncCallbackInfo->request->GetBackgroundTaskSubmodes();
+    if (backgroundTaskModes.size() == 0 || backgroundTaskSubmodes.size() == 0) {
+        Common::HandleIntErrCode(env, ERR_BGTASK_CONTINUOUS_MODE_OR_SUBMODE_IS_EMPTY, true);
+        asyncCallbackInfo->errCode = ERR_BGTASK_CONTINUOUS_MODE_OR_SUBMODE_IS_EMPTY;
+        return false;
+    }
+    if (backgroundTaskModes.size() != backgroundTaskSubmodes.size()) {
+        Common::HandleIntErrCode(env, ERR_BGTASK_CONTINUOUS_MODE_OR_SUBMODE_LENGTH_MISMATCH, true);
+        asyncCallbackInfo->errCode = ERR_BGTASK_CONTINUOUS_MODE_OR_SUBMODE_LENGTH_MISMATCH;
+        return false;
+    }
+    if (!StartContinuousTaskCheckSpecialModeParam(env, asyncCallbackInfo)) {
+        return false;
+    }
+    for (uint32_t index = 0; index < backgroundTaskSubmodes.size(); index++) {
+        uint32_t subMode = backgroundTaskSubmodes[index];
+        if (subMode >= BackgroundTaskSubmode::END ||
+            subMode < BackgroundTaskSubmode::SUBMODE_CAR_KEY_NORMAL_NOTIFICATION) {
+            Common::HandleIntErrCode(env, ERR_BGTASK_CONTINUOUS_MODE_OR_SUBMODE_CROSS_BORDER, true);
+            asyncCallbackInfo->errCode = ERR_BGTASK_CONTINUOUS_MODE_OR_SUBMODE_CROSS_BORDER;
+            return false;
+        }
+        if (subMode == BackgroundTaskSubmode::SUBMODE_NORMAL_NOTIFICATION) {
+            if (!BackgroundTaskMode::IsModeTypeMatching(backgroundTaskModes[index])) {
+                Common::HandleIntErrCode(env, ERR_BGTASK_CONTINUOUS_MODE_OR_SUBMODE_TYPE_MISMATCH, true);
+                asyncCallbackInfo->errCode = ERR_BGTASK_CONTINUOUS_MODE_OR_SUBMODE_TYPE_MISMATCH;
+                return false;
+            }
+        } else {
+            if (BackgroundTaskMode::GetSubModeTypeMatching(subMode) != backgroundTaskModes[index]) {
+                Common::HandleIntErrCode(env, ERR_BGTASK_CONTINUOUS_MODE_OR_SUBMODE_TYPE_MISMATCH, true);
+                asyncCallbackInfo->errCode = ERR_BGTASK_CONTINUOUS_MODE_OR_SUBMODE_TYPE_MISMATCH;
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+bool StartContinuousTaskCheckRequest(napi_env env, napi_value *argv, uint32_t argc, bool isThrow,
+    AsyncCallbackInfo *asyncCallbackInfo)
+{
+    if (argc != MAX_UPDATE_BG_RUNNING_PARAMS) {
+        Common::HandleParamErr(env, ERR_PARAM_NUMBER_ERR, isThrow);
+        asyncCallbackInfo->errCode = ERR_PARAM_NUMBER_ERR;
+        return false;
+    }
+    if (GetAbilityContext(env, argv[0], asyncCallbackInfo->abilityContext) == nullptr) {
+        BGTASK_LOGE("Get ability context failed");
+        Common::HandleIntErrCode(env, ERR_BGTASK_CONTINUOUS_REQUEST_NULL_OR_TYPE, isThrow);
+        asyncCallbackInfo->errCode = ERR_BGTASK_CONTINUOUS_REQUEST_NULL_OR_TYPE;
+        return false;
+    }
+    const std::shared_ptr<AppExecFwk::AbilityInfo> info = asyncCallbackInfo->abilityContext->GetAbilityInfo();
+    if (info == nullptr) {
+        BGTASK_LOGE("abilityInfo is null");
+        Common::HandleParamErr(env, ERR_ABILITY_INFO_EMPTY, isThrow);
+        asyncCallbackInfo->errCode = ERR_ABILITY_INFO_EMPTY;
+        return false;
+    }
+    if (!Common::GetContinuousTaskRequest(env, argv[1], asyncCallbackInfo->request)) {
+        Common::HandleIntErrCode(env, ERR_BGTASK_CONTINUOUS_REQUEST_NULL_OR_TYPE, true);
+        asyncCallbackInfo->errCode = ERR_BGTASK_CONTINUOUS_REQUEST_NULL_OR_TYPE;
+        return false;
+    }
+    if (!StartContinuousTaskCheckModes(env, isThrow, asyncCallbackInfo)) {
+        BGTASK_LOGE("check continuous modes fail");
+        return false;
+    }
+    return true;
+}
+
 napi_value StartContinuousTask(napi_env env, napi_callback_info info, bool isThrow)
 {
     HitraceScoped traceScoped(HITRACE_TAG_OHOS,
@@ -1043,7 +1157,7 @@ napi_value StartContinuousTask(napi_env env, napi_callback_info info, bool isThr
         Common::HandleParamErr(env, ERR_PARAM_NUMBER_ERR, isThrow);
         return WrapVoidToJS(env);
     }
-    if (!StartBackgroundRunningCheckRequest(env, argv, argc, isThrow, asyncCallbackInfo)) {
+    if (!StartContinuousTaskCheckRequest(env, argv, argc, isThrow, asyncCallbackInfo)) {
         BGTASK_LOGE("startContinuousTask check request failed");
         return WrapVoidToJS(env);
     }

@@ -1026,7 +1026,7 @@ napi_value StartContinuousTaskPromise(napi_env env, AsyncCallbackInfo *asyncCall
     return promise;
 }
 
-bool StartContinuousTaskCheckSpecialModeParma(napi_env env, AsyncCallbackInfo *asyncCallbackInfo)
+bool StartContinuousTaskCheckSpecialModeParam(napi_env env, AsyncCallbackInfo *asyncCallbackInfo)
 {
     std::vector<uint32_t> backgroundTaskModes = asyncCallbackInfo->request->GetBackgroundTaskModes();
     int32_t specialModeSize = std::count(backgroundTaskModes.begin(), backgroundTaskModes.end(),
@@ -1079,7 +1079,7 @@ bool StartContinuousTaskCheckModes(napi_env env, bool isThrow, AsyncCallbackInfo
         asyncCallbackInfo->errCode = ERR_BGTASK_CONTINUOUS_MODE_OR_SUBMODE_LENGTH_MISMATCH;
         return false;
     }
-    if (!CheckSpecialModeParam(env, asyncCallbackInfo)) {
+    if (!StartContinuousTaskCheckSpecialModeParam(env, asyncCallbackInfo)) {
         return false;
     }
     for (uint32_t index = 0; index < backgroundTaskSubmodes.size(); index++) {

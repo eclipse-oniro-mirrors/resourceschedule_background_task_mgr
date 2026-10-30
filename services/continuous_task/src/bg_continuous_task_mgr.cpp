@@ -1658,7 +1658,8 @@ ErrCode BgContinuousTaskMgr::CheckAbilityTaskNum(const std::shared_ptr<Continuou
     return ERR_OK;
 }
 
-ErrCode BgContinuousTaskMgr::AllowApplyContinuousTaskByRequestObject(const std::shared_ptr<ContinuousTaskRecord> record)
+ErrCode BgContinuousTaskMgr::AllowApplyContinuousTaskByRequestObject(
+    const std::shared_ptr<ContinuousTaskRecord> record)
 {
     // 申请数量是否超过10个
     ErrCode ret = CheckAbilityTaskNum(record);

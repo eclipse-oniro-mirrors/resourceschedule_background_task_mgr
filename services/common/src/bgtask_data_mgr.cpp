@@ -205,7 +205,7 @@ void BgtaskDataMgr::UpdateAudioUsbDevice(int32_t uid, bool connectionState)
 bool BgtaskDataMgr::CheckAudioUsbDeviceByUid(int32_t uid)
 {
     std::lock_guard<std::mutex> lock(dataMutex_);
-    auto record == audioUsbDeviceInfo_.find(uid);
+    auto record = audioUsbDeviceInfo_.find(uid);
     if (record != audioUsbDeviceInfo_.end()) {
         return record->second;
     }

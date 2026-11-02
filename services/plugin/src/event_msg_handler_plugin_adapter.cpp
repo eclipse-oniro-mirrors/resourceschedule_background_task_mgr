@@ -64,6 +64,10 @@ void EventMsgHandlerPluginAdapter::InitCbMap(CallBackMap &cbMap)
         {ResType::BgtaskInnerEvent::MULTI_DEVICE_CAST_EVENT,
             [this](const int32_t stateType, const nlohmann::json &payload) {
                 this->HandleMultiDeviceCastEvent(payload);
+            }},
+        {ResType::BgtaskInnerEvent::AUDIO_USB_DEVICE_CAST_EVENT,
+            [this](const int32_t stateType, const nlohmann::json &payload) {
+                this->HandleAudioUsbDeviceCastEvent(payload);
             }}
     };
 }
@@ -119,6 +123,19 @@ void EventMsgHandlerPluginAdapter::HandleMultiDeviceCastEvent(const nlohmann::js
     } else if (state == MULTI_DEVICE_CAST_STATE_STOP) {
         BgtaskDataMgr::GetInstance()->HandleMultiDeviceCastStop(uid, said);
     }
+}
+
+void EventMsgHandlerPluginAdapter::HandleAudioUsbDeviceCastEvent(const nlohmann::json &payload)
+{
+    int32_t uid = -1;
+    bool connectionState = false;
+    if (!ResCommonUtil::ParseIntParameterFromJson("uid", uid, payload) ||
+        !ResCommonUtil::ParseBoolParameterFromJson("connectionState", connectionState, payload)) {
+        BGTASK_LOGE("HandleAudioUsbDeviceCastEvent parse payload error");
+        return;
+    }
+    BgtaskDataMgr::GetInstance()->UpdateAudioUsbDevice(uid, connectionState);
+    BgContinuousTaskMgr::GetInstance()->HandleReportAdjustEvent(uid);
 }
 
 void EventMsgHandlerPluginAdapter::Init()

@@ -1658,22 +1658,9 @@ ErrCode BgContinuousTaskMgr::CheckAbilityTaskNum(const std::shared_ptr<Continuou
     return ERR_OK;
 }
 
-ErrCode BgContinuousTaskMgr::AllowApplyContinuousTask(const std::shared_ptr<ContinuousTaskRecord> record)
+ErrCode BgContinuousTaskMgr::AllowApplyContinuousTaskByRequestObject(
+    const std::shared_ptr<ContinuousTaskRecord> record)
 {
-#ifdef GAME_PRE_LAUNCH_ENABLE
-    if (DelayedSingleton<GamePreLaunchMgr>::GetInstance()->IsGamePreLaunchApp(record->GetUid())) {
-        BGTASK_LOGE("uid: %{public}d is in pre-launch state, cannot apply continuous task", record->GetUid());
-        return ERR_BGTASK_CONTINUOUS_NOT_APPLY_PRELOAD_STATE;
-    }
-#endif
-    if (DelayedSingleton<BgtaskConfig>::GetInstance()->IsMaliciousAppConfig(record->bundleName_,
-        record->bgModeIds_)) {
-        BGTASK_LOGE("bundleName: %{public}s is malicious block", record->bundleName_.c_str());
-        return ERR_BGTASK_MALICIOUS_CONTINUOUSTASK;
-    }
-    if (!record->isByRequestObject_) {
-        return ERR_OK;
-    }
     // 申请数量是否超过10个
     ErrCode ret = CheckAbilityTaskNum(record);
     if (ret != ERR_OK) {
@@ -1689,10 +1676,14 @@ ErrCode BgContinuousTaskMgr::AllowApplyContinuousTask(const std::shared_ptr<Cont
     if (record->IsFromWebview() || appOnForeground_.count(uid) > 0) {
         return ERR_OK;
     }
-    // 应用退后台前已申请过的类型，外加播音类型
+    // 应用退后台前已申请过的类型，外加播音类型，audio类型USB设备
     std::vector<uint32_t> checkBgModeIds {};
     if (applyTaskOnForeground_.find(uid) != applyTaskOnForeground_.end()) {
         checkBgModeIds = applyTaskOnForeground_.at(uid);
+    }
+    if (BgtaskDataMgr::GetInstance()->CheckAudioUsbDeviceByUid(uid) &&
+        !CommonUtils::CheckExistMode(checkBgModeIds, BackgroundMode::USB_CONNECTION)) {
+        checkBgModeIds.push_back(BackgroundMode::USB_CONNECTION);
     }
     checkBgModeIds.push_back(BackgroundMode::AUDIO_PLAYBACK);
     if (CommonUtils::CheckApplyMode(record->bgModeIds_, checkBgModeIds)) {
@@ -1712,6 +1703,25 @@ ErrCode BgContinuousTaskMgr::AllowApplyContinuousTask(const std::shared_ptr<Cont
     BGTASK_LOGE("uid: %{public}d, bundleName: %{public}s check allow apply continuous task fail.",
         uid, bundleName.c_str());
     return ERR_BGTASK_CONTINUOUS_NOT_APPLY_ONBACKGROUND;
+}
+
+ErrCode BgContinuousTaskMgr::AllowApplyContinuousTask(const std::shared_ptr<ContinuousTaskRecord> record)
+{
+#ifdef GAME_PRE_LAUNCH_ENABLE
+    if (DelayedSingleton<GamePreLaunchMgr>::GetInstance()->IsGamePreLaunchApp(record->GetUid())) {
+        BGTASK_LOGE("uid: %{public}d is in pre-launch state, cannot apply continuous task", record->GetUid());
+        return ERR_BGTASK_CONTINUOUS_NOT_APPLY_PRELOAD_STATE;
+    }
+#endif
+    if (DelayedSingleton<BgtaskConfig>::GetInstance()->IsMaliciousAppConfig(record->bundleName_,
+        record->bgModeIds_)) {
+        BGTASK_LOGE("bundleName: %{public}s is malicious block", record->bundleName_.c_str());
+        return ERR_BGTASK_MALICIOUS_CONTINUOUSTASK;
+    }
+    if (!record->isByRequestObject_) {
+        return ERR_OK;
+    }
+    return AllowApplyContinuousTaskByRequestObject(record);
 }
 
 ErrCode BgContinuousTaskMgr::StartBackgroundRunningInner(std::shared_ptr<ContinuousTaskRecord> &continuousTaskRecord)
@@ -3870,6 +3880,9 @@ void BgContinuousTaskMgr::OnRemoveSystemAbility(int32_t systemAbilityId, const s
         case SA_ID_GAME_SERVICE:
             PostRemoveTaskByMode(BackgroundMode::NEARBY_DATA_TRANSFER);
             break;
+        case USB_SYSTEM_ABILITY_ID:
+            BgtaskDataMgr::GetInstance()->ClearAudioUsbDeviceInfo();
+            break;
         default:
             break;
     }
@@ -5127,6 +5140,8 @@ void BgContinuousTaskMgr::GetLiveViewAndMediaControllerByUid(int32_t uid, bool &
     if (iter != avSessionNotification_.end()) {
         mediaControllerState = iter->second;
     }
+    bool audioUsbDeviceConnectionState = BgtaskDataMgr::GetInstance()->CheckAudioUsbDeviceByUid(uid);
+    mediaControllerState = mediaControllerState || audioUsbDeviceConnectionState;
 }
 
 void BgContinuousTaskMgr::ReportTaskAdjustEventByUid(int32_t uid)

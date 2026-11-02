@@ -77,6 +77,7 @@ void BackgroundTaskMgrService::OnStart()
     AddSystemAbilityListener(SA_ID_GAME_SERVICE);
     AddSystemAbilityListener(RES_SCHED_SYS_ABILITY_ID);
     AddSystemAbilityListener(AVSESSION_SERVICE_ID);
+    AddSystemAbilityListener(USB_SYSTEM_ABILITY_ID);
 }
 
 void BackgroundTaskMgrService::SetReady(uint32_t flag)

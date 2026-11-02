@@ -288,6 +288,7 @@ private:
         std::string &taskInfoMapKey);
     ErrCode CheckAbilityTaskNum(const std::shared_ptr<ContinuousTaskRecord> record);
     bool CheckPermissionForInner(const sptr<ContinuousTaskParamForInner> &taskParam, int32_t callingUid);
+    ErrCode AllowApplyContinuousTaskByRequestObject(const std::shared_ptr<ContinuousTaskRecord> record);
     ErrCode AllowApplyContinuousTask(const std::shared_ptr<ContinuousTaskRecord> record);
     ErrCode SendLiveViewAndOtherNotification(std::shared_ptr<ContinuousTaskRecord> record);
     std::shared_ptr<ContinuousTaskRecord> CreateSubRecordForLiveView(

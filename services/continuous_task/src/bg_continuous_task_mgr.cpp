@@ -3508,9 +3508,11 @@ ErrCode BgContinuousTaskMgr::SendLiveViewAndOtherNotification(std::shared_ptr<Co
         if (mode == BackgroundMode::DATA_TRANSFER) {
             continue;
         }
-        uint32_t subMode = record->bgSubModeIds_[index];
         subRecord->bgModeIds_.push_back(mode);
-        subRecord->bgSubModeIds_.push_back(subMode);
+        if (index < record->bgSubModeIds_.size()) {
+            uint32_t subMode = record->bgSubModeIds_[index];
+            subRecord->bgSubModeIds_.push_back(subMode);
+        }
     }
     subRecord->bgModeId_ = subRecord->bgModeIds_[0];
     ret = SendNotification(subRecord, record, appName, true);
@@ -4405,7 +4407,7 @@ ErrCode BgContinuousTaskMgr::RemoveAuthRecord(const sptr<ContinuousTaskParam> &t
         BGTASK_LOGW("manager is not ready");
         return ERR_BGTASK_SYS_NOT_READY;
     }
-    if (!taskParam) {
+    if (!taskParam || taskParam->bgModeIds_.empty()) {
         BGTASK_LOGE("continuous task param is null!");
         return ERR_BGTASK_CHECK_TASK_PARAM;
     }

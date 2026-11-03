@@ -18,6 +18,8 @@
 
 #include <string>
 
+#include "continuous_task_detection_reason.h"
+
 namespace OHOS {
 namespace BackgroundTaskMgr {
 class BackgroundMode {

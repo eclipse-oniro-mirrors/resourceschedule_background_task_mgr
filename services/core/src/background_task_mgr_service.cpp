@@ -194,7 +194,7 @@ ErrCode BackgroundTaskMgrService::RequestSuspendDelay(const std::string& reason,
 {
     if (CheckAtomicService()) {
         pid_t callingPid = IPCSkeleton::GetCallingPid();
-        pid_t callingUid = IPCSkeleton::GetCallingUid();
+        pid_t callingUid = IPCSkeleton::GetCallingAppUid();
         BGTASK_LOGE("uid %{public}d pid %{public}d Check atomisc service fail, apply transienttask not allowed",
             callingUid, callingPid);
         return ERR_BGTASK_PERMISSION_DENIED;
@@ -238,7 +238,7 @@ ErrCode BackgroundTaskMgrService::StartBackgroundRunning(const ContinuousTaskPar
             if (mode != BackgroundMode::AUDIO_PLAYBACK && mode != BackgroundMode::MULTI_DEVICE_CONNECTION &&
                 mode != BackgroundMode::LOCATION) {
                 pid_t callingPid = IPCSkeleton::GetCallingPid();
-                pid_t callingUid = IPCSkeleton::GetCallingUid();
+                pid_t callingUid = IPCSkeleton::GetCallingAppUid();
                 BGTASK_LOGE("uid %{public}d pid %{public}d Check atomisc service fail,"
                     " apply continuoustask not allowed", callingUid, callingPid);
                 return ERR_BGTASK_PERMISSION_DENIED;
@@ -262,7 +262,7 @@ ErrCode BackgroundTaskMgrService::StartContinuousTask(const ContinuousTaskParam 
             if (mode != BackgroundMode::AUDIO_PLAYBACK && mode != BackgroundMode::MULTI_DEVICE_CONNECTION &&
                 mode != BackgroundMode::LOCATION) {
                 pid_t callingPid = IPCSkeleton::GetCallingPid();
-                pid_t callingUid = IPCSkeleton::GetCallingUid();
+                pid_t callingUid = IPCSkeleton::GetCallingAppUid();
                 BGTASK_LOGE("uid %{public}d pid %{public}d Check atomisc service fail,"
                     " apply continuoustask not allowed", callingUid, callingPid);
                 return ERR_BGTASK_PERMISSION_DENIED;
@@ -285,7 +285,7 @@ ErrCode BackgroundTaskMgrService::UpdateBackgroundRunning(const ContinuousTaskPa
             if (mode != BackgroundMode::AUDIO_PLAYBACK && mode != BackgroundMode::MULTI_DEVICE_CONNECTION &&
                 mode != BackgroundMode::LOCATION) {
                 pid_t callingPid = IPCSkeleton::GetCallingPid();
-                pid_t callingUid = IPCSkeleton::GetCallingUid();
+                pid_t callingUid = IPCSkeleton::GetCallingAppUid();
                 BGTASK_LOGE("uid %{public}d pid %{public}d Check atomisc service fail,"
                     " update continuoustask not allowed", callingUid, callingPid);
                 return ERR_BGTASK_PERMISSION_DENIED;
@@ -312,7 +312,7 @@ ErrCode BackgroundTaskMgrService::RequestGetContinuousTasksByUidForInner(int32_t
     std::vector<ContinuousTaskInfo> &list)
 {
     BgTaskHiTraceChain traceChain(__func__);
-    pid_t callingUid = IPCSkeleton::GetCallingUid();
+    pid_t callingUid = IPCSkeleton::GetCallingAppUid();
     if (!CheckCallingToken() && uid != callingUid) {
         BGTASK_LOGW("RequestGetContinuousTasksByUidForInner not allowed");
         return ERR_BGTASK_PERMISSION_DENIED;
@@ -359,7 +359,7 @@ ErrCode BackgroundTaskMgrService::UpdateDataTransferProgress(const DataTransferP
 {
     if (CheckAtomicService()) {
         pid_t callingPid = IPCSkeleton::GetCallingPid();
-        pid_t callingUid = IPCSkeleton::GetCallingUid();
+        pid_t callingUid = IPCSkeleton::GetCallingAppUid();
         BGTASK_LOGE("uid %{public}d pid %{public}d Check atomisc service fail, UpdateDataTransferProgress not allowed",
             callingUid, callingPid);
         return ERR_BGTASK_PERMISSION_DENIED;
@@ -404,7 +404,7 @@ ErrCode BackgroundTaskMgrService::GetContinuousTaskApps(std::vector<ContinuousTa
 {
     BgTaskHiTraceChain traceChain(__func__);
     pid_t callingPid = IPCSkeleton::GetCallingPid();
-    pid_t callingUid = IPCSkeleton::GetCallingUid();
+    pid_t callingUid = IPCSkeleton::GetCallingAppUid();
     std::vector<std::shared_ptr<ContinuousTaskCallbackInfo>> resultList;
     if (!CheckCallingToken()) {
         BGTASK_LOGW("uid %{public}d pid %{public}d GetContinuousTaskApps not allowed", callingUid, callingPid);
@@ -458,7 +458,7 @@ ErrCode BackgroundTaskMgrService::SubscribeBackgroundTask(
         }
     }
     pid_t callingPid = IPCSkeleton::GetCallingPid();
-    pid_t callingUid = IPCSkeleton::GetCallingUid();
+    pid_t callingUid = IPCSkeleton::GetCallingAppUid();
     BGTASK_LOGI("uid %{public}d pid %{public}d isHap %{public}d flag %{public}u subscribe",
         callingUid, callingPid, isHap, flag);
     auto subscriberInfo = std::make_shared<SubscriberInfo>(subscriber, callingUid, callingPid, isHap, flag);
@@ -648,7 +648,7 @@ ErrCode BackgroundTaskMgrService::IsModeSupported(const ContinuousTaskParam &tas
 {
     if (CheckAtomicService()) {
         pid_t callingPid = IPCSkeleton::GetCallingPid();
-        pid_t callingUid = IPCSkeleton::GetCallingUid();
+        pid_t callingUid = IPCSkeleton::GetCallingAppUid();
         BGTASK_LOGE("uid %{public}d pid %{public}d Check atomisc service fail, IsModeSupported not allowed",
             callingUid, callingPid);
         return ERR_BGTASK_PERMISSION_DENIED;
@@ -681,7 +681,7 @@ ErrCode BackgroundTaskMgrService::RequestAuthFromUser(const ContinuousTaskParam 
 {
     if (CheckAtomicService()) {
         pid_t callingPid = IPCSkeleton::GetCallingPid();
-        pid_t callingUid = IPCSkeleton::GetCallingUid();
+        pid_t callingUid = IPCSkeleton::GetCallingAppUid();
         BGTASK_LOGE("uid %{public}d pid %{public}d Check atomisc service fail, IsModeSupported not allowed",
             callingUid, callingPid);
         return ERR_BGTASK_PERMISSION_DENIED;
@@ -705,7 +705,7 @@ ErrCode BackgroundTaskMgrService::CheckSpecialScenarioAuth(int32_t appIndex, uin
 {
     if (CheckAtomicService()) {
         pid_t callingPid = IPCSkeleton::GetCallingPid();
-        pid_t callingUid = IPCSkeleton::GetCallingUid();
+        pid_t callingUid = IPCSkeleton::GetCallingAppUid();
         BGTASK_LOGE("uid %{public}d pid %{public}d Check atomisc service fail, IsModeSupported not allowed",
             callingUid, callingPid);
         return ERR_BGTASK_PERMISSION_DENIED;
@@ -743,7 +743,7 @@ ErrCode BackgroundTaskMgrService::EnableContinuousTaskRequest(int32_t uid, bool 
 
 ErrCode BackgroundTaskMgrService::SetBackgroundTaskState(const BackgroundTaskStateInfo &taskParam)
 {
-    pid_t callingUid = IPCSkeleton::GetCallingUid();
+    pid_t callingUid = IPCSkeleton::GetCallingAppUid();
     if (CheckAtomicService()) {
         pid_t callingPid = IPCSkeleton::GetCallingPid();
         BGTASK_LOGE("uid %{public}d pid %{public}d Check atomisc service fail, SetBackgroundTaskState not allowed",
@@ -772,7 +772,7 @@ ErrCode BackgroundTaskMgrService::SetBackgroundTaskState(const BackgroundTaskSta
 ErrCode BackgroundTaskMgrService::GetBackgroundTaskState(const BackgroundTaskStateInfo &taskParam,
     uint32_t &authResult)
 {
-    pid_t callingUid = IPCSkeleton::GetCallingUid();
+    pid_t callingUid = IPCSkeleton::GetCallingAppUid();
     if (CheckAtomicService()) {
         pid_t callingPid = IPCSkeleton::GetCallingPid();
         BGTASK_LOGE("uid %{public}d pid %{public}d Check atomisc service fail, GetBackgroundTaskState not allowed",
@@ -801,7 +801,7 @@ ErrCode BackgroundTaskMgrService::GetBackgroundTaskState(const BackgroundTaskSta
 ErrCode BackgroundTaskMgrService::GetAllContinuousTasksBySystem(
     std::vector<std::shared_ptr<ContinuousTaskInfo>> &list)
 {
-    pid_t callingUid = IPCSkeleton::GetCallingUid();
+    pid_t callingUid = IPCSkeleton::GetCallingAppUid();
     if (CheckAtomicService()) {
         pid_t callingPid = IPCSkeleton::GetCallingPid();
         BGTASK_LOGE("uid %{public}d pid %{public}d Check atomisc service fail, GetAllContinuousTasksBySystem"

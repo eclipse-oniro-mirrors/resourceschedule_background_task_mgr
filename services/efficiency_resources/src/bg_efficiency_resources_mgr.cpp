@@ -391,7 +391,7 @@ ErrCode BgEfficiencyResourcesMgr::ApplyEfficiencyResources(
         return ERR_BGTASK_RESOURCES_EXCEEDS_MAX;
     }
 
-    auto uid = IPCSkeleton::GetCallingUid();
+    auto uid = IPCSkeleton::GetCallingAppUid();
     auto pid = IPCSkeleton::GetCallingPid();
     std::string bundleName = "";
     if (!IsCallingInfoLegal(uid, pid, bundleName)) {
@@ -668,7 +668,7 @@ ErrCode BgEfficiencyResourcesMgr::ResetAllEfficiencyResources()
         return ERR_BGTASK_SYS_NOT_READY;
     }
 
-    auto uid = IPCSkeleton::GetCallingUid();
+    auto uid = IPCSkeleton::GetCallingAppUid();
     auto pid = IPCSkeleton::GetCallingPid();
     std::string bundleName = "";
     if (!IsCallingInfoLegal(uid, pid, bundleName)) {
@@ -1116,7 +1116,7 @@ ErrCode BgEfficiencyResourcesMgr::GetAllEfficiencyResources(
         return ERR_BGTASK_RESOURCES_SYS_NOT_READY;
     }
 
-    auto uid = IPCSkeleton::GetCallingUid();
+    auto uid = IPCSkeleton::GetCallingAppUid();
     auto pid = IPCSkeleton::GetCallingPid();
     std::string bundleName = "";
     if (!IsCallingInfoLegal(uid, pid, bundleName)) {

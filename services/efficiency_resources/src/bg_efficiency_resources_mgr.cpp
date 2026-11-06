@@ -484,7 +484,7 @@ void BgEfficiencyResourcesMgr::SendResourceApplyTask(int32_t uid, int32_t pid, c
 void BgEfficiencyResourcesMgr::ApplyEfficiencyResourcesInner(std::shared_ptr<ResourceCallbackInfo>
     callbackInfo, const sptr<EfficiencyResourceInfo> &resourceInfo)
 {
-    BGTASK_LOGI("u_%{public}d,p_{public}d,rN_%{public}u,isPer_%{public}d,tO_%{public}u,isPro_%{public}d,cL_{public}d",
+    BGTASK_LOGI("u_%{public}d,p_%{public}d,rN_%{public}u,isPer_%{public}d,tO_%{public}u,isPro_%{public}d,cL_%{public}d",
         callbackInfo->GetUid(), callbackInfo->GetPid(), resourceInfo->GetResourceNumber(), resourceInfo->IsPersist(),
         resourceInfo->GetTimeOut(), resourceInfo->IsProcess(), resourceInfo->GetCpuLevel());
     int32_t mapKey = resourceInfo->IsProcess() ? callbackInfo->GetPid() : callbackInfo->GetUid();
@@ -998,7 +998,7 @@ bool BgEfficiencyResourcesMgr::RemoveTargetResourceRecord(std::unordered_map<int
 
     // update the left quota of cpu efficiency resource when reset
     UpdateQuotaIfCpuReset(type, callbackInfo->GetUid(), callbackInfo->GetResourceNumber());
-    BGTASK_LOGI("key_%{public}d,u_%{public}d,plg_%{public}s,rN%_{public}d,rS_%{public}u",
+    BGTASK_LOGI("key_%{public}d,u_%{public}d,plg_%{public}s,rN_%{public}d,rS_%{public}u",
         mapKey, callbackInfo->GetUid(), callbackInfo->GetBundleName().c_str(), eraseBit, cancelType);
     ReportHisysEvent(EfficiencyResourceEventTriggerType::EFFICIENCY_RESOURCE_RESET, nullptr, callbackInfo, type);
     subscriberMgr_->OnResourceChanged(callbackInfo, type);

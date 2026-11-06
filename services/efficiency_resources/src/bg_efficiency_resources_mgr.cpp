@@ -484,8 +484,7 @@ void BgEfficiencyResourcesMgr::SendResourceApplyTask(int32_t uid, int32_t pid, c
 void BgEfficiencyResourcesMgr::ApplyEfficiencyResourcesInner(std::shared_ptr<ResourceCallbackInfo>
     callbackInfo, const sptr<EfficiencyResourceInfo> &resourceInfo)
 {
-    BGTASK_LOGI("apply efficiency resources, uid:%{public}d, pid %{public}d, resource number: %{public}u,"\
-        "isPersist: %{public}d, timeOut: %{public}u, isProcess: %{public}d, cpuLevel: %{public}d",
+    BGTASK_LOGI("u_%{public}d,p_%{public}d,rN_%{public}u,isPer_%{public}d,tO_%{public}u,isPro_%{public}d,cL_%{public}d",
         callbackInfo->GetUid(), callbackInfo->GetPid(), resourceInfo->GetResourceNumber(), resourceInfo->IsPersist(),
         resourceInfo->GetTimeOut(), resourceInfo->IsProcess(), resourceInfo->GetCpuLevel());
     int32_t mapKey = resourceInfo->IsProcess() ? callbackInfo->GetPid() : callbackInfo->GetUid();
@@ -612,7 +611,7 @@ void BgEfficiencyResourcesMgr::ResetTimeOutResource(int32_t mapKey, bool isProce
         EfficiencyResourcesEventType::APP_RESOURCE_RESET;
     auto iter = infoMap.find(mapKey);
     if (iter == infoMap.end()) {
-        BGTASK_LOGI("%{public}d not exist", mapKey);
+        BGTASK_LOGD("%{public}d not exist", mapKey);
         return;
     }
     auto &resourceRecord = iter->second;
@@ -999,9 +998,8 @@ bool BgEfficiencyResourcesMgr::RemoveTargetResourceRecord(std::unordered_map<int
 
     // update the left quota of cpu efficiency resource when reset
     UpdateQuotaIfCpuReset(type, callbackInfo->GetUid(), callbackInfo->GetResourceNumber());
-    BGTASK_LOGI("remove record from info map, mapkey %{public}d, uid: %{public}d, bundle name: %{public}s "
-        "erasebit %{public}d, reason: %{public}u", mapKey, callbackInfo->GetUid(),
-        callbackInfo->GetBundleName().c_str(), eraseBit, cancelType);
+    BGTASK_LOGI("key_%{public}d,u_%{public}d,pkg_%{public}s,rN_%{public}d,rS_%{public}u",
+        mapKey, callbackInfo->GetUid(), callbackInfo->GetBundleName().c_str(), eraseBit, cancelType);
     ReportHisysEvent(EfficiencyResourceEventTriggerType::EFFICIENCY_RESOURCE_RESET, nullptr, callbackInfo, type);
     subscriberMgr_->OnResourceChanged(callbackInfo, type);
     if (iter->second->resourceNumber_ == 0) {

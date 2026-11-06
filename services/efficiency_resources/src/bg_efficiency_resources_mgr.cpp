@@ -998,7 +998,7 @@ bool BgEfficiencyResourcesMgr::RemoveTargetResourceRecord(std::unordered_map<int
 
     // update the left quota of cpu efficiency resource when reset
     UpdateQuotaIfCpuReset(type, callbackInfo->GetUid(), callbackInfo->GetResourceNumber());
-    BGTASK_LOGI("key_%{public}d,u_%{public}d,plg_%{public}s,rN_%{public}d,rS_%{public}u",
+    BGTASK_LOGI("key_%{public}d,u_%{public}d,pkg_%{public}s,rN_%{public}d,rS_%{public}u",
         mapKey, callbackInfo->GetUid(), callbackInfo->GetBundleName().c_str(), eraseBit, cancelType);
     ReportHisysEvent(EfficiencyResourceEventTriggerType::EFFICIENCY_RESOURCE_RESET, nullptr, callbackInfo, type);
     subscriberMgr_->OnResourceChanged(callbackInfo, type);

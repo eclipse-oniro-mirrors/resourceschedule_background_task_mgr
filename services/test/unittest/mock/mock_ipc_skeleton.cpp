@@ -61,6 +61,11 @@ pid_t IPCSkeleton::GetCallingUid()
     return uid;
 }
 
+int32_t IPCSkeleton::GetCallingAppUid()
+{
+    return GetCallingUid();
+}
+
 std::string IPCSkeleton::ResetCallingIdentity()
 {
     return "";

@@ -901,7 +901,7 @@ ErrCode BgContinuousTaskMgr::RequestBackgroundRunningForInner(const sptr<Continu
         BGTASK_LOGE("continuous task param is null!");
         return ERR_BGTASK_CHECK_TASK_PARAM;
     }
-    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    int32_t callingUid = IPCSkeleton::GetCallingAppUid();
     // webview sdk申请长时任务，上下文在应用。callkit sa 申请长时时，上下文在sa;
     if (!CheckPermissionForInner(taskParam, callingUid)) {
         BGTASK_LOGE("continuous task param uid %{public}d is invalid, real %{public}d", taskParam->uid_, callingUid);
@@ -1027,7 +1027,7 @@ ErrCode BgContinuousTaskMgr::StartBackgroundRunning(const sptr<ContinuousTaskPar
         taskParam->progressInfo_ = nullptr;
     }
     ErrCode result = ERR_OK;
-    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    int32_t callingUid = IPCSkeleton::GetCallingAppUid();
     pid_t callingPid = IPCSkeleton::GetCallingPid();
     std::string bundleName = BundleManagerHelper::GetInstance()->GetClientBundleName(callingUid);
     int32_t userId = -1;
@@ -1077,7 +1077,7 @@ ErrCode BgContinuousTaskMgr::StartContinuousTask(const sptr<ContinuousTaskParam>
         taskParam->progressInfo_ = nullptr;
     }
     ErrCode result = ERR_OK;
-    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    int32_t callingUid = IPCSkeleton::GetCallingAppUid();
     pid_t callingPid = IPCSkeleton::GetCallingPid();
     std::string bundleName = BundleManagerHelper::GetInstance()->GetClientBundleName(callingUid);
     int32_t userId = -1;
@@ -1167,7 +1167,7 @@ ErrCode BgContinuousTaskMgr::CheckSubMode(const std::shared_ptr<AAFwk::Want> wan
 ErrCode BgContinuousTaskMgr::UpdateBackgroundRunning(const sptr<ContinuousTaskParam> &taskParam)
 {
     BgTaskHiTraceChain traceChain(__func__);
-    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    int32_t callingUid = IPCSkeleton::GetCallingAppUid();
     ErrCode result = CheckIsSysReadyAndPermission(callingUid);
     if (result != ERR_OK) {
         return result;
@@ -1579,7 +1579,7 @@ ErrCode BgContinuousTaskMgr::UpdateBackgroundRunningInner(const std::string &tas
 ErrCode BgContinuousTaskMgr::UpdateDataTransferProgress(const sptr<DataTransferProgress> &progressInfo)
 {
     BgTaskHiTraceChain traceChain(__func__);
-    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    int32_t callingUid = IPCSkeleton::GetCallingAppUid();
     ErrCode result = CheckIsSysReadyAndPermission(callingUid);
     if (result != ERR_OK) {
         return result;
@@ -2181,7 +2181,7 @@ ErrCode BgContinuousTaskMgr::StopBackgroundRunning(const std::string &abilityNam
         BGTASK_LOGE("abilityName is empty!");
         return ERR_BGTASK_INVALID_PARAM;
     }
-    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    int32_t callingUid = IPCSkeleton::GetCallingAppUid();
     ErrCode result = ERR_OK;
     HitraceScoped traceScoped(HITRACE_TAG_OHOS,
         "BackgroundTaskManager::ContinuousTask::Service::StopBackgroundRunningInner");
@@ -2274,7 +2274,7 @@ ErrCode BgContinuousTaskMgr::StopBackgroundRunningByTask(const std::shared_ptr<C
 
 ErrCode BgContinuousTaskMgr::GetAllContinuousTasks(std::vector<std::shared_ptr<ContinuousTaskInfo>> &list)
 {
-    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    int32_t callingUid = IPCSkeleton::GetCallingAppUid();
     ErrCode result = CheckIsSysReadyAndPermission(callingUid);
     if (result != ERR_OK) {
         return result;
@@ -2290,7 +2290,7 @@ ErrCode BgContinuousTaskMgr::GetAllContinuousTasks(std::vector<std::shared_ptr<C
 ErrCode BgContinuousTaskMgr::GetAllContinuousTasks(
     std::vector<std::shared_ptr<ContinuousTaskInfo>> &list, bool includeSuspended)
 {
-    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    int32_t callingUid = IPCSkeleton::GetCallingAppUid();
     ErrCode result = CheckIsSysReadyAndPermission(callingUid);
     if (result != ERR_OK) {
         return result;
@@ -3782,7 +3782,7 @@ ErrCode BgContinuousTaskMgr::CheckModeSupportedPermission(const sptr<ContinuousT
         return ERR_BGTASK_PERMISSION_DENIED;
     }
     if (specialModeSize == 1 && taskParam->bgModeIds_.size() == 1) {
-        int32_t callingUid = IPCSkeleton::GetCallingUid();
+        int32_t callingUid = IPCSkeleton::GetCallingAppUid();
         std::string bundleName = BundleManagerHelper::GetInstance()->GetClientBundleName(callingUid);
         if (!DelayedSingleton<BgtaskConfig>::GetInstance()->IsSpecialExemptedQuatoApp(bundleName)) {
             uint64_t callingTokenId = IPCSkeleton::GetCallingTokenID();
@@ -3815,7 +3815,7 @@ ErrCode BgContinuousTaskMgr::IsModeSupported(const sptr<ContinuousTaskParam> &ta
     }
     uint64_t fullTokenId = IPCSkeleton::GetCallingFullTokenID();
     uint64_t callingTokenId = IPCSkeleton::GetCallingTokenID();
-    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    int32_t callingUid = IPCSkeleton::GetCallingAppUid();
     std::string bundleName = BundleManagerHelper::GetInstance()->GetClientBundleName(callingUid);
     handler_->PostSyncTask([this, callingTokenId, taskParam, bundleName, fullTokenId, &result]() {
         result = this->CheckTaskkeepingPermission(taskParam, callingTokenId, bundleName, fullTokenId);
@@ -4040,7 +4040,7 @@ ErrCode BgContinuousTaskMgr::RequestAuthFromUser(const sptr<ContinuousTaskParam>
     if (ret != ERR_OK) {
         return ret;
     }
-    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    int32_t callingUid = IPCSkeleton::GetCallingAppUid();
     int32_t userId = -1;
 #ifdef HAS_OS_ACCOUNT_PART
     AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(callingUid, userId);
@@ -4200,7 +4200,7 @@ ErrCode BgContinuousTaskMgr::CheckSpecialScenarioAuth(int32_t appIndex, uint32_t
         BGTASK_LOGE("background mode permission is not passed");
         return ERR_BGTASK_PERMISSION_DENIED;
     }
-    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    int32_t callingUid = IPCSkeleton::GetCallingAppUid();
     int32_t userId = -1;
 #ifdef HAS_OS_ACCOUNT_PART
     AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(callingUid, userId);
@@ -4956,7 +4956,7 @@ ErrCode BgContinuousTaskMgr::RemoveAuthRecord(const sptr<ContinuousTaskParam> &t
         BGTASK_LOGE("continuous task param is null!");
         return ERR_BGTASK_CHECK_TASK_PARAM;
     }
-    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    int32_t callingUid = IPCSkeleton::GetCallingAppUid();
     int32_t userId = -1;
 #ifdef HAS_OS_ACCOUNT_PART
     AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(callingUid, userId);

@@ -256,14 +256,14 @@
             "name":"ohos_bgsubmode_prompt_usb",
             "value":"Bir USB bağlantısı görevi devam ediyor. Bu bildirimi kapatmak, görevi sonlandırır.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"notification_text_usb",
             "value":"USB bağlantısı",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]

@@ -256,14 +256,14 @@
             "name":"ohos_bgsubmode_prompt_usb",
             "value":"อยู่ระหว่างดำเนินงานการเชื่อมต่อ USB การปิดการแจ้งเตือนนี้จะเป็นการสิ้นสุดงาน",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"notification_text_usb",
             "value":"การเชื่อมต่อ USB",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]

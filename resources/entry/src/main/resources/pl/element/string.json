@@ -256,14 +256,14 @@
             "name":"ohos_bgsubmode_prompt_usb",
             "value":"Zadanie połączenia USB jest w toku. Zamknięcie tego powiadomienia spowoduje jego zakończenie.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"notification_text_usb",
-            "value":"Połączenie USB",
+            "value":"połączenie USB",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]

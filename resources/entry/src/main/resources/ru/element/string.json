@@ -256,14 +256,14 @@
             "name":"ohos_bgsubmode_prompt_usb",
             "value":"Выполняется задача USB-соединения. Если вы закроете это уведомление, задача будет завершена.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"notification_text_usb",
             "value":"USB-соединение",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]

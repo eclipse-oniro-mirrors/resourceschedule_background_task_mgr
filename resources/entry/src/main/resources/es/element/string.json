@@ -256,14 +256,14 @@
             "name":"ohos_bgsubmode_prompt_usb",
             "value":"Hay una tarea de conexión USB en curso. Si cierras esta notificación, la tarea finalizará.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"notification_text_usb",
             "value":"conexión USB",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]

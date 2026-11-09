@@ -256,14 +256,14 @@
             "name":"ohos_bgsubmode_prompt_usb",
             "value":"正在執行 USB 連線任務，刪除通知後，任務將停止。",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"notification_text_usb",
             "value":"USB 連線",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]

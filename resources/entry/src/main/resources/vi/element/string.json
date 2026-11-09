@@ -256,7 +256,7 @@
             "name":"ohos_bgsubmode_prompt_usb",
             "value":"Đang thực hiện một tác vụ kết nối USB. Đóng thông báo này sẽ kết thúc tác vụ đó.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {

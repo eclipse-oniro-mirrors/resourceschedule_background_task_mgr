@@ -256,14 +256,14 @@
             "name":"ohos_bgsubmode_prompt_usb",
             "value":"Eine USB-Verbindungsaufgabe wird durchgeführt. Durch Entfernen dieser Benachrichtigung wird diese Aufgabe beendet.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"notification_text_usb",
             "value":"USB-Verbindung",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]

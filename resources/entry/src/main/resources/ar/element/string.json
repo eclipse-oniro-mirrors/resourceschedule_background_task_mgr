@@ -256,7 +256,7 @@
             "name":"ohos_bgsubmode_prompt_usb",
             "value":"هناك عملية اتصال عبر USB جارية، وإغلاق هذا الإشعار سيؤدي إلى إنهائها.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {

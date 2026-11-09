@@ -256,14 +256,14 @@
             "name":"ohos_bgsubmode_prompt_usb",
             "value":"نۆۋەتتە USB ۋەزىپىسى يۈرۈۋاتىدۇ، بۇ ئۇقتۇرۇشنى ئۆچۈرسىڭىز توختايدۇ.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"notification_text_usb",
             "value":"‏USB",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]

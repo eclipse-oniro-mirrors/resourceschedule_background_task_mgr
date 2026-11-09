@@ -256,14 +256,14 @@
             "name":"ohos_bgsubmode_prompt_usb",
             "value":"Está a decorrer uma tarefa de ligação USB. Fechar esta notificação irá terminá-la.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"notification_text_usb",
-            "value":"Ligação USB",
+            "value":"ligação USB",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]

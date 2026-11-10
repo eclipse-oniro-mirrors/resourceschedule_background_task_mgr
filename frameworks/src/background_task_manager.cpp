@@ -435,21 +435,22 @@ ErrCode BackgroundTaskManager::GetContinuousTaskApps(std::vector<std::shared_ptr
     return result;
 }
 
-ErrCode BackgroundTaskManager::StopContinuousTask(int32_t uid, int32_t pid, uint32_t taskType, const std::string &key)
+ErrCode BackgroundTaskManager::StopContinuousTask(int32_t uid, int32_t subReason, uint32_t taskType,
+    const std::string &key)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     GET_BACK_GROUND_TASK_MANAGER_PROXY_RETURN
 
-    return proxy_->StopContinuousTask(uid, pid, taskType, key);
+    return proxy_->StopContinuousTask(uid, subReason, taskType, key);
 }
 
 ErrCode BackgroundTaskManager::SuspendContinuousTask(
-    int32_t uid, int32_t pid, int32_t reason, const std::string &key, bool isStandby)
+    int32_t uid, int32_t subReason, int32_t mode, const std::string &key, bool isStandby)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     GET_BACK_GROUND_TASK_MANAGER_PROXY_RETURN
 
-    return proxy_->SuspendContinuousTask(uid, pid, reason, key, isStandby);
+    return proxy_->SuspendContinuousTask(uid, subReason, mode, key, isStandby);
 }
 
 ErrCode BackgroundTaskManager::ActiveContinuousTask(int32_t uid, int32_t pid, const std::string &key, bool isStandby)

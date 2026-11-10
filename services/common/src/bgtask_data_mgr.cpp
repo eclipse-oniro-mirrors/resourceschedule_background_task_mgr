@@ -198,8 +198,16 @@ bool BgtaskDataMgr::CheckLiveViewInfoByUid(int32_t uid)
 void BgtaskDataMgr::UpdateAudioUsbDevice(int32_t uid, bool connectionState)
 {
     std::lock_guard<std::mutex> lock(dataMutex_);
-    BGTASK_LOGI("update audio usb device, uid:%{public}d, connectionState:%{public}d", uid, connectionState);
-    audioUsbDeviceInfo_[uid] = connectionState;
+    int32_t currentConnectionNum = audioUsbDeviceInfo_[uid];
+    BGTASK_LOGI("update audio usb device, uid:%{public}d, connectionState:%{public}d, connectionNum:%{public}d",
+        uid, connectionState, currentConnectionNum);
+    if (connectionState) {
+        audioUsbDeviceInfo_[uid] = currentConnectionNum + 1;
+    } else if (currentConnectionNum == 0) {
+        return;
+    } else {
+        audioUsbDeviceInfo_[uid] = currentConnectionNum - 1;
+    }
 }
 
 bool BgtaskDataMgr::CheckAudioUsbDeviceByUid(int32_t uid)
@@ -207,7 +215,7 @@ bool BgtaskDataMgr::CheckAudioUsbDeviceByUid(int32_t uid)
     std::lock_guard<std::mutex> lock(dataMutex_);
     auto record = audioUsbDeviceInfo_.find(uid);
     if (record != audioUsbDeviceInfo_.end()) {
-        return record->second;
+        return record->second > 0;
     }
     return false;
 }

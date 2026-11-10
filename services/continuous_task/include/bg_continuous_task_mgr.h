@@ -145,9 +145,9 @@ public:
     void InitRequiredResourceInfo();
     void Clear();
     int32_t GetBgTaskUid();
-    void StopContinuousTask(int32_t uid, int32_t pid, uint32_t taskType, const std::string &key);
+    void StopContinuousTask(int32_t uid, int32_t subReason, uint32_t taskType, const std::string &key);
     void SuspendContinuousTask(
-        int32_t uid, int32_t pid, int32_t reason, const std::string &key, bool isStandby = false);
+        int32_t uid, int32_t subReason, int32_t mode, const std::string &key, bool isStandby = false);
     void SuspendContinuousAudioTask(int32_t uid);
     void ActiveContinuousTask(int32_t uid, int32_t pid, const std::string &key, bool isStandby = false);
     void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId);
@@ -228,8 +228,8 @@ private:
         const std::string &mergeBlueNotificationText, const std::shared_ptr<ContinuousTaskRecord> record);
     bool FormatBannerNotificationContext(const std::string &appName, std::string &bannerContent);
     bool SetCachedBundleInfo(const std::shared_ptr<ContinuousTaskRecord> &record);
-    void HandleStopContinuousTask(int32_t uid, int32_t pid, uint32_t taskType, const std::string &key);
-    void HandleSuspendContinuousTask(int32_t uid, int32_t pid, int32_t reason, const std::string &key);
+    void HandleStopContinuousTask(int32_t uid, int32_t subReason, uint32_t taskType, const std::string &key);
+    void HandleSuspendContinuousTask(int32_t uid, int32_t subReason, int32_t mode, const std::string &key);
     void HandleSuspendContinuousAudioTask(int32_t uid);
     void HandleActiveContinuousTask(int32_t uid, int32_t pid, const std::string &key);
     void HandleActiveNotification(std::shared_ptr<ContinuousTaskRecord> record);

@@ -15,7 +15,9 @@
 
 #ifndef FOUNDATION_RESOURCESCHEDULE_BACKGROUND_TASK_MGR_INTERFACES_INNERKITS_INCLUDE_CONTINUOUS_TASK_SUSPEND_REASON_H
 #define FOUNDATION_RESOURCESCHEDULE_BACKGROUND_TASK_MGR_INTERFACES_INNERKITS_INCLUDE_CONTINUOUS_TASK_SUSPEND_REASON_H
- 
+
+#include "continuous_task_detection_reason.h"
+
 namespace OHOS {
 namespace BackgroundTaskMgr {
 class ContinuousTaskSuspendReason {
@@ -42,7 +44,8 @@ public:
         SYSTEM_SUSPEND_USB_ALREADY_OCCUPIED = 21
     };
 
-    static uint32_t GetSuspendReasonValue(const uint32_t mode, bool isStandby);
+    static uint32_t GetSuspendReasonValue(const uint32_t mode, bool isStandby,
+        int32_t subReason = ContinuousTaskDetectionReason::SUCCESS);
     static std::string GetSuspendReasonMessage(const uint32_t suspendReason);
 };
 }  // namespace BackgroundTaskMgr

@@ -172,24 +172,24 @@ public:
     /**
      * @brief Request stop continuous task.
      * @param uid app uid.
-     * @param pid app pid.
+     * @param subReason subReason.
      * @param taskType continuous task type.
      * @param key continuous task key.
      * @return Returns ERR_OK if success, else failure.
      */
-    static ErrCode StopContinuousTask(int32_t uid, int32_t pid, uint32_t taskType, const std::string &key);
+    static ErrCode StopContinuousTask(int32_t uid, int32_t subReason, uint32_t taskType, const std::string &key);
 
     /**
      * @brief Request suspend continuous task.
      * @param uid app uid.
-     * @param pid app pid.
-     * @param reason continuous task suspend reason.
+     * @param subReason subReason.
+     * @param mode mode.
      * @param key continuous task key.
      * @param key isStandby whether it is standby send, default is false.
      * @return Returns ERR_OK if success, else failure.
      */
     static ErrCode SuspendContinuousTask(
-        int32_t uid, int32_t pid, int32_t reason, const std::string &key, bool isStandby = false);
+        int32_t uid, int32_t subReason, int32_t mode, const std::string &key, bool isStandby = false);
 
     /**
      * @brief Request active continuous task.

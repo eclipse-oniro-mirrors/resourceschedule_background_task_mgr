@@ -52,6 +52,11 @@ const std::unordered_map<uint32_t, uint32_t> BACKGROUND_MODE_TO_CANCEL_REASON_MA
     {BackgroundMode::END, ContinuousTaskCancelReason::INVALID_REASON}
 };
 
+const std::unordered_map<uint32_t, uint32_t> CONTINUOUS_TASK_DETECTION_CANCEL_SUBREASON_MAP = {
+    {ContinuousTaskDetectionReason::USB_NOT_CONNECTION, ContinuousTaskCancelReason::SYSTEM_CANCEL_NOT_USE_USB},
+    {ContinuousTaskDetectionReason::USB_OCCUPIED, ContinuousTaskCancelReason::SYSTEM_CANCEL_USB_ALREADY_OCCUPIED}
+};
+
 std::string BackgroundMode::GetBackgroundModeStr(uint32_t mode)
 {
     auto iter = PARAM_BACKGROUND_MODE_STR_MAP.find(mode);
@@ -61,8 +66,14 @@ std::string BackgroundMode::GetBackgroundModeStr(uint32_t mode)
     return "default";
 }
 
-int32_t BackgroundMode::GetDetailedCancelReasonFromMode(uint32_t mode)
+int32_t BackgroundMode::GetDetailedCancelReasonFromMode(uint32_t mode, int32_t subReason)
 {
+    if (subReason > ContinuousTaskDetectionReason::SUCCESS && subReason < ContinuousTaskDetectionReason::END) {
+        auto findDetectionReason = CONTINUOUS_TASK_DETECTION_CANCEL_SUBREASON_MAP.find(subReason);
+        if (findDetectionReason != CONTINUOUS_TASK_DETECTION_CANCEL_SUBREASON_MAP.end()) {
+            return findDetectionReason->second;
+        }
+    }
     auto iter = BACKGROUND_MODE_TO_CANCEL_REASON_MAP.find(mode);
     if (iter != BACKGROUND_MODE_TO_CANCEL_REASON_MAP.end()) {
         return iter->second;

@@ -582,7 +582,7 @@ ErrCode BackgroundTaskMgrService::GetEfficiencyResourcesInfos(
     return result;
 }
 
-ErrCode BackgroundTaskMgrService::StopContinuousTask(int32_t uid, int32_t pid, uint32_t taskType,
+ErrCode BackgroundTaskMgrService::StopContinuousTask(int32_t uid, int32_t subReason, uint32_t taskType,
     const std::string &key)
 {
     BgTaskHiTraceChain traceChain(__func__);
@@ -590,18 +590,18 @@ ErrCode BackgroundTaskMgrService::StopContinuousTask(int32_t uid, int32_t pid, u
         BGTASK_LOGW("StopContinuousTask not allowed");
         return ERR_BGTASK_PERMISSION_DENIED;
     }
-    BgContinuousTaskMgr::GetInstance()->StopContinuousTask(uid, pid, taskType, key);
+    BgContinuousTaskMgr::GetInstance()->StopContinuousTask(uid, subReason, taskType, key);
     return ERR_OK;
 }
 
 ErrCode BackgroundTaskMgrService::SuspendContinuousTask(
-    int32_t uid, int32_t pid, int32_t reason, const std::string &key, bool isStandby)
+    int32_t uid, int32_t subReason, int32_t mode, const std::string &key, bool isStandby)
 {
     if (!CheckCallingToken() || !CheckCallingProcess()) {
         BGTASK_LOGW("SuspendContinuousTask not allowed");
         return ERR_BGTASK_PERMISSION_DENIED;
     }
-    BgContinuousTaskMgr::GetInstance()->SuspendContinuousTask(uid, pid, reason, key, isStandby);
+    BgContinuousTaskMgr::GetInstance()->SuspendContinuousTask(uid, subReason, mode, key, isStandby);
     return ERR_OK;
 }
 

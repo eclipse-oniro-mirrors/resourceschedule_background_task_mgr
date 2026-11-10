@@ -40,6 +40,11 @@ const std::unordered_map<uint32_t, uint32_t> STANDBY_SUSPEND_REASON = {
     {BackgroundMode::NEARLINK, ContinuousTaskSuspendReason::SYSTEM_SUSPEND_NEARLINK_DATA_NOT_EXIST}
 };
 
+const std::unordered_map<uint32_t, uint32_t> CONTINUOUS_TASK_DETECTION_SUSPEND_SUBREASON_MAP = {
+    {ContinuousTaskDetectionReason::USB_NOT_CONNECTION, ContinuousTaskSuspendReason::SYSTEM_SUSPEND_USB_NOT_USED},
+    {ContinuousTaskDetectionReason::USB_OCCUPIED, ContinuousTaskSuspendReason::SYSTEM_SUSPEND_USB_ALREADY_OCCUPIED}
+};
+
 const std::unordered_map<uint32_t, std::string> SUSPEND_REASON_TO_MESSAGE = {
     {ContinuousTaskSuspendReason::SYSTEM_SUSPEND_DATA_TRANSFER_LOW_SPEED,
         "For a period of time, the application did not use data transfer or the data transfer rate was too low."},
@@ -74,11 +79,21 @@ const std::unordered_map<uint32_t, std::string> SUSPEND_REASON_TO_MESSAGE = {
     {ContinuousTaskSuspendReason::SYSTEM_SUSPEND_USER_UNAUTHORIZED,
         "User not authorized when request MODE_SPECIAL_SCENARIO_PROCESSING."},
     {ContinuousTaskSuspendReason::SYSTEM_SUSPEND_USB_NOT_USED,
-        "Not use USB device when request MODE_USB_CONNECTION mode."}
+        "Not use USB device when request MODE_USB_CONNECTION mode."},
+    {ContinuousTaskSuspendReason::SYSTEM_SUSPEND_USB_ALREADY_OCCUPIED,
+        "The USB device is already occupied when request MODE_USB_CONNECTION mode."}
 };
 
-uint32_t ContinuousTaskSuspendReason::GetSuspendReasonValue(const uint32_t mode, bool isStandby)
+uint32_t ContinuousTaskSuspendReason::GetSuspendReasonValue(const uint32_t mode, bool isStandby,
+    int32_t subReason)
 {
+    if (subReason > ContinuousTaskDetectionReason::SUCCESS && subReason < ContinuousTaskDetectionReason::END &&
+        !isStandby) {
+        auto findDetectionReason = CONTINUOUS_TASK_DETECTION_SUSPEND_SUBREASON_MAP.find(subReason);
+        if (findDetectionReason != CONTINUOUS_TASK_DETECTION_SUSPEND_SUBREASON_MAP.end()) {
+            return findDetectionReason->second;
+        }
+    }
     auto reasonMap = isStandby ? STANDBY_SUSPEND_REASON : PARAM_SUSPEND_REASON;
     auto iter = reasonMap.find(mode);
     if (iter != reasonMap.end()) {

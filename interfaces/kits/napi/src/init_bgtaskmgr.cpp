@@ -232,6 +232,14 @@ napi_value ContinuousTaskDetailedCancelReasonInit(napi_env env, napi_value expor
     return exports;
 }
 
+void UsbContinuousTaskSuspendReasonInit(napi_env env, napi_value obj)
+{
+    SetNamedPropertyByInteger(env, obj, static_cast<uint32_t>(
+        ContinuousTaskSuspendReason::SYSTEM_SUSPEND_USB_NOT_USED), "SYSTEM_SUSPEND_USB_NOT_USED");
+    SetNamedPropertyByInteger(env, obj, static_cast<uint32_t>(
+        ContinuousTaskSuspendReason::SYSTEM_SUSPEND_USB_ALREADY_OCCUPIED), "SYSTEM_SUSPEND_USB_ALREADY_OCCUPIED");
+}
+
 napi_value ContinuousTaskSuspendReasonInit(napi_env env, napi_value exports)
 {
     napi_value obj = nullptr;
@@ -274,11 +282,10 @@ napi_value ContinuousTaskSuspendReasonInit(napi_env env, napi_value exports)
         "SYSTEM_SUSPEND_NEARLINK_DATA_NOT_EXIST");
     SetNamedPropertyByInteger(env, obj, static_cast<uint32_t>(
         ContinuousTaskSuspendReason::SYSTEM_SUSPEND_USER_UNAUTHORIZED), "SYSTEM_SUSPEND_USER_UNAUTHORIZED");
-    SetNamedPropertyByInteger(env, obj, static_cast<uint32_t>(
-        ContinuousTaskSuspendReason::SYSTEM_SUSPEND_USB_NOT_USED), "SYSTEM_SUSPEND_USB_NOT_USED");
-    SetNamedPropertyByInteger(env, obj, static_cast<uint32_t>(
-        ContinuousTaskSuspendReason::SYSTEM_SUSPEND_USB_ALREADY_OCCUPIED), "SYSTEM_SUSPEND_USB_ALREADY_OCCUPIED");
-    napi_property_descriptor exportFuncs[] = { DECLARE_NAPI_PROPERTY("ContinuousTaskSuspendReason", obj) };
+    UsbContinuousTaskSuspendReasonInit(env, obj);
+    napi_property_descriptor exportFuncs[] = {
+        DECLARE_NAPI_PROPERTY("ContinuousTaskSuspendReason", obj),
+    };
     napi_define_properties(env, exports, sizeof(exportFuncs) / sizeof(*exportFuncs), exportFuncs);
     return exports;
 }

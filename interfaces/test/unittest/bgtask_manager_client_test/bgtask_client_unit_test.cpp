@@ -89,6 +89,8 @@ constexpr uint32_t SYSTEM_CANCEL_NOT_USE_MULTI_DEVICE = 10;
 constexpr uint32_t SYSTEM_CANCEL_USE_ILLEGALLY = 11;
 constexpr uint32_t SYSTEM_CANCEL_DATA_TRANSFER_NOT_UPDATE = 12;
 constexpr uint32_t SYSTEM_CANCEL_NOT_USE_NEARLINK = 15;
+constexpr uint32_t SYSTEM_CANCEL_NOT_USE_USB = 16;
+constexpr uint32_t SYSTEM_CANCEL_USB_ALREADY_OCCUPIED = 17;
 constexpr uint32_t CAR_KEY = 1;
 constexpr uint32_t SYSTEM_SUSPEND_DATA_TRANSFER_LOW_SPEED = 4;
 constexpr uint32_t SYSTEM_SUSPEND_AUDIO_PLAYBACK_NOT_USE_AVSESSION = 5;
@@ -106,6 +108,8 @@ constexpr uint32_t SYSTEM_SUSPEND_AUDIO_PLAYBACK_MUTE = 16;
 constexpr uint32_t SYSTEM_SUSPEND_NEARLINK_NOT_USED = 17;
 constexpr uint32_t SYSTEM_SUSPEND_NEARLINK_DATA_NOT_EXIST = 18;
 constexpr uint32_t SYSTEM_SUSPEND_USER_UNAUTHORIZED = 19;
+constexpr uint32_t SYSTEM_SUSPEND_USB_NOT_USED = 20;
+constexpr uint32_t SYSTEM_SUSPEND_USB_ALREADY_OCCUPIED = 21;
 constexpr uint32_t MODE_DATA_TRANSFER = 1;
 constexpr uint32_t MODE_AUDIO_PLAYBACK = 2;
 constexpr uint32_t MODE_AUDIO_RECORDING = 3;
@@ -359,6 +363,10 @@ HWTEST_F(BgTaskClientUnitTest, ContinuousTaskCancelReason_001, TestSize.Level1)
         (int32_t)ContinuousTaskCancelReason::SYSTEM_CANCEL_DATA_TRANSFER_NOT_UPDATE);
     EXPECT_EQ(SYSTEM_CANCEL_NOT_USE_NEARLINK,
         (int32_t)ContinuousTaskCancelReason::SYSTEM_CANCEL_NOT_USE_NEARLINK);
+    EXPECT_EQ(SYSTEM_CANCEL_NOT_USE_USB,
+        (int32_t)ContinuousTaskCancelReason::SYSTEM_CANCEL_NOT_USE_USB);
+    EXPECT_EQ(SYSTEM_CANCEL_USB_ALREADY_OCCUPIED,
+        (int32_t)ContinuousTaskCancelReason::SYSTEM_CANCEL_USB_ALREADY_OCCUPIED);
 }
 
 /**
@@ -399,6 +407,10 @@ HWTEST_F(BgTaskClientUnitTest, ContinuousTaskSuspendReason_001, TestSize.Level1)
         (uint32_t)ContinuousTaskSuspendReason::SYSTEM_SUSPEND_NEARLINK_DATA_NOT_EXIST);
     EXPECT_EQ(SYSTEM_SUSPEND_USER_UNAUTHORIZED,
         (uint32_t)ContinuousTaskSuspendReason::SYSTEM_SUSPEND_USER_UNAUTHORIZED);
+    EXPECT_EQ(SYSTEM_SUSPEND_USB_NOT_USED,
+        (uint32_t)ContinuousTaskSuspendReason::SYSTEM_SUSPEND_USB_NOT_USED);
+    EXPECT_EQ(SYSTEM_SUSPEND_USB_ALREADY_OCCUPIED,
+        (uint32_t)ContinuousTaskSuspendReason::SYSTEM_SUSPEND_USB_ALREADY_OCCUPIED);
 }
 
 /**
@@ -1173,6 +1185,12 @@ HWTEST_F(BgTaskClientUnitTest, GetDetailedCancelReasonFromMode_001, TestSize.Lev
         ContinuousTaskCancelReason::INVALID_REASON);
     EXPECT_EQ(BackgroundMode::GetDetailedCancelReasonFromMode(MODE_LOCATION),
         ContinuousTaskCancelReason::SYSTEM_CANCEL_NOT_USE_LOCATION);
+    EXPECT_EQ(BackgroundMode::GetDetailedCancelReasonFromMode(MODE_USB_CONNECTION,
+        ContinuousTaskDetectionReason::USB_NOT_CONNECTION),
+        ContinuousTaskCancelReason::SYSTEM_CANCEL_NOT_USE_USB);
+    EXPECT_EQ(BackgroundMode::GetDetailedCancelReasonFromMode(MODE_USB_CONNECTION,
+        ContinuousTaskDetectionReason::USB_OCCUPIED),
+        ContinuousTaskCancelReason::SYSTEM_CANCEL_USB_ALREADY_OCCUPIED);
 }
 
 /**
@@ -1382,6 +1400,10 @@ HWTEST_F(BgTaskClientUnitTest, GetAllContinuousTasksBySystem_001, TestSize.Level
 HWTEST_F(BgTaskClientUnitTest, GetSuspendReasonMessage_001, TestSize.Level1)
 {
     EXPECT_EQ(ContinuousTaskSuspendReason::GetSuspendReasonMessage(INVALID_MODE_OR_SUBMODE), "unknown suspendReason");
+    EXPECT_EQ(ContinuousTaskSuspendReason::GetSuspendReasonMessage(SYSTEM_SUSPEND_USB_NOT_USED),
+        "Not use USB device when request MODE_USB_CONNECTION mode.");
+    EXPECT_EQ(ContinuousTaskSuspendReason::GetSuspendReasonMessage(SYSTEM_SUSPEND_USB_ALREADY_OCCUPIED),
+        "The USB device is already occupied when request MODE_USB_CONNECTION mode.");
 }
 
 /**
@@ -1416,6 +1438,12 @@ HWTEST_F(BgTaskClientUnitTest, GetSuspendReasonValue_003, TestSize.Level1)
 {
     EXPECT_EQ(ContinuousTaskSuspendReason::GetSuspendReasonValue(
         AUDIO_PLAYBACK_ID, true), SYSTEM_SUSPEND_AUDIO_PLAYBACK_MUTE);
+    EXPECT_EQ(ContinuousTaskSuspendReason::GetSuspendReasonValue(
+        MODE_USB_CONNECTION, false, ContinuousTaskDetectionReason::USB_NOT_CONNECTION),
+        SYSTEM_SUSPEND_USB_NOT_USED);
+    EXPECT_EQ(ContinuousTaskSuspendReason::GetSuspendReasonValue(
+        MODE_USB_CONNECTION, false, ContinuousTaskDetectionReason::USB_OCCUPIED),
+        SYSTEM_SUSPEND_USB_ALREADY_OCCUPIED);
 }
 
 /**

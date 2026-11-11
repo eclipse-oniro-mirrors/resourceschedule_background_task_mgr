@@ -114,9 +114,10 @@ ErrCode BackgroundTaskMgrHelper::ResetAllEfficiencyResources()
     return DelayedSingleton<BackgroundTaskManager>::GetInstance()->ResetAllEfficiencyResources();
 }
 
-ErrCode BackgroundTaskMgrHelper::StopContinuousTask(int32_t uid, int32_t pid, uint32_t taskType, const std::string &key)
+ErrCode BackgroundTaskMgrHelper::StopContinuousTask(int32_t uid, int32_t subReason, uint32_t taskType,
+    const std::string &key)
 {
-    return DelayedSingleton<BackgroundTaskManager>::GetInstance()->StopContinuousTask(uid, pid, taskType, key);
+    return DelayedSingleton<BackgroundTaskManager>::GetInstance()->StopContinuousTask(uid, subReason, taskType, key);
 }
 ErrCode BackgroundTaskMgrHelper::SetBgTaskConfig(const std::string &configData, int32_t sourceType)
 {
@@ -124,10 +125,10 @@ ErrCode BackgroundTaskMgrHelper::SetBgTaskConfig(const std::string &configData, 
 }
 
 ErrCode BackgroundTaskMgrHelper::SuspendContinuousTask(
-    int32_t uid, int32_t pid, int32_t reason, const std::string &key, bool isStandby)
+    int32_t uid, int32_t subReason, int32_t mode, const std::string &key, bool isStandby)
 {
     return DelayedSingleton<BackgroundTaskManager>::GetInstance()->SuspendContinuousTask(
-        uid, pid, reason, key, isStandby);
+        uid, subReason, mode, key, isStandby);
 }
 
 ErrCode BackgroundTaskMgrHelper::ActiveContinuousTask(

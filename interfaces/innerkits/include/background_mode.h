@@ -18,6 +18,8 @@
 
 #include <string>
 
+#include "continuous_task_detection_reason.h"
+
 namespace OHOS {
 namespace BackgroundTaskMgr {
 class BackgroundMode {
@@ -42,7 +44,8 @@ public:
     };
 
     static std::string GetBackgroundModeStr(uint32_t mode);
-    static int32_t GetDetailedCancelReasonFromMode(uint32_t mode);
+    static int32_t GetDetailedCancelReasonFromMode(uint32_t mode,
+        int32_t subReason = ContinuousTaskDetectionReason::SUCCESS);
 };
 }  // namespace BackgroundTaskMgr
 }  // namespace OHOS

@@ -93,9 +93,9 @@ public:
     ErrCode GetEfficiencyResourcesInfos(std::vector<ResourceCallbackInfo> &appList,
         std::vector<ResourceCallbackInfo> &procList) override;
     ErrCode GetAllEfficiencyResources(std::vector<EfficiencyResourceInfo> &resourceInfoList) override;
-    ErrCode StopContinuousTask(int32_t uid, int32_t pid, uint32_t taskType, const std::string &key) override;
+    ErrCode StopContinuousTask(int32_t uid, int32_t subReason, uint32_t taskType, const std::string &key) override;
     ErrCode SuspendContinuousTask(
-        int32_t uid, int32_t pid, int32_t reason, const std::string &key, bool isStandby = false) override;
+        int32_t uid, int32_t subReason, int32_t mode, const std::string &key, bool isStandby = false) override;
     ErrCode ActiveContinuousTask(int32_t uid, int32_t pid, const std::string &key, bool isStandby = false) override;
     ErrCode AVSessionNotifyUpdateNotification(int32_t uid, int32_t pid, bool isPublish = false) override;
     ErrCode SetBgTaskConfig(const std::string &configData, int32_t sourceType) override;

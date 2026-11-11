@@ -2355,22 +2355,23 @@ ErrCode BgContinuousTaskMgr::GetAllContinuousTasksInner(int32_t uid,
     return ERR_OK;
 }
 
-void BgContinuousTaskMgr::StopContinuousTask(int32_t uid, int32_t pid, uint32_t taskType, const std::string &key)
+void BgContinuousTaskMgr::StopContinuousTask(int32_t uid, int32_t subReason, uint32_t taskType, const std::string &key)
 {
     if (!isSysReady_.load()) {
         BGTASK_LOGW("manager is not ready");
         return;
     }
     auto self = shared_from_this();
-    auto task = [self, uid, pid, taskType, key]() {
+    auto task = [self, uid, subReason, taskType, key]() {
         if (self) {
-            self->HandleStopContinuousTask(uid, pid, taskType, key);
+            self->HandleStopContinuousTask(uid, subReason, taskType, key);
         }
     };
     handler_->PostTask(task);
 }
 
-void BgContinuousTaskMgr::HandleStopContinuousTask(int32_t uid, int32_t pid, uint32_t taskType, const std::string &key)
+void BgContinuousTaskMgr::HandleStopContinuousTask(int32_t uid, int32_t subReason, uint32_t taskType,
+    const std::string &key)
 {
     BGTASK_LOGI("taskType: %{public}d, key %{public}s", taskType, key.c_str());
     if (taskType == BackgroundMode::DATA_TRANSFER) {
@@ -2388,35 +2389,36 @@ void BgContinuousTaskMgr::HandleStopContinuousTask(int32_t uid, int32_t pid, uin
     int32_t detailedCancelReason_ = ContinuousTaskCancelReason::INVALID_REASON;
     if (record->bgModeIds_.size() > 0) {
         /* 多类型时，返回第一个类型对应的检测失败原因 */
-        detailedCancelReason_ = BackgroundMode::GetDetailedCancelReasonFromMode(record->bgModeIds_[0]);
+        detailedCancelReason_ = BackgroundMode::GetDetailedCancelReasonFromMode(record->bgModeIds_[0],
+            subReason);
     }
     SetReason(key, FREEZE_CANCEL, detailedCancelReason_);
     StopBackgroundRunningByTask(record);
 }
 
 void BgContinuousTaskMgr::SuspendContinuousTask(
-    int32_t uid, int32_t pid, int32_t reason, const std::string &key, bool isStandby)
+    int32_t uid, int32_t subReason, int32_t mode, const std::string &key, bool isStandby)
 {
     if (!isSysReady_.load()) {
         BGTASK_LOGW("manager is not ready");
         return;
     }
     auto self = shared_from_this();
-    auto task = [self, uid, pid, reason, key, isStandby]() {
+    auto task = [self, uid, subReason, mode, key, isStandby]() {
         if (!self) {
             return;
         }
         bool hasCallback = self->IsExistCallback(uid, CONTINUOUS_TASK_SUSPEND);
         if (isStandby) {
             if (hasCallback) {
-                self->HandleSuspendContinuousTaskByStandby(uid, pid, reason, key);
+                self->HandleSuspendContinuousTaskByStandby(uid, subReason, mode, key);
             }
             return;
         }
         if (hasCallback) {
-            self->HandleSuspendContinuousTask(uid, pid, reason, key);
+            self->HandleSuspendContinuousTask(uid, subReason, mode, key);
         } else {
-            self->HandleStopContinuousTask(uid, pid, 0, key);
+            self->HandleStopContinuousTask(uid, subReason, 0, key);
         }
     };
     handler_->PostTask(task);
@@ -2433,7 +2435,8 @@ bool BgContinuousTaskMgr::IsExistCallback(int32_t uid, uint32_t type)
     return false;
 }
 
-void BgContinuousTaskMgr::HandleSuspendContinuousTask(int32_t uid, int32_t pid, int32_t mode, const std::string &key)
+void BgContinuousTaskMgr::HandleSuspendContinuousTask(int32_t uid, int32_t subReason, int32_t mode,
+    const std::string &key)
 {
     if (continuousTaskInfosMap_.find(key) == continuousTaskInfosMap_.end()) {
         BGTASK_LOGW("suspend TaskInfo failure, no matched task: %{public}s", key.c_str());
@@ -2448,7 +2451,7 @@ void BgContinuousTaskMgr::HandleSuspendContinuousTask(int32_t uid, int32_t pid, 
         BGTASK_LOGW("SuspendContinuousTask mode: %{public}d, key %{public}s", mode, key.c_str());
         iter->second->suspendState_ = true;
         iter->second->isStandby_ = false;
-        uint32_t reasonValue = ContinuousTaskSuspendReason::GetSuspendReasonValue(mode, false);
+        uint32_t reasonValue = ContinuousTaskSuspendReason::GetSuspendReasonValue(mode, false, subReason);
         if (reasonValue == 0) {
             iter->second->suspendReason_ = -1;
         } else {

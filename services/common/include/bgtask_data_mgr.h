@@ -72,7 +72,7 @@ private:
     std::list<std::shared_ptr<AudioInfo>> audioPlayerInfos_ {};
     std::list<std::shared_ptr<MultiDeviceInfo>> multiDeviceInfo_ {};
     std::unordered_map<int32_t, std::unordered_set<std::string>> allLiveViewInfo_ {};
-    std::unordered_map<int32_t, bool> audioUsbDeviceInfo_ {};
+    std::unordered_map<int32_t, int32_t> audioUsbDeviceInfo_ {};
 };
 }  // namespace BackgroundTaskMgr
 }  // namespace OHOS

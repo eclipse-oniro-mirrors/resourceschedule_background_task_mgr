@@ -914,6 +914,31 @@ ErrCode BgContinuousTaskMgr::RequestBackgroundRunningForInner(const sptr<Continu
     return StopBackgroundRunningForInner(taskParam, callingUid);
 }
 
+bool BgContinuousTaskMgr::CheckRenderPids(const sptr<ContinuousTaskParamForInner> &taskParam)
+{
+    std::vector<AppExecFwk::RenderProcessInfo> renderProcessInfo;
+    if (!AppMgrHelper::GetInstance()->GetAllRenderProcesses(renderProcessInfo)) {
+        BGTASK_LOGE("get all render process fail.");
+        return false;
+    }
+    if (renderProcessInfo.empty()) {
+        BGTASK_LOGE("render process info is empty.");
+        return false;
+    }
+    int32_t hostPid = taskParam->pid_;
+    for (const auto renderPid : taskParam->renderPids_) {
+        auto findPid = [renderPid, hostPid](const auto &target) {
+            return renderPid == target.pid_ && hostPid == target.hostPid_;
+        };
+        auto findPidIter = find_if(renderProcessInfo.begin(), renderProcessInfo.end(), findPid);
+        if (findPidIter == renderProcessInfo.end()) {
+            BGTASK_LOGE("renderPid: %{public}d is invalid,", renderPid);
+            return false;
+        }
+    }
+    return true;
+}
+
 bool BgContinuousTaskMgr::CheckPermissionForInner(const sptr<ContinuousTaskParamForInner> &taskParam,
     int32_t callingUid)
 {
@@ -925,6 +950,9 @@ bool BgContinuousTaskMgr::CheckPermissionForInner(const sptr<ContinuousTaskParam
     }
 
     if (callingUid == taskParam->uid_ && taskParam->bgModeId_ == BackgroundMode::AUDIO_PLAYBACK) {
+        if (!taskParam->renderPids_.empty()) {
+            return CheckRenderPids(taskParam);
+        }
         return true;
     }
     return false;
@@ -1001,6 +1029,7 @@ ErrCode BgContinuousTaskMgr::StartBackgroundRunningForInner(const sptr<Continuou
     if (callingUid == taskParam->uid_ && taskParam->bgModeId_ == BackgroundMode::AUDIO_PLAYBACK) {
         continuousTaskRecord->needNotificationForInnerApi_ = true;
         continuousTaskRecord->isFromComponent_ = true;
+        continuousTaskRecord->renderPids_ = taskParam->renderPids_;
     }
 
     HitraceScoped traceScoped(HITRACE_TAG_OHOS,
@@ -2937,6 +2966,7 @@ std::shared_ptr<ContinuousTaskCallbackInfo> BgContinuousTaskMgr::MakeCallbackInf
     }
     callback->SetStandby(record->isStandby_);
     callback->SetFromComponent(record->isFromComponent_);
+    callback->SetRenderPids(record->renderPids_);
     return callback;
 }
 

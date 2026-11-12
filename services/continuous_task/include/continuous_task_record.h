@@ -71,6 +71,8 @@ public:
     void ResetModeDataTransfer();
     void RemoveModeDataTransfer(const std::vector<uint32_t> &modes, const std::vector<uint32_t> &subModes);
     void RecoverTaskMode(const std::vector<uint32_t> &modes, const std::vector<uint32_t> &subModes, uint32_t bgModeId);
+    void SetRenderPids(const std::vector<uint32_t> &renderPids);
+    std::vector<uint32_t> GetRenderPids() const;
 
 private:
     std::vector<uint32_t> ToVector(std::string &str);
@@ -120,6 +122,7 @@ private:
     // 标记是否通过组件申请的长时任务
     bool isFromComponent_ {false};
     bool isByStartContinuousTask_ {false};
+    std::vector<uint32_t> renderPids_ {};
 
     friend class BgContinuousTaskMgr;
     friend class NotificationTools;

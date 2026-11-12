@@ -63,6 +63,8 @@ public:
 
     bool SubscribeConfigurationObserver(const sptr<AppExecFwk::IConfigurationObserver> &observer);
 
+    bool GetAllRenderProcesses(std::vector<AppExecFwk::RenderProcessInfo> &renderProcessInfo);
+
 private:
     bool Connect();
 

@@ -287,6 +287,7 @@ private:
     ErrCode StartBackgroundRunningSubmit(std::shared_ptr<ContinuousTaskRecord> continuousTaskRecord,
         std::string &taskInfoMapKey);
     ErrCode CheckAbilityTaskNum(const std::shared_ptr<ContinuousTaskRecord> record);
+    bool CheckRenderPids(const sptr<ContinuousTaskParamForInner> &taskParam);
     bool CheckPermissionForInner(const sptr<ContinuousTaskParamForInner> &taskParam, int32_t callingUid);
     ErrCode AllowApplyContinuousTaskByRequestObject(const std::shared_ptr<ContinuousTaskRecord> record);
     ErrCode AllowApplyContinuousTask(const std::shared_ptr<ContinuousTaskRecord> record);

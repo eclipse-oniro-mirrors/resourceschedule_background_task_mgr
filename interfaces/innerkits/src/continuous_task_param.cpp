@@ -153,6 +153,10 @@ bool ContinuousTaskParamForInner::ReadFromParcel(Parcel &parcel)
         BGTASK_LOGE("Failed to read the appIndex_");
         return false;
     }
+    if (!parcel.ReadUInt32Vector(&renderPids_)) {
+        BGTASK_LOGE("Failed to read the renderPids");
+        return false;
+    }
     return true;
 }
 
@@ -312,6 +316,10 @@ bool ContinuousTaskParamForInner::Marshalling(Parcel &parcel) const
         BGTASK_LOGE("Failed to write appIndex_");
         return false;
     }
+    if (!parcel.WriteUInt32Vector(renderPids_)) {
+        BGTASK_LOGE("Failed to write renderPids");
+        return false;
+    }
     return true;
 }
 
@@ -333,6 +341,16 @@ void ContinuousTaskParamForInner::SetAppIndex(const int32_t appIndex)
 int32_t ContinuousTaskParamForInner::GetAppIndex() const
 {
     return appIndex_;
+}
+
+void ContinuousTaskParamForInner::SetRenderPids(const std::vector<uint32_t> &renderPids)
+{
+    renderPids_ = renderPids;
+}
+
+std::vector<uint32_t> ContinuousTaskParamForInner::GetRenderPids() const
+{
+    return renderPids_;
 }
 }  // namespace BackgroundTaskMgr
 }  // namespace OHOS

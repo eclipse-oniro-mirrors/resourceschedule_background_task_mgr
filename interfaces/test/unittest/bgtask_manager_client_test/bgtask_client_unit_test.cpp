@@ -688,6 +688,8 @@ HWTEST_F(BgTaskClientUnitTest, BackgroundTaskSubscriber_002, TestSize.Level1)
     subscriber.OnProcEfficiencyResourcesReset(nullptr);
     int32_t flag = 1;
     subscriber.GetFlag(flag);
+    subscriber.SetFlag(1, true);
+    subscriber.InitCurrentCallBackType();
     EXPECT_NE(subscriber.GetImpl(), nullptr);
 }
 
@@ -822,6 +824,8 @@ HWTEST_F(BgTaskClientUnitTest, ContinuousTaskParamForInner_001, TestSize.Level1)
         new ContinuousTaskParamForInner(1, 1, true));
     info2->SetPid(1);
     EXPECT_EQ(info2->GetPid(), 1);
+    info2->SetAppIndex(1);
+    EXPECT_EQ(info2->GetAppIndex(), 1);
 
     Parcel parcel1 = Parcel();
     info2->Marshalling(parcel1);

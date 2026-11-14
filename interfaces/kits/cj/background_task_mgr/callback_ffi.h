@@ -38,6 +38,7 @@ public:
 
 private:
     std::function<void()> ffiCallback_;
+    void FindCallbackInstance(std::shared_ptr<CallbackFFI> &instance, int32_t &key);
 };
 
 extern std::map<int32_t, std::shared_ptr<CallbackFFI>> callbackInstances_;

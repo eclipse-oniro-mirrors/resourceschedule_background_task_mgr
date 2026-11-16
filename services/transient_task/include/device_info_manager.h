@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_RESOURCESCHEDULE_BACKGROUND_TASK_MGR_SERVICES_TRANSIENT_TASK_INCLUDE_DEVICE_INFO_MANAGER_H
 #define FOUNDATION_RESOURCESCHEDULE_BACKGROUND_TASK_MGR_SERVICES_TRANSIENT_TASK_INCLUDE_DEVICE_INFO_MANAGER_H
 
+#include <atomic>
 #include "input_manager.h"
 
 namespace OHOS {
@@ -28,29 +29,29 @@ public:
 
     inline bool IsScreenOn() const
     {
-        return isScreenOn_;
+        return isScreenOn_.load();
     }
 
     inline bool IsScreenUnlock() const
     {
-        return isScreenUnlock_;
+        return isScreenUnlock_.load();
     }
 
     inline bool IsLowPowerMode() const
     {
-        return isLowPowerMode_;
+        return isLowPowerMode_.load();
     }
 
     inline void SetDump(bool isDump)
     {
-        isDump_ = isDump;
+        isDump_.store(isDump);
     }
 
 private:
-    bool isDump_ {false};
-    bool isScreenOn_ {true};
-    bool isScreenUnlock_ {false};
-    bool isLowPowerMode_ {false};
+    std::atomic<bool> isDump_ {false};
+    std::atomic<bool> isScreenOn_ {true};
+    std::atomic<bool> isScreenUnlock_ {false};
+    std::atomic<bool> isLowPowerMode_ {false};
 };
 }  // namespace BackgroundTaskMgr
 }  // namespace OHOS

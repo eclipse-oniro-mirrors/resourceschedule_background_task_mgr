@@ -66,6 +66,7 @@ public:
 private:
     void RemoveMultiDeviceInfoByUid(int32_t uid);
     void RemoveMultiDeviceInfoBySaid(int32_t said);
+    bool AddAudioPlayerInfoInner(const std::shared_ptr<AudioInfo> audioInfo);
 
 private:
     std::mutex dataMutex_;

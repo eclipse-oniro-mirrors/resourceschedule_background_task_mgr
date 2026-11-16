@@ -49,14 +49,14 @@ void BgtaskPluginMgr::Init()
             BGTASK_LOGI("Subscribe async resType: %{public}u", it->first);
         }
     }
-    pluginEnable.store(true);
+    pluginEnable = true;
     BGTASK_LOGI("BgtaskPluginMgr init success, %{public}zu plugins registered", asyncCbMap_.size());
 }
 
 void BgtaskPluginMgr::Disable()
 {
-    pluginEnable.store(false);
     std::lock_guard<std::mutex> lock(cbMapMutex_);
+    pluginEnable = false;
     for (auto it = asyncCbMap_.begin(); it != asyncCbMap_.end(); it++) {
         auto valueList = it->second->GetPluginValue(it->first);
         for (const auto& value : valueList) {
@@ -72,7 +72,8 @@ void BgtaskPluginMgr::Disable()
 
 void BgtaskPluginMgr::DispatchResource(const std::shared_ptr<ResourceSchedule::ResData>& resData)
 {
-    if (!pluginEnable.load() || resData == nullptr) {
+    std::lock_guard<std::mutex> lock(cbMapMutex_);
+    if (!pluginEnable || resData == nullptr) {
         BGTASK_LOGE("SuspendManagerPluginMgr not enable or data is nullptr");
         return;
     }
@@ -80,7 +81,6 @@ void BgtaskPluginMgr::DispatchResource(const std::shared_ptr<ResourceSchedule::R
     BGTASK_LOGD("BgtaskPluginMgr dispatch resource, type: %{public}u, value: %{public}" PRId64,
         resData->resType, resData->value);
 
-    std::lock_guard<std::mutex> lock(cbMapMutex_);
     auto iter = asyncCbMap_.find(resData->resType);
     if (iter != asyncCbMap_.end() && iter->second != nullptr) {
         iter->second->DispatchResource(resData->resType, resData->value, resData->payload);
@@ -100,7 +100,7 @@ void BgtaskPluginMgr::RegisterAsyncPlugin(const uint32_t resType, const std::sha
     if (it != asyncCbMap_.end() && it->second != nullptr) {
         BGTASK_LOGW("resType:%{public}u registed by %{public}s", resType, it->second->GetPluginName().c_str());
     } else {
-        if (pluginEnable.load()) {
+        if (pluginEnable) {
             RegisterAsyncPluginByValue(resType, plugin);
             BGTASK_LOGI("Register async plugin, type: %{public}u", resType);
         }

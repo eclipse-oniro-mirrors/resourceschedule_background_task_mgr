@@ -96,21 +96,34 @@ extern "C" {
         LOGI("~CallbackFFI");
     }
 
-    void CallbackFFI::OnExpired()
+    void CallbackFFI::FindCallbackInstance(std::shared_ptr<CallbackFFI> &instance, int32_t &key)
     {
-        LOGI("OnExpired start");
         std::lock_guard<std::mutex> lock(callbackLock_);
         auto findCallback = std::find_if(callbackInstances_.begin(), callbackInstances_.end(),
             [&](const auto& callbackInstance) { return callbackInstance.second.get() == this; }
         );
         if (findCallback == callbackInstances_.end()) {
+            return;
+        }
+        key = findCallback->first;
+        instance = findCallback->second;
+    }
+
+    void CallbackFFI::OnExpired()
+    {
+        LOGI("OnExpired start");
+        int32_t key = -1;
+        std::shared_ptr<CallbackFFI> callbackInstance;
+        FindCallbackInstance(callbackInstance, key);
+        if (callbackInstance == nullptr) {
             LOGI("expired callback not found");
             return;
         }
         LOGI("call CJ callback");
-        findCallback->second->ffiCallback_();
+        callbackInstance->ffiCallback_();
         LOGI("OnExpired end");
-        callbackInstances_.erase(findCallback);
+        std::lock_guard<std::mutex> lock(callbackLock_);
+        callbackInstances_.erase(key);
         return;
     }
 

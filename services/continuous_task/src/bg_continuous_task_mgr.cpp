@@ -916,6 +916,11 @@ ErrCode BgContinuousTaskMgr::RequestBackgroundRunningForInner(const sptr<Continu
 
 bool BgContinuousTaskMgr::CheckRenderPids(const sptr<ContinuousTaskParamForInner> &taskParam)
 {
+    int32_t size = static_cast<int32_t>(taskParam->renderPids_.size());
+    if (size > 1) {
+        BGTASK_LOGE("renderPid size > 1.");
+        return false;
+    }
     std::vector<AppExecFwk::RenderProcessInfo> renderProcessInfo;
     if (!AppMgrHelper::GetInstance()->GetAllRenderProcesses(renderProcessInfo)) {
         BGTASK_LOGE("get all render process fail.");

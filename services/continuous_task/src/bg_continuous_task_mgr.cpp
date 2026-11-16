@@ -4595,9 +4595,9 @@ bool BgContinuousTaskMgr::CheckNavigationAndProgressLiveView(std::shared_ptr<Con
 bool BgContinuousTaskMgr::CheckLiveViewInfo(std::shared_ptr<ContinuousTaskRecord> record)
 {
     if (CommonUtils::CheckExistMode(record->bgModeIds_, BackgroundMode::USB_CONNECTION)) {
-        bool liveViewState = BgtaskDataMgr::GetInstance()->CheckLiveViewInfoByUid(uid);
+        bool liveViewState = BgtaskDataMgr::GetInstance()->CheckLiveViewInfoByUid(record->uid_);
         bool mediaControllerState = false;
-        auto iter = avSessionNotification_.find(uid);
+        auto iter = avSessionNotification_.find(record->uid_);
         if (iter != avSessionNotification_.end()) {
             mediaControllerState = iter->second;
         }

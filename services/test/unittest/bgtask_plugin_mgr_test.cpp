@@ -135,7 +135,7 @@ HWTEST_F(BgtaskPluginMgrTest, BgtaskPluginMgrTest_004, TestSize.Level2)
 
     BgtaskPluginMgr::GetInstance().Init();
 
-    EXPECT_TRUE(BgtaskPluginMgr::GetInstance().pluginEnable.load());
+    EXPECT_TRUE(BgtaskPluginMgr::GetInstance().pluginEnable);
     EXPECT_TRUE(plugin1->initCalled);
     EXPECT_TRUE(plugin2->initCalled);
 }
@@ -149,7 +149,7 @@ HWTEST_F(BgtaskPluginMgrTest, BgtaskPluginMgrTest_005, TestSize.Level2)
 {
     BgtaskPluginMgr::GetInstance().Init();
 
-    EXPECT_TRUE(BgtaskPluginMgr::GetInstance().pluginEnable.load());
+    EXPECT_TRUE(BgtaskPluginMgr::GetInstance().pluginEnable);
     EXPECT_EQ(BgtaskPluginMgr::GetInstance().asyncCbMap_.size(), 0);
 }
 
@@ -168,7 +168,7 @@ HWTEST_F(BgtaskPluginMgrTest, BgtaskPluginMgrTest_006, TestSize.Level2)
 
     BgtaskPluginMgr::GetInstance().Disable();
 
-    EXPECT_FALSE(BgtaskPluginMgr::GetInstance().pluginEnable.load());
+    EXPECT_FALSE(BgtaskPluginMgr::GetInstance().pluginEnable);
     EXPECT_TRUE(plugin1->uninitCalled);
     EXPECT_TRUE(plugin2->uninitCalled);
 }
@@ -182,7 +182,7 @@ HWTEST_F(BgtaskPluginMgrTest, BgtaskPluginMgrTest_007, TestSize.Level2)
 {
     BgtaskPluginMgr::GetInstance().Disable();
 
-    EXPECT_FALSE(BgtaskPluginMgr::GetInstance().pluginEnable.load());
+    EXPECT_FALSE(BgtaskPluginMgr::GetInstance().pluginEnable);
 }
 
 /**
@@ -346,11 +346,11 @@ HWTEST_F(BgtaskPluginMgrTest, BgtaskPluginMgrTest_016, TestSize.Level2)
     BgtaskPluginMgr::GetInstance().RegisterAsyncPlugin(MockBgtaskPlugin::TEST_RES_TYPE_ALL, plugin);
 
     BgtaskPluginMgr::GetInstance().Init();
-    EXPECT_TRUE(BgtaskPluginMgr::GetInstance().pluginEnable.load());
+    EXPECT_TRUE(BgtaskPluginMgr::GetInstance().pluginEnable);
     EXPECT_TRUE(plugin->initCalled);
 
     BgtaskPluginMgr::GetInstance().Disable();
-    EXPECT_FALSE(BgtaskPluginMgr::GetInstance().pluginEnable.load());
+    EXPECT_FALSE(BgtaskPluginMgr::GetInstance().pluginEnable);
     EXPECT_TRUE(plugin->uninitCalled);
 }
 
@@ -366,7 +366,7 @@ HWTEST_F(BgtaskPluginMgrTest, BgtaskPluginMgrTest_017, TestSize.Level2)
     auto plugin = std::make_shared<MockBgtaskPlugin>();
     BgtaskPluginMgr::GetInstance().RegisterAsyncPlugin(MockBgtaskPlugin::TEST_RES_TYPE_ALL, plugin);
 
-    EXPECT_TRUE(BgtaskPluginMgr::GetInstance().pluginEnable.load());
+    EXPECT_TRUE(BgtaskPluginMgr::GetInstance().pluginEnable);
     EXPECT_EQ(BgtaskPluginMgr::GetInstance().asyncCbMap_.size(), 1);
 }
 

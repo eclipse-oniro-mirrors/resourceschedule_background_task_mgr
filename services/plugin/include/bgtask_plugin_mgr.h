@@ -34,7 +34,7 @@ public:
     void RegisterAsyncPluginByValue(const uint32_t resType, const std::shared_ptr<BgtaskPlugin> plugin);
  
 private:
-    std::atomic<bool> pluginEnable {false};
+    bool pluginEnable {false};
     std::mutex cbMapMutex_;
     std::unordered_map<uint32_t, std::shared_ptr<BgtaskPlugin>> asyncCbMap_;
 };

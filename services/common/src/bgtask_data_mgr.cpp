@@ -43,6 +43,11 @@ bool BgtaskDataMgr::AddAudioPlayerInfo(const std::shared_ptr<AudioInfo> audioInf
         return false;
     }
     std::lock_guard<std::mutex> lock(dataMutex_);
+    return AddAudioPlayerInfoInner(audioInfo);
+}
+
+bool BgtaskDataMgr::AddAudioPlayerInfoInner(const std::shared_ptr<AudioInfo> audioInfo)
+{
     int32_t uid = audioInfo->uid_;
     int32_t sessionId = audioInfo->sessionId_;
     auto findRecord = [uid, sessionId](const auto &target) {
@@ -73,15 +78,13 @@ void BgtaskDataMgr::RemoveAudioPlayerInfo(int32_t uid, int32_t sessionId)
 
 void BgtaskDataMgr::AfterAddSaListener()
 {
-    {
-        std::lock_guard<std::mutex> lock(dataMutex_);
-        audioPlayerInfos_.clear();
-    }
     std::vector<std::shared_ptr<AudioStandard::AudioRendererChangeInfo>> audioInfos;
     auto ret = AudioStandard::AudioStreamManager::GetInstance()->GetCurrentRendererChangeInfos(audioInfos);
     if (ret != 0) {
         BGTASK_LOGE("GetCurrentRendererChangeInfos failed, errcode: %{public}d.", ret);
     }
+    std::lock_guard<std::mutex> lock(dataMutex_);
+    audioPlayerInfos_.clear();
     for (const auto &info : audioInfos) {
         if (info == nullptr) {
             continue;
@@ -92,7 +95,7 @@ void BgtaskDataMgr::AfterAddSaListener()
             continue;
         }
         auto recorderInfo = std::make_shared<AudioInfo>(info->clientUID, info->sessionId);
-        AddAudioPlayerInfo(recorderInfo);
+        AddAudioPlayerInfoInner(recorderInfo);
     }
 }
 

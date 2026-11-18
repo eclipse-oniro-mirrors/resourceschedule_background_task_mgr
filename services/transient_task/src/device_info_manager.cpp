@@ -23,7 +23,7 @@ namespace OHOS {
 namespace BackgroundTaskMgr {
 void DeviceInfoManager::OnInputEvent(const EventInfo& eventInfo)
 {
-    if (isDump_) {
+    if (isDump_.load()) {
         std::vector<std::string> strArg = eventInfo.GetStringArgs();
         if (strArg[0] != "dump") {
             return;
@@ -32,20 +32,20 @@ void DeviceInfoManager::OnInputEvent(const EventInfo& eventInfo)
 
     switch (eventInfo.GetEventId()) {
         case EVENT_SCREEN_ON:
-            isScreenOn_ = true;
+            isScreenOn_.store(true);
             break;
         case EVENT_SCREEN_OFF:
-            isScreenOn_ = false;
-            isScreenUnlock_ = false;
+            isScreenOn_.store(false);
+            isScreenUnlock_.store(false);
             break;
         case EVENT_SCREEN_UNLOCK:
-            isScreenUnlock_ = true;
+            isScreenUnlock_.store(true);
             break;
         case EVENT_BATTERY_LOW:
-            isLowPowerMode_ = true;
+            isLowPowerMode_.store(true);
             break;
         case EVENT_BATTERY_OKAY:
-            isLowPowerMode_ = false;
+            isLowPowerMode_.store(false);
             break;
         default:
             break;

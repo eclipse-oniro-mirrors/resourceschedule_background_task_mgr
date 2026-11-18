@@ -169,7 +169,7 @@ bool BackgroundTaskMgrService::CheckHapCalling(bool &isHap, uint32_t flag)
     auto tokenFlag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
     if (tokenFlag == Security::AccessToken::ATokenTypeEnum::TOKEN_HAP) {
         isHap = true;
-        if (flag == SUBSCRIBER_BACKGROUND_TASK_STATE) {
+        if ((flag & SUBSCRIBER_BACKGROUND_TASK_STATE) > 0) {
             return true;
         }
         return BundleManagerHelper::GetInstance()->CheckPermission(BGMODE_PERMISSION);
@@ -445,7 +445,7 @@ ErrCode BackgroundTaskMgrService::SubscribeBackgroundTask(
         BGTASK_LOGW("SubscribeBackgroundTask not allowed");
         return ERR_BGTASK_PERMISSION_DENIED;
     }
-    if (isHap && flag == SUBSCRIBER_BACKGROUND_TASK_STATE) {
+    if (isHap && (flag & SUBSCRIBER_BACKGROUND_TASK_STATE) > 0) {
         if (CheckAtomicService()) {
             return ERR_BGTASK_PERMISSION_DENIED;
         }
@@ -486,7 +486,7 @@ ErrCode BackgroundTaskMgrService::UnsubscribeBackgroundTask(const sptr<IBackgrou
         BGTASK_LOGW("UnsubscribeBackgroundTask not allowed");
         return ERR_BGTASK_PERMISSION_DENIED;
     }
-    if (isHap && flag == SUBSCRIBER_BACKGROUND_TASK_STATE) {
+    if (isHap && (flag & SUBSCRIBER_BACKGROUND_TASK_STATE) > 0) {
         if (CheckAtomicService()) {
             return ERR_BGTASK_PERMISSION_DENIED;
         }

@@ -128,16 +128,6 @@ napi_value WrapUndefinedToJS(napi_env env)
     return result;
 }
 
-napi_value GetCallbackErrorValue(napi_env env, int32_t errCode)
-{
-    napi_value jsObject = nullptr;
-    napi_value jsValue = nullptr;
-    NAPI_CALL(env, napi_create_int32(env, errCode, &jsValue));
-    NAPI_CALL(env, napi_create_object(env, &jsObject));
-    NAPI_CALL(env, napi_set_named_property(env, jsObject, "code", jsValue));
-    return jsObject;
-}
-
 napi_value GetAbilityContext(const napi_env &env, const napi_value &value,
     std::shared_ptr<AbilityRuntime::AbilityContext> &abilityContext)
 {

@@ -146,6 +146,7 @@ private:
     std::shared_ptr<ResourcesSubscriberMgr> subscriberMgr_ {nullptr};
     std::unique_ptr<AppExecFwk::AppMgrClient> appMgrClient_ {nullptr};
     uint32_t dependsReady_ = 0;
+    std::mutex resourceQuotaMgrLock_;
     void *resourceQuotaMgrHandle_ {nullptr};
     EfficiencyResourceApplyReportHisysEvent applyEventData_;
     EfficiencyResourceResetReportHisysEvent resetEventData_;

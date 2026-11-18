@@ -62,6 +62,7 @@ BgEfficiencyResourcesMgr::~BgEfficiencyResourcesMgr() {}
 
 void BgEfficiencyResourcesMgr::LoadResourceQuotaMgrLib()
 {
+    std::lock_guard<std::mutex> lock(resourceQuotaMgrLock_);
     if (resourceQuotaMgrHandle_ != nullptr) {
         return;
     }
@@ -300,6 +301,7 @@ bool BgEfficiencyResourcesMgr::CheckAlivedApp(int32_t uid)
 
 void BgEfficiencyResourcesMgr::Clear()
 {
+    std::lock_guard<std::mutex> lock(resourceQuotaMgrLock_);
     if (resourceQuotaMgrHandle_ != nullptr) {
         dlclose(resourceQuotaMgrHandle_);
         resourceQuotaMgrHandle_ = nullptr;
@@ -356,6 +358,7 @@ bool BgEfficiencyResourcesMgr::CheckOrUpdateCpuApplyQuota(int32_t uid, const std
         return true;
     }
 
+    std::lock_guard<std::mutex> lock(resourceQuotaMgrLock_);
     if (resourceQuotaMgrHandle_ == nullptr) {
         BGTASK_LOGD("ResourceQuotaMgrHandle_ is nullptr.");
         return true;
@@ -585,6 +588,7 @@ void BgEfficiencyResourcesMgr::UpdateQuotaIfCpuReset(
         return;
     }
 
+    std::lock_guard<std::mutex> lock(resourceQuotaMgrLock_);
     if (resourceQuotaMgrHandle_ == nullptr) {
         BGTASK_LOGD("ResourceQuotaMgrHandle_ is nullptr.");
         return;
@@ -804,6 +808,7 @@ ErrCode BgEfficiencyResourcesMgr::ShellDumpInner(const std::vector<std::string> 
 void BgEfficiencyResourcesMgr::DumpGetCpuQuota(const std::vector<std::string> &dumpOption,
     std::vector<std::string> &dumpInfo)
 {
+    std::lock_guard<std::mutex> lock(resourceQuotaMgrLock_);
     if (resourceQuotaMgrHandle_ == nullptr) {
         BGTASK_LOGD("ResourceQuotaMgrHandle_ is nullptr.");
         return;
@@ -830,6 +835,7 @@ void BgEfficiencyResourcesMgr::DumpGetCpuQuota(const std::vector<std::string> &d
 
 void BgEfficiencyResourcesMgr::DumpSetCpuQuota(const std::vector<std::string> &dumpOption)
 {
+    std::lock_guard<std::mutex> lock(resourceQuotaMgrLock_);
     if (resourceQuotaMgrHandle_ == nullptr) {
         BGTASK_LOGD("ResourceQuotaMgrHandle_ is nullptr.");
         return;
@@ -863,6 +869,7 @@ void BgEfficiencyResourcesMgr::DumpSetCpuQuota(const std::vector<std::string> &d
 
 void BgEfficiencyResourcesMgr::DumpResetCpuQuotaUsage(const std::vector<std::string> &dumpOption)
 {
+    std::lock_guard<std::mutex> lock(resourceQuotaMgrLock_);
     if (resourceQuotaMgrHandle_ == nullptr) {
         BGTASK_LOGD("ResourceQuotaMgrHandle_ is nullptr.");
         return;

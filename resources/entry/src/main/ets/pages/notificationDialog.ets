@@ -325,13 +325,11 @@ struct PermissionDialog {
             return;
         }
       }
+      let isBottomPopoverTemp = false;
+      this.isBottomPopover = isBottomPopoverTemp && isVertical;
     } catch (err) {
       console.error(TAG, 'Failed to get the device foldable status. Code: ${err?.code}');
     }
-
-    // read ccm configs
-    let isBottomPopoverTemp = false;
-    this.isBottomPopover = isBottomPopoverTemp && isVertical;
   }
 
   async updateStatus(): Promise<void> {

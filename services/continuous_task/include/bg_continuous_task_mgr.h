@@ -196,6 +196,7 @@ private:
     ErrCode SendContinuousTaskNotification(std::shared_ptr<ContinuousTaskRecord> &ContinuousTaskRecordPtr);
     ErrCode GetContinuousTaskAppsInner(std::vector<std::shared_ptr<ContinuousTaskCallbackInfo>> &list, int32_t uid,
         bool includeSuspended = false);
+    ErrCode CheckAvsessionSendNotification(int32_t uid, bool isPublish);
     ErrCode AVSessionNotifyUpdateNotificationInner(int32_t uid, int32_t pid, bool isPublish = false);
     void RemoveAudioPlaybackDelayTask(int32_t uid);
     ErrCode StopBackgroundRunningByContext(int32_t uid, const std::string &abilityName, int32_t abilityId);
@@ -203,6 +204,7 @@ private:
     void HandlePersistenceData();
     void HandleOnExtensionRestore();
     void RestoreApplyRecord();
+    void RecoverRenderPid(std::shared_ptr<ContinuousTaskRecord> record);
     void CheckPersistenceData(const std::vector<AppExecFwk::RunningProcessInfo> &allProcesses);
     void DumpAllTaskInfo(std::vector<std::string> &dumpInfo);
     void DumpCancelTask(const std::vector<std::string> &dumpOption, bool cleanAll);
@@ -287,7 +289,7 @@ private:
     ErrCode StartBackgroundRunningSubmit(std::shared_ptr<ContinuousTaskRecord> continuousTaskRecord,
         std::string &taskInfoMapKey);
     ErrCode CheckAbilityTaskNum(const std::shared_ptr<ContinuousTaskRecord> record);
-    bool CheckRenderPids(const sptr<ContinuousTaskParamForInner> &taskParam);
+    bool CheckRenderPids(int32_t uid, const std::vector<uint32_t> &renderPids);
     bool CheckPermissionForInner(const sptr<ContinuousTaskParamForInner> &taskParam, int32_t callingUid);
     ErrCode AllowApplyContinuousTaskByRequestObject(const std::shared_ptr<ContinuousTaskRecord> record);
     ErrCode AllowApplyContinuousTask(const std::shared_ptr<ContinuousTaskRecord> record);

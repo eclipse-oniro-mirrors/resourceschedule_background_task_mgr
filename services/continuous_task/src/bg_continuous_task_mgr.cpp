@@ -389,6 +389,16 @@ bool BgContinuousTaskMgr::CheckProcessUidInfo(const std::vector<AppExecFwk::Runn
     return false;
 }
 
+void BgContinuousTaskMgr::RecoverRenderPid(std::shared_ptr<ContinuousTaskRecord> record)
+{
+    if (record->renderPids_.empty()) {
+        return;
+    }
+    if (!CheckRenderPids(record->uid_, record->renderPids_)) {
+        record->renderPids_.clear();
+    }
+}
+
 void BgContinuousTaskMgr::CheckPersistenceData(const std::vector<AppExecFwk::RunningProcessInfo> &allProcesses)
 {
     auto iter = continuousTaskInfosMap_.begin();
@@ -407,6 +417,7 @@ void BgContinuousTaskMgr::CheckPersistenceData(const std::vector<AppExecFwk::Run
         }
 
         if (pidIsAlive) {
+            RecoverRenderPid(record);
             SetCachedBundleInfo(record);
             if (record->GetNotificationId() == -1) {
                 BGTASK_LOGI("notification id is -1, continue");
@@ -914,9 +925,9 @@ ErrCode BgContinuousTaskMgr::RequestBackgroundRunningForInner(const sptr<Continu
     return StopBackgroundRunningForInner(taskParam, callingUid);
 }
 
-bool BgContinuousTaskMgr::CheckRenderPids(const sptr<ContinuousTaskParamForInner> &taskParam)
+bool BgContinuousTaskMgr::CheckRenderPids(int32_t uid, const std::vector<uint32_t> &renderPids)
 {
-    int32_t size = static_cast<int32_t>(taskParam->renderPids_.size());
+    int32_t size = static_cast<int32_t>(renderPids.size());
     if (size > 1) {
         BGTASK_LOGE("renderPid size > 1.");
         return false;
@@ -930,10 +941,9 @@ bool BgContinuousTaskMgr::CheckRenderPids(const sptr<ContinuousTaskParamForInner
         BGTASK_LOGE("render process info is empty.");
         return false;
     }
-    int32_t hostPid = taskParam->pid_;
-    for (const auto renderPid : taskParam->renderPids_) {
-        auto findPid = [renderPid, hostPid](const auto &target) {
-            return renderPid == target.pid_ && hostPid == target.hostPid_;
+    for (const auto renderPid : renderPids) {
+        auto findPid = [renderPid, uid](const auto &target) {
+            return renderPid == target.pid_ && uid == target.hostPid_;
         };
         auto findPidIter = find_if(renderProcessInfo.begin(), renderProcessInfo.end(), findPid);
         if (findPidIter == renderProcessInfo.end()) {
@@ -955,9 +965,6 @@ bool BgContinuousTaskMgr::CheckPermissionForInner(const sptr<ContinuousTaskParam
     }
 
     if (callingUid == taskParam->uid_ && taskParam->bgModeId_ == BackgroundMode::AUDIO_PLAYBACK) {
-        if (!taskParam->renderPids_.empty()) {
-            return CheckRenderPids(taskParam);
-        }
         return true;
     }
     return false;
@@ -1034,7 +1041,9 @@ ErrCode BgContinuousTaskMgr::StartBackgroundRunningForInner(const sptr<Continuou
     if (callingUid == taskParam->uid_ && taskParam->bgModeId_ == BackgroundMode::AUDIO_PLAYBACK) {
         continuousTaskRecord->needNotificationForInnerApi_ = true;
         continuousTaskRecord->isFromComponent_ = true;
-        continuousTaskRecord->renderPids_ = taskParam->renderPids_;
+        if (!taskParam->renderPids_.empty() && CheckRenderPids(taskParam->uid_, taskParam->renderPids_)) {
+            continuousTaskRecord->renderPids_ = taskParam->renderPids_;
+        }
     }
 
     HitraceScoped traceScoped(HITRACE_TAG_OHOS,
@@ -2850,10 +2859,47 @@ ErrCode BgContinuousTaskMgr::AVSessionNotifyUpdateNotification(int32_t uid, int3
     return result;
 }
 
+ErrCode BgContinuousTaskMgr::CheckAvsessionSendNotification(int32_t uid, bool isPublish)
+{
+    auto findAudioDetectFail = [uid](const auto &target) {
+        return uid == target.second->GetUid() && target.second->audioDetectFail_;
+    };
+    auto findAudioDetectFailIter = find_if(continuousTaskInfosMap_.begin(), continuousTaskInfosMap_.end(),
+        findAudioDetectFail);
+    if (findAudioDetectFailIter == continuousTaskInfosMap_.end()) {
+        RemoveAudioPlaybackDelayTask(uid);
+        return ERR_OK;
+    }
+    bool refreshNotification = false;
+    auto iter = continuousTaskInfosMap_.begin();
+    while (iter != continuousTaskInfosMap_.end()) {
+        if (iter->second == nullptr || iter->second->GetUid() != uid) {
+            iter++;
+            continue;
+        }
+        auto record = iter->second;
+        if (!isPublish && CheckPublishTaskNotification(record) &&
+            !CommonUtils::CheckExistMode(record->bgSubModeIds_,
+            BackgroundTaskSubmode::SUBMODE_AVSESSION_AUDIO_PLAYBACK)) {
+            ErrCode ret = SendContinuousTaskNotification(record);
+            if (ret ==ERR_OK) {
+                refreshNotification = true;
+            } else {
+                return ret;
+            }
+        }
+        iter++;
+    }
+    if (refreshNotification) {
+        RefreshTaskRecord();
+        RemoveAudioPlaybackDelayTask(uid);
+    }
+    return ERR_OK;
+}
+
 ErrCode BgContinuousTaskMgr::AVSessionNotifyUpdateNotificationInner(int32_t uid, int32_t pid, bool isPublish)
 {
     BGTASK_LOGI("uid: %{public}d, isPublish: %{public}d", uid, isPublish);
-    ReportTaskAdjustEventByUid(uid);
     avSessionNotification_[uid] = isPublish;
     if (isPublish) {
         RemoveAudioPlaybackDelayTask(uid);
@@ -2867,32 +2913,21 @@ ErrCode BgContinuousTaskMgr::AVSessionNotifyUpdateNotificationInner(int32_t uid,
         return ERR_BGTASK_OBJECT_NOT_EXIST;
     }
 
-    ErrCode result = ERR_OK;
-    auto record = findUidIter->second;
-
-    // 应用退后台删除播控，退后台在60s后检测avsession，在65s后发送通知，当avsession检测失败且未取消长时任务时，不发通知
-    // 解决删除播控通知后（avsession停流，存在长时任务场景）仍显示长时任务通知的体验问题
-    if (findUidIter->second->audioDetectFail_) {
-        RemoveAudioPlaybackDelayTask(uid);
-        return ERR_OK;
-    }
-
-    // 子类型包含avsession，不发通知
-    if (!isPublish &&
-        CommonUtils::CheckExistMode(record->bgSubModeIds_, BackgroundTaskSubmode::SUBMODE_AVSESSION_AUDIO_PLAYBACK)) {
-        RemoveAudioPlaybackDelayTask(uid);
-        return ERR_OK;
-    }
-
-    // 只有播音类型长时任务，并且没有AVSession通知
-    if (!isPublish && CheckPublishTaskNotification(record)) {
-        result = SendContinuousTaskNotification(record);
-        RefreshTaskRecord();
-        RemoveAudioPlaybackDelayTask(uid);
+    ErrCode result = CheckAvsessionSendNotification(uid, isPublish);
+    if (result != ERR_OK) {
         return result;
     }
+    bool refershContinuousTask = false;
     std::map<std::string, std::pair<std::string, std::string>> newPromptInfos;
-    if (!CommonUtils::CheckExistMode(record->bgModeIds_, BackgroundMode::DATA_TRANSFER)) {
+    auto iter = continuousTaskInfosMap_.begin();
+    while (iter != continuousTaskInfosMap_.end()) {
+        if (iter->second == nullptr || iter->second->GetUid() != uid ||
+            CommonUtils::CheckExistMode(record->bgModeIds_, BackgroundMode::DATA_TRANSFER)) {
+            iter++;
+            continue;
+        }
+        auto record = iter->second;
+        refershContinuousTask = true;
         std::string mainAbilityLabel = GetMainAbilityLabel(record->bundleName_, record->userId_);
         std::string notificationText = GetNotificationText(record);
         if (notificationText.empty()) {
@@ -2903,6 +2938,9 @@ ErrCode BgContinuousTaskMgr::AVSessionNotifyUpdateNotificationInner(int32_t uid,
             newPromptInfos.emplace(record->notificationLabel_, std::make_pair(mainAbilityLabel, notificationText));
             NotificationTools::GetInstance()->RefreshContinuousNotifications(newPromptInfos, bgTaskUid_);
         }
+        iter++;
+    }
+    if (refershContinuousTask) {
         RefreshTaskRecord();
     }
     RemoveAudioPlaybackDelayTask(uid);

@@ -3817,12 +3817,15 @@ HWTEST_F(BgContinuousTaskMgrTest, SendContinuousTaskNotification_NonDataTransfer
 HWTEST_F(BgContinuousTaskMgrTest, NeedNotification_001, TestSize.Level1)
 {
     std::shared_ptr<ContinuousTaskRecord> continuousTaskRecord = std::make_shared<ContinuousTaskRecord>();
+    std::vector<uint32_t> renderPids {1};
+    continuousTaskRecord->SetRenderPids(renderPids);
     EXPECT_FALSE(continuousTaskRecord->NeedNotificationForInnerApi());
     EXPECT_FALSE(continuousTaskRecord->IsFromComponent());
     continuousTaskRecord->needNotificationForInnerApi_ = true;
     continuousTaskRecord->isFromComponent_ = true;
     EXPECT_TRUE(continuousTaskRecord->NeedNotificationForInnerApi());
     EXPECT_TRUE(continuousTaskRecord->IsFromComponent());
+    EXPECT_EQ(continuousTaskRecord->GetRenderPids().size(), 1);
 }
 
 /**

@@ -314,9 +314,9 @@ struct PermissionDialog {
   }
 
   async updateIsBottomPopover(): Promise<void> {
-    let dis = display.getDefaultDisplaySync();
-    let isVertical = dis.width <= dis.height;
     try {
+      let dis = display.getDefaultDisplaySync();
+      let isVertical = dis.width <= dis.height;
       if (display.isFoldable()) {
         let foldStatus = display.getFoldStatus();
         if (foldStatus == display.FoldStatus.FOLD_STATUS_EXPANDED ||

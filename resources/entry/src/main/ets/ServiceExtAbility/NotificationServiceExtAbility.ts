@@ -41,19 +41,23 @@ const COMMON_EVENT_NAME = 'OnBgTaskServiceDialogClicked';
 
 // 异常退出。场景：弹窗后，上滑进入多任务，退出应用
 async function handleDialogQuitException(want: Want): Promise<void> {
-  CommonEventManager.publish(
-    COMMON_EVENT_NAME,
-    {
-      code: 10,
-      data: want.parameters.bundleName.toString(),
-      parameters: {
-        bundleName: want.parameters.bundleName.toString(),
-        bundleUid: want.parameters.bundleUid.toString(),
-        appIndex: want.parameters.appIndex.toString()
-      }
-    } as CommonEventManager.CommonEventPublishData,
-    () => { console.info(TAG, 'publish DIALOG_CRASHED succeeded'); }
-  );
+  try {
+    CommonEventManager.publish(
+      COMMON_EVENT_NAME,
+      {
+        code: 10,
+        data: want.parameters.bundleName.toString(),
+        parameters: {
+          bundleName: want.parameters.bundleName.toString(),
+          bundleUid: want.parameters.bundleUid.toString(),
+          appIndex: want.parameters.appIndex.toString()
+        }
+      } as CommonEventManager.CommonEventPublishData,
+      () => { console.info(TAG, 'publish DIALOG_CRASHED succeeded'); }
+    );
+  } catch (err) {
+    console.error(TAG, 'Failed to get the device foldable status. Code: ${err?.code}');
+  }
 }
 
 export class EnableBgTaskAuthDialog {

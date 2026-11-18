@@ -56,7 +56,7 @@ async function handleDialogQuitException(want: Want): Promise<void> {
       () => { console.info(TAG, 'publish DIALOG_CRASHED succeeded'); }
     );
   } catch (err) {
-    console.error(TAG, 'Failed to get the device foldable status. Code: ${err?.code}');
+    console.error(TAG, 'Failed to publish. Code: ${err?.code}');
   }
 }
 

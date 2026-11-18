@@ -943,7 +943,7 @@ bool BgContinuousTaskMgr::CheckRenderPids(int32_t uid, const std::vector<uint32_
     }
     for (const auto renderPid : renderPids) {
         auto findPid = [renderPid, uid](const auto &target) {
-            return renderPid == target.pid_ && uid == target.hostPid_;
+            return renderPid == target.pid_ && uid == target.hostUid_;
         };
         auto findPidIter = find_if(renderProcessInfo.begin(), renderProcessInfo.end(), findPid);
         if (findPidIter == renderProcessInfo.end()) {
@@ -2922,7 +2922,7 @@ ErrCode BgContinuousTaskMgr::AVSessionNotifyUpdateNotificationInner(int32_t uid,
     auto iter = continuousTaskInfosMap_.begin();
     while (iter != continuousTaskInfosMap_.end()) {
         if (iter->second == nullptr || iter->second->GetUid() != uid ||
-            CommonUtils::CheckExistMode(record->bgModeIds_, BackgroundMode::DATA_TRANSFER)) {
+            CommonUtils::CheckExistMode(iter->second->bgModeIds_, BackgroundMode::DATA_TRANSFER)) {
             iter++;
             continue;
         }

@@ -19,9 +19,10 @@ namespace OHOS {
 namespace BackgroundTaskMgr {
 namespace {
 const std::unordered_map<int32_t, std::string> SA_ERRCODE_MSG_MAP = {
-    {ERR_BGTASK_PERMISSION_DENIED, "Permission denied."},
+    {ERR_BGTASK_PERMISSION_DENIED, "Permission verification failed. The application does not have the permission "
+        "required to call the API"},
     {ERR_BGTASK_NOT_SYSTEM_APP,
-        "System API verification failed. Only system application can apply."},
+        "Permission verification failed. A non-system application calls a system API."},
     {ERR_BGTASK_NO_MEMORY, "Memory operation failed. Failed to allocate the memory."},
     {ERR_BGTASK_SYS_NOT_READY, "System service operation failed. The system service is not ready."},
     {ERR_BGTASK_SERVICE_NOT_CONNECTED, "System service operation failed. The system service is not connected."},

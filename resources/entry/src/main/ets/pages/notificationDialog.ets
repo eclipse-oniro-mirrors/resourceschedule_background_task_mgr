@@ -314,9 +314,9 @@ struct PermissionDialog {
   }
 
   async updateIsBottomPopover(): Promise<void> {
-    let dis = display.getDefaultDisplaySync();
-    let isVertical = dis.width <= dis.height;
     try {
+      let dis = display.getDefaultDisplaySync();
+      let isVertical = dis.width <= dis.height;
       if (display.isFoldable()) {
         let foldStatus = display.getFoldStatus();
         if (foldStatus == display.FoldStatus.FOLD_STATUS_EXPANDED ||
@@ -325,13 +325,11 @@ struct PermissionDialog {
             return;
         }
       }
+      let isBottomPopoverTemp = false;
+      this.isBottomPopover = isBottomPopoverTemp && isVertical;
     } catch (err) {
       console.error(TAG, 'Failed to get the device foldable status. Code: ${err?.code}');
     }
-
-    // read ccm configs
-    let isBottomPopoverTemp = false;
-    this.isBottomPopover = isBottomPopoverTemp && isVertical;
   }
 
   async updateStatus(): Promise<void> {

@@ -251,6 +251,10 @@ public:
  
     void SetFromComponent(const bool isFromComponent);
 
+    void SetRenderPids(const std::vector<uint32_t> &renderPids);
+    
+    std::vector<uint32_t> GetRenderPids() const;
+
     /**
      * @brief Marshals a purpose into a parcel.
      *
@@ -289,6 +293,7 @@ private:
     bool cancelCallBackSelf_ {false};
     bool isStandby_ {false};
     bool isFromComponent_ {false};
+    std::vector<uint32_t> renderPids_ {};
 };
 }  // namespace BackgroundTaskMgr
 }  // namespace OHOS

@@ -719,6 +719,8 @@ HWTEST_F(BgTaskClientUnitTest, ContinuousTaskCallbackInfo_001, TestSize.Level1)
     info2->SetWantAgentBundleName("wantAgentBundleName");
     info2->SetWantAgentAbilityName("wantAgentAbilityName");
     info2->SetCancelCallBackSelf(true);
+    std::vector<uint32_t> renderPids {1};
+    info2->SetRenderPids(renderPids);
     Parcel parcel = Parcel();
     info2->Marshalling(parcel);
     sptr<ContinuousTaskCallbackInfo> info3 = sptr<ContinuousTaskCallbackInfo>(
@@ -743,6 +745,7 @@ HWTEST_F(BgTaskClientUnitTest, ContinuousTaskCallbackInfo_001, TestSize.Level1)
     EXPECT_EQ(info3->GetWantAgentBundleName(), "wantAgentBundleName");
     EXPECT_EQ(info3->GetWantAgentAbilityName(), "wantAgentAbilityName");
     EXPECT_EQ(info3->IsCancelCallBackSelf(), true);
+    EXPECT_EQ(info3->GetRenderPids().size(), 1);
 }
 
 /**
@@ -826,6 +829,9 @@ HWTEST_F(BgTaskClientUnitTest, ContinuousTaskParamForInner_001, TestSize.Level1)
     EXPECT_EQ(info2->GetPid(), 1);
     info2->SetAppIndex(1);
     EXPECT_EQ(info2->GetAppIndex(), 1);
+    std::vector<uint32_t> renderPids {1};
+    info2->SetRenderPids(renderPids);
+    EXPECT_EQ(info2->GetRenderPids().size(), 1);
 
     Parcel parcel1 = Parcel();
     info2->Marshalling(parcel1);

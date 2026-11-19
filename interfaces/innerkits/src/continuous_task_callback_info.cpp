@@ -230,6 +230,16 @@ void ContinuousTaskCallbackInfo::SetFromComponent(const bool isFromComponent)
     isFromComponent_ = isFromComponent;
 }
 
+void ContinuousTaskCallbackInfo::SetRenderPids(const std::vector<uint32_t> &renderPids)
+{
+    renderPids_ = renderPids;
+}
+
+std::vector<uint32_t> ContinuousTaskCallbackInfo::GetRenderPids() const
+{
+    return renderPids_;
+}
+
 bool ContinuousTaskCallbackInfo::Marshalling(Parcel &parcel) const
 {
     WRITE_PARCEL_WITH_RET(parcel, Uint32, typeId_, false);
@@ -261,6 +271,7 @@ bool ContinuousTaskCallbackInfo::Marshalling(Parcel &parcel) const
     WRITE_PARCEL_WITH_RET(parcel, Bool, cancelCallBackSelf_, false);
     WRITE_PARCEL_WITH_RET(parcel, Bool, isStandby_, false);
     WRITE_PARCEL_WITH_RET(parcel, Bool, isFromComponent_, false);
+    WRITE_PARCEL_WITH_RET(parcel, UInt32Vector, renderPids_, false);
     return true;
 }
 
@@ -310,6 +321,7 @@ bool ContinuousTaskCallbackInfo::ReadFromParcel(Parcel &parcel)
     READ_PARCEL_WITH_RET(parcel, Bool, cancelCallBackSelf_, false);
     READ_PARCEL_WITH_RET(parcel, Bool, isStandby_, false);
     READ_PARCEL_WITH_RET(parcel, Bool, isFromComponent_, false);
+    READ_PARCEL_WITH_RET(parcel, UInt32Vector, (&renderPids_), false);
     return true;
 }
 }  // namespace BackgroundTaskMgr

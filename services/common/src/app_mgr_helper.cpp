@@ -89,6 +89,19 @@ bool AppMgrHelper::UnsubscribeObserver(const sptr<AppExecFwk::IApplicationStateO
     return true;
 }
 
+bool AppMgrHelper::GetAllRenderProcesses(std::vector<AppExecFwk::RenderProcessInfo> &renderProcessInfo)
+{
+    std::lock_guard<std::mutex> lock(connectMutex_);
+    if (!Connect()) {
+        return false;
+    }
+    if (appMgrProxy_->GetAllRenderProcesses(renderProcessInfo) != ERR_OK) {
+        BGTASK_LOGE("failed to get all render process.");
+        return false;
+    }
+    return true;
+}
+
 bool AppMgrHelper::Connect()
 {
     if (appMgrProxy_ != nullptr) {

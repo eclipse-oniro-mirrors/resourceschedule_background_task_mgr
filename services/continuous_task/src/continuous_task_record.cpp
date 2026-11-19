@@ -217,6 +217,16 @@ void ContinuousTaskRecord::RecoverTaskMode(const std::vector<uint32_t> &modes,
     bgModeId_ = bgModeId;
 }
 
+void ContinuousTaskRecord::SetRenderPids(const std::vector<uint32_t> &renderPids)
+{
+    renderPids_ = renderPids;
+}
+
+std::vector<uint32_t> ContinuousTaskRecord::GetRenderPids() const
+{
+    return renderPids_;
+}
+
 std::string ContinuousTaskRecord::ParseToJsonStr()
 {
     nlohmann::json root;
@@ -265,6 +275,7 @@ std::string ContinuousTaskRecord::ParseToJsonStr()
     }
     root["isFromComponent"] = isFromComponent_;
     root["isByStartContinuousTask"] = isByStartContinuousTask_;
+    root["renderPids"] = ToString(renderPids_);
     return root.dump(CommonUtils::jsonFormat_);
 }
 
@@ -383,6 +394,10 @@ void ContinuousTaskRecord::SetRecordValue(const nlohmann::json &value)
     this->isStandbySuspend_ = value.at("isStandbySuspend").get<bool>();
     this->isFromComponent_ = value.at("isFromComponent").get<bool>();
     this->isByStartContinuousTask_ = value.at("isByStartContinuousTask").get<bool>();
+    if (value.contains("renderPids") && value["renderPids"].is_string()) {
+        auto renderPid = value.at("renderPids").get<std::string>();
+        this->renderPids_ = ToVector(renderPid);
+    }
 }
 }  // namespace BackgroundTaskMgr
 }  // namespace OHOS
